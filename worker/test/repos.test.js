@@ -1,4 +1,5 @@
 import { env } from "cloudflare:workers";
+import { runInDurableObject } from "cloudflare:test";
 import { describe, expect, it, vi } from "vitest";
 import { validateFlake, validateRepo } from "../src/api/contract.js";
 import worker from "../src/index.js";
@@ -207,6 +208,19 @@ describe("repo delete forks", () => {
     expect((await e.ARTIFACTS.list()).repos.map((r) => r.name).filter((n) => n.startsWith("del-forks"))).toEqual([]);
     expect((await send("POST", "/api/repos", { name: "del-forks" })).status).toBe(201);
     await (await e.ARTIFACTS.get("del-forks")).fork("del-forks--DELFORKS-1");
+  });
+
+  it("a repo made again under a deleted repo's name holds none of its leases", async () => {
+    const e = { ...env, ARTIFACTS: fakeArtifacts() };
+    const send = (method, path, body) => worker.fetch(new Request(`http://cinder.test${path}`, { method, headers: OWNER, body: JSON.stringify(body) }), e);
+    const repoDO = () => env.REPO_DO.get(env.REPO_DO.idFromName("del-leases"));
+    expect((await send("POST", "/api/repos", { name: "del-leases" })).status).toBe(201);
+    // A lease an unfinished change of the old repo holds on main.
+    await runInDurableObject(repoDO(), (i) => i.ctx.storage.put("leases:main", { "old-change": { keys: ["src/index.js#page"] } }));
+    expect(await repoDO().leases("main")).not.toEqual({});
+    expect((await send("DELETE", "/api/repos/del-leases", { confirm: "del-leases" })).status).toBe(204);
+    expect((await send("POST", "/api/repos", { name: "del-leases" })).status).toBe(201);
+    expect(await repoDO().leases("main")).toEqual({});
   });
 });
 
