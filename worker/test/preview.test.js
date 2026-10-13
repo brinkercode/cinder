@@ -50,6 +50,15 @@ describe("change preview", () => {
     expect(await post(await as("dev@example.com"))).toBe(400);
   });
 
+  it("a target that moved past its index still predicts from the last indexed commit and queues the new head's index", async () => {
+    const { fake, preview, id } = await setup("prev-moved");
+    // A merge moved main to sha2, which no index job has run on yet.
+    fake.repos.get("prev-moved").commits.unshift({ sha: "sha2" });
+    const out = await preview({ intent: "Retry fetch", target: "main" });
+    expect(out.symbols).toEqual([{ symbol: "src/http.js#retryFetch", p: null }]);
+    expect(await env.DB.prepare("SELECT 1 FROM jobs WHERE repo_id = ? AND kind = 'index' AND json_extract(payload, '$.sha') = 'sha2'").bind(id).first()).not.toBeNull();
+  });
+
   it("preview creates no change and no fork", async () => {
     const { fake, preview, id } = await setup("prev-none");
     const out = await preview({ intent: "Retry fetch", target: "main", request_id: "req-7" });
