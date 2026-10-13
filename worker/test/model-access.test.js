@@ -371,3 +371,21 @@ it("a failed replace leaves the previous key working", async () => {
   await modelCall("owner", runner, sent);
   expect(sent[0].options.extraHeaders["cf-aig-byok-alias"]).toBe(cf.configs.get(kept.config_id).alias);
 });
+
+// A save through a Worker whose AI binding answers every gateway run with status, recording each run in sent.
+const saveWith = (provider, body, status, sent) => worker.fetch(signedIn(`/api/me/models/${provider}`, { method: "PUT", headers: { Authorization: OWNER }, body: JSON.stringify(body) }),
+  { ...e, AI: { gateway: (id) => ({ run: async (data, options) => { sent.push({ id, data, options }); return new Response("{}", { status }); } }) } });
+
+it("saving a key checks it through the gateway at once: a key the provider accepts shows connected", async () => {
+  const sent = [];
+  expect((await saveWith("anthropic", { method: "key", value: "sk-ant-ch3ck" }, 200, sent)).status).toBe(204);
+  expect(await provider("anthropic")).toMatchObject({ status: "connected", reason: null, last_used_at: expect.any(String) });
+  expect(sent).toMatchObject([{ id: "cinder", data: { provider: "anthropic", endpoint: "v1/messages/count_tokens" },
+    options: { extraHeaders: { "cf-aig-byok-alias": expect.stringMatching(/^p-[0-9a-f]{16}$/) } } }]);
+  expect(JSON.stringify(sent)).not.toContain("sk-ant-ch3ck");
+});
+
+it("saving a key the provider refuses shows failing with the reason", async () => {
+  expect((await saveWith("openai", { method: "key", value: "sk-bad" }, 401, [])).status).toBe(204);
+  expect(await provider("openai")).toMatchObject({ status: "failing", reason: "OpenAI refused the key (HTTP 401)" });
+});
