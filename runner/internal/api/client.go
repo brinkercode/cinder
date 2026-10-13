@@ -322,6 +322,13 @@ func (c *Client) JobSecret(ctx context.Context, jobID, name string) (Secret, err
 	return Secret(body.Value), err
 }
 
+// ReviewDiff returns a claimed review job's change as unified diff text, which the Worker reads from Artifacts.
+func (c *Client) ReviewDiff(ctx context.Context, jobID string) (string, error) {
+	var body struct{ Diff string }
+	_, err := c.send(ctx, http.MethodGet, "/api/work/jobs/"+url.PathEscape(jobID)+"/diff", nil, &body)
+	return body.Diff, err
+}
+
 // Put sends a job's result to its runner route (symbols, authorship or compare).
 func (c *Client) Put(ctx context.Context, path string, body any) error {
 	_, err := c.send(ctx, http.MethodPut, path, body, nil)
