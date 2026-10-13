@@ -24,7 +24,17 @@ export async function previewChange(request, env, { name }) {
   const branch = target ?? policy.integration[0];
   if (!isAllowedTarget(policy, branch)) return error(422, "target_not_allowed", `branch policy does not allow target ${branch}`);
 
-  const sha = (await createArtifacts(env.ARTIFACTS).log(name, branch))[0]?.sha ?? null;
+  const head = (await createArtifacts(env.ARTIFACTS).log(name, branch))[0]?.sha ?? null;
+  // A target that just moved (a merge) has no index at its new head yet, and predicting there finds no symbols at all:
+  // queue that index (RepoDO.symbols) and predict from the repo's newest indexed commit, which lacks only the latest merges.
+  // lazy: the newest indexed commit of the repo, not of this branch; scope it to the branch's history if repos with
+  // diverged integration branches get wrong predictions.
+  const indexed = (sha) => env.DB.prepare("SELECT 1 FROM symbol_indexes WHERE repo_id = ? AND sha = ?").bind(repo.id, sha).first();
+  let sha = head;
+  if (head && !(await indexed(head))) {
+    await repoDO.symbols({ id: repo.id, name }, branch);
+    sha = (await env.DB.prepare("SELECT sha FROM symbol_indexes WHERE repo_id = ? ORDER BY rowid DESC LIMIT 1").bind(repo.id).first("sha")) ?? head;
+  }
   const symbols = await predictSymbols(env, repo.id, sha, intent);
   const predicted = symbols.map((s) => s.symbol);
   // Same overlap rule as RepoDO.grant, against every change holding or waiting on a lease.
