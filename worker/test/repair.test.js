@@ -87,6 +87,16 @@ describe("repair", () => {
     expect((await stub.get()).events.some((e) => e.kind === "repair_started")).toBe(false);
   });
 
+  it("a verify that conflicts again right after a clean converge goes to conflict instead of converging forever", async () => {
+    const { call, failVerify } = await setup("verify-conflict-loop");
+    const conflict = "Auto-merging src/index.js\nCONFLICT (content): Merge conflict in src/index.js\nAutomatic merge failed";
+    expect((await failVerify(conflict)).state).toBe("converging");
+    const runner = (await (await call("/api/runners", { name: "conv", kinds: ["converge"] })).json()).token;
+    const job = (await (await call("/api/work/claim", { kinds: ["converge"] }, runner)).json()).job.id;
+    expect((await (await call(`/api/work/jobs/${job}/report`, { status: "done" }, runner)).json()).change.state).toBe("verifying");
+    expect((await failVerify(conflict)).state).toBe("conflict");
+  });
+
   it("max_repairs from the agent's lock overrides the default of 2", async () => {
     await env.DB.prepare("INSERT OR IGNORE INTO agent_versions (id, name, version, harness, model, effort, prompt_hash, tools, limits) " +
       "VALUES ('agent/fixer/v1', 'fixer', 1, 'claude-code', 'claude-opus-5-5', 'default', 'h', '[]', '{\"max_repairs\":3}')").run();

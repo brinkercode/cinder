@@ -650,7 +650,13 @@ async function report(request, env, { job: id }) {
   // A verify that couldn't merge the head onto a target that moved under it (queueConvergeJobs skips a verifying change)
   // is not the agent's to repair: the change converges, and a real conflict there goes to the resolver with its hunks.
   // lazy: read from git's message in the log; a typed report field would be exact.
-  if (job.kind === "verify" && job.status === "failed" && /^CONFLICT \(/m.test(body.detail ?? "")) to = "converging";
+  if (job.kind === "verify" && job.status === "failed" && /^CONFLICT \(/m.test(body.detail ?? "")) {
+    // A clean converge just before it already rebased onto the target, so the conflict is with the changes merged ahead of
+    // it in the queue: converging again would loop verify and converge forever. It goes to conflict, for the resolver.
+    const prev = await env.DB.prepare("SELECT kind, status FROM jobs WHERE change_id = ? AND id <> ? ORDER BY created_at DESC LIMIT 1")
+      .bind(job.change_id, job.id).first();
+    to = prev?.kind === "converge" && prev.status === "done" ? "conflict" : "converging";
+  }
   // A behind change's next push converges onto its target before it verifies (queue.js queueConvergeJobs).
   if (["develop", "commit"].includes(job.kind) && to === "verifying"
     && await env.DB.prepare("SELECT 1 FROM change_behind WHERE change_id = ?").bind(job.change_id).first()) to = "converging";
