@@ -386,8 +386,9 @@ export async function deleteRepo(request, env, { name }) {
   // Its change forks (<name>--<KEY>-<n>; no repo name holds "--") go too, or a repo made again under this name can't fork
   // its first changes. Matched in Artifacts, not D1, so forks a repo deleted before this rule left behind go as well.
   for (const fork of (await artifacts.list()).filter((n) => n.startsWith(`${name}--`))) await artifacts.delete(fork);
-  // A repo made again under this name must not see this one's heads (code.js resolve).
-  await env.REPO_DO.get(env.REPO_DO.idFromName(name)).dropHeads();
+  // A repo made again under this name starts with none of this one's state: heads (code.js resolve), leases its
+  // changes held (else new changes stack on a holder that no longer exists), claim locks and caches.
+  await env.REPO_DO.get(env.REPO_DO.idFromName(name)).wipe();
   await env.DB.batch([...(await repoRows(env)).map((q) => env.DB.prepare(q).bind(...(q.includes("?2") ? [repo.id, name] : [repo.id]))),
     env.DB.prepare("INSERT INTO repo_deletions (name, actor, at) VALUES (?, ?, ?)").bind(name, actor, new Date().toISOString())]);
   if (hooks.length || secrets.length) await rebind(env);
