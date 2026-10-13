@@ -9,7 +9,8 @@ const dispatch = () => env.DISPATCH_DO.get(env.DISPATCH_DO.idFromName("tick-test
 afterEach(() => vi.unstubAllGlobals());
 
 it("a 10-minute slot's tick runs once, whether the cron or DispatchDO's alarm takes it first", async () => {
-  const slot = Math.floor(Date.parse("2026-10-13T16:20:00Z") / SLOT_MS) * SLOT_MS;
+  // A day ahead, so the alarm it sets doesn't fire during the test.
+  const slot = Math.floor((Date.now() + 86_400_000) / SLOT_MS) * SLOT_MS;
   await runInDurableObject(dispatch(), async (i) => {
     expect(await i.takeSlot(slot + 1_000)).toBe(true); // the cron
     expect(await i.takeSlot(slot + 30_000)).toBe(false); // the alarm, same slot
