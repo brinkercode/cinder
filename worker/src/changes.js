@@ -692,7 +692,8 @@ export async function diffSummary(env, name, change, head_sha, cached) {
   }
   const lines = files.flatMap((f) => f.lines ?? []);
   const summary = { files_changed: files.length, additions: lines.filter((l) => l[0] === "+").length, deletions: lines.filter((l) => l[0] === "-").length, ahead: null, behind: null };
-  await env.DB.prepare("INSERT OR IGNORE INTO head_diffs VALUES (?, ?, ?)").bind(change.repo_id, head_sha, JSON.stringify(summary)).run();
+  // An empty diff isn't kept: a head with no files is almost always one its fork couldn't be read at yet, and recounting is cheap.
+  if (files.length) await env.DB.prepare("INSERT OR IGNORE INTO head_diffs VALUES (?, ?, ?)").bind(change.repo_id, head_sha, JSON.stringify(summary)).run();
   return summary;
 }
 

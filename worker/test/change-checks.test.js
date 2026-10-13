@@ -1,7 +1,7 @@
 import { env, runInDurableObject } from "cloudflare:test";
 import { expect, it } from "vitest";
 import { validateChangeCheck, validateChangeCommit, validateDiffFile } from "../src/api/shapes.js";
-import { newChange } from "../src/changes.js";
+import { diffSummary, newChange } from "../src/changes.js";
 import worker from "../src/index.js";
 import { fakeArtifacts } from "./fakes/artifacts.js";
 
@@ -45,6 +45,26 @@ it("files: a change with no head branch and one commit touching 3 files reports 
   const count = (f, k) => f.lines.filter((l) => l[0] === k).length;
   expect(got.map((f) => [f.path, f.status, count(f, "+"), count(f, "-")])).toEqual([["a.md", "added", 2, 0], ["b.md", "modified", 1, 1], ["c.md", "modified", 0, 1]]);
   for (const f of got) expect(validateDiffFile(f).errors).toEqual([]);
+});
+
+it("a change pushed to refs/for/<target> lists its files and commits from the fork's target branch", async () => {
+  const { fake, call, change } = await setup("pushed-for-repo");
+  const fork = fake.repos.get(change.fork);
+  Object.assign(fork.files, { "a.md": "new" });
+  fork.commits.unshift({ hash: "p1", message: "Say what a failed check records" });
+  fork.at = { base1: { "a.md": "old" }, p1: fork.files };
+  await runInDurableObject(env.CHANGE_DO.get(env.CHANGE_DO.idFromName(change.id)), async (i) => {
+    await i.ctx.storage.put("change", { ...(await i.ctx.storage.get("change")), head_branch: "refs/for/main", driver: "ana@example.com" });
+  });
+  expect((await call(`/api/changes/${change.id}/files`)).map((f) => [f.path, f.status])).toEqual([["a.md", "modified"]]);
+  expect((await call(`/api/changes/${change.id}/commits`)).map((c) => c.sha)).toEqual(["p1"]);
+});
+
+it("an empty diff summary isn't cached, so a head is recounted once its fork can be read", async () => {
+  const { fake, change } = await setup("empty-diff-repo");
+  const e = { ...env, ARTIFACTS: fake };
+  expect(await diffSummary(e, "empty-diff-repo", change, "h-empty", null)).toMatchObject({ files_changed: 0 });
+  expect(await env.DB.prepare("SELECT 1 FROM head_diffs WHERE head_sha = 'h-empty'").first()).toBeNull();
 });
 
 it("files: a change with no commits of its own lists no files", async () => {
