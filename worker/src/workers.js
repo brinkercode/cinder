@@ -109,6 +109,21 @@ const GO_HOSTS = ["proxy.golang.org", "sum.golang.org", "pkg.go.dev"];
 // An allowed GET for a container whose every job is an agent on web markdown asks for Markdown; an HTML answer anyway is
 // converted with Workers AI before the agent reads it, counted on the job's web usage. Anything else passes through.
 // lazy: reads the jobs and their allowlists per request; cache per container if a job's request rate makes D1 the bottleneck.
+// Workers clone blobless (runner gitauth) and fetch a file's contents only when a command reads it. Those later fetches
+// carry no token: a git read (smart-HTTP upload-pack, never receive-pack) of a repo or change fork one of the container's
+// jobs works on gets a 60-second read token here, so no Artifacts token is ever kept in the container.
+async function gitRead(req, env, url, jobs) {
+  const m = url.pathname.match(/\/([^/]+)\.git\/(info\/refs|git-upload-pack)$/);
+  const read = m && (m[2] === "git-upload-pack" ? req.method === "POST" : url.searchParams.get("service") === "git-upload-pack");
+  if (!read || req.headers.has("authorization")) return req;
+  const changes = JSON.stringify(jobs.map((j) => j.change_id).filter(Boolean));
+  const { results } = await env.DB.prepare("SELECT fork FROM change_numbers WHERE change_id IN (SELECT value FROM json_each(?))").bind(changes).all();
+  if (![...jobs.map((j) => j.repo), ...results.map((r) => r.fork)].includes(m[1])) return req;
+  const headers = new Headers(req.headers);
+  headers.set("authorization", `Bearer ${(await createArtifacts(env.ARTIFACTS).createToken(m[1], "read", 60)).token}`);
+  return new Request(req, { headers });
+}
+
 async function egress(req, env, ctx) {
   const url = new URL(req.url);
   const host = url.hostname.toLowerCase();
@@ -143,6 +158,7 @@ async function egress(req, env, ctx) {
     if (store && new URL((await store.info()).remote).hostname === host) continue;
     return refuse(host, "not on the job's egress allowlist");
   }
+  req = await gitRead(req, env, url, jobs);
   if (req.method !== "GET" || !locks.every((l) => l?.web === "markdown")) return fetch(req);
   const headers = new Headers(req.headers);
   headers.set("accept", "text/markdown, text/html;q=0.9, */*;q=0.8");

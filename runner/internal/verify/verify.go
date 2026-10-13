@@ -76,17 +76,19 @@ func run(ctx context.Context, dir string, token api.Secret, j Job) (rep api.Repo
 		tok  api.Secret
 		args []string
 	}
-	steps := []step{{cmp.Or(j.ReadToken, token), []string{"clone", "--branch", j.Branch, "--", j.Target, dir}}}
+	// The clone is blobless: a merge fetches the blobs it needs from the target, so it sends the clone's token.
+	read := cmp.Or(j.ReadToken, token)
+	steps := []step{{read, []string{"clone", "--branch", j.Branch, "--", j.Target, dir}}}
 	if j.Fork != "" {
 		// The tree the merge will land: the target, each change ahead merged in order, then this change merged on top. The
 		// branch ref moves to the changes ahead, so findings stay on this change's own lines.
 		merge := []string{"-C", dir, "-c", "user.name=cinder-verify", "-c", "user.email=cinder-verify@cinder.invalid", "merge", "--quiet", "--no-ff", "--no-edit", "FETCH_HEAD"}
 		steps = append(steps, step{"", []string{"-C", dir, "checkout", "--quiet", "--detach"}})
 		for _, a := range j.Ahead {
-			steps = append(steps, step{a.Token, []string{"-C", dir, "fetch", "--", a.Remote, cmp.Or(a.Head, j.Branch)}}, step{"", merge})
+			steps = append(steps, step{a.Token, []string{"-C", dir, "fetch", "--", a.Remote, cmp.Or(a.Head, j.Branch)}}, step{read, merge})
 		}
 		steps = append(steps, step{"", []string{"-C", dir, "update-ref", "refs/heads/" + j.Branch, "HEAD"}},
-			step{token, []string{"-C", dir, "fetch", "--", j.Fork, j.Head}}, step{"", merge})
+			step{token, []string{"-C", dir, "fetch", "--", j.Fork, j.Head}}, step{read, merge})
 	}
 	for _, s := range steps {
 		if out, err := gitauth.Command(ctx, string(s.tok), s.args...).CombinedOutput(); err != nil {
