@@ -21,7 +21,7 @@ export async function listCommits(request, env, { id }) {
   const name = await env.DB.prepare("SELECT name FROM repos WHERE id = ?").bind(change.repo_id).first("name");
   const artifacts = createArtifacts(env.ARTIFACTS);
   const base = new Set((await artifacts.log(name, change.target_branch)).map((c) => c.sha));
-  const commits = (await artifacts.log(change.fork, change.head_branch ?? change.target_branch)).filter((c) => !base.has(c.sha));
+  const commits = (await changeLog(artifacts, name, change)).filter((c) => !base.has(c.sha));
   return Response.json(commits.map(({ sha, message = "", author = null }) => ({ sha, message, author, trailers: trailers(message) })));
 }
 
@@ -34,12 +34,20 @@ export async function listFiles(request, env, { id }) {
   return Response.json(await changeFiles(createArtifacts(env.ARTIFACTS), name, change));
 }
 
+// The change's history, newest first: its fork's branch, or once merged (the fork is deleted) its head in repo name,
+// which the merge brought in. Its own commits are the ones not on the target's log (Artifacts logs first parents only).
+async function changeLog(artifacts, name, change) {
+  if (change.state !== "merged") return artifacts.log(change.fork, change.head_branch ?? change.target_branch);
+  return change.head ? artifacts.log(name, change.head) : [];
+}
+
 // The change's files as listFiles returns them; name is its repo.
 export async function changeFiles(artifacts, name, change) {
   const base = new Set((await artifacts.log(name, change.target_branch)).map((c) => c.sha));
-  const log = await artifacts.log(change.fork, change.head_branch ?? change.target_branch);
+  const log = await changeLog(artifacts, name, change);
   if (!log.length || base.has(log[0].sha)) return [];
-  return diffFiles(artifacts, change.fork, log.find((c) => base.has(c.sha))?.sha ?? null, log[0].sha);
+  const store = change.state === "merged" ? name : change.fork;
+  return diffFiles(artifacts, store, log.find((c) => base.has(c.sha))?.sha ?? null, log[0].sha);
 }
 
 // GET /api/changes/:id/checks → [ChangeCheck] for the change's head: verify stages, guard and SARIF findings.
