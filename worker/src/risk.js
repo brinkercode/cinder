@@ -40,19 +40,46 @@ export async function judgeRisk(env, repo, input, change) {
   return judge(env, repo, "risk", await riskState(env.DB, repo, input), RISK_QUESTIONS, change);
 }
 
+// A changed line's comment syntax by file extension; a line in a file not listed here is code unless blank.
+// A changed line is a comment only when nothing else can hide on it: a line comment, or a block comment opened and closed
+// on that line with nothing after it. A block comment's inner lines ("* …") count as code, as a continuation line looks
+// the same. lazy: a comment-looking line inside a multi-line string counts as a comment; track string state per file if
+// that ever matters (verify still runs on every change).
+const BLOCK = String.raw`\/\*((?!\*\/).)*\*\/$`;
+const COMMENT = [[/\.(c|cc|cjs|cpp|go|h|java|js|jsx|kt|mjs|rs|swift|ts|tsx)$/, new RegExp(String.raw`^(\/\/|${BLOCK})`)], [/\.s?css$/, new RegExp(`^${BLOCK}`)],
+  [/\.(bash|py|rb|sh|toml|ya?ml)$/, /^#(?!!)/], [/\.tf$/, new RegExp(String.raw`^(#|\/\/|${BLOCK})`)], [/\.sql$/, new RegExp(String.raw`^(--|${BLOCK})`)],
+  [/\.(html?|svelte|vue|xml)$/, /^<!--((?!-->).)*-->$/]];
+const DOC = /\.(md|mdx|txt)$/i;
+
+// files: [{ path, lines }] as diffFiles (code.js) gives them. The reason a change that edits only documentation, comments
+// or blank lines needs no person, else null. A file with no line diff (too big to diff) counts as code.
+export function quietDiff(files) {
+  if (!files?.length) return null;
+  if (files.every((f) => DOC.test(f.path))) return "documentation-only change";
+  const comment = (path) => COMMENT.find(([ext]) => ext.test(path))?.[1];
+  const quiet = files.every((f) => DOC.test(f.path) || f.lines?.every((l) => {
+    const text = l.slice(1).trim();
+    return l[0] === " " || !text || comment(f.path)?.test(text);
+  }));
+  return quiet ? "comment-only change" : null;
+}
+
 // Routes a change from its calibrated risk, stores { route: auto|agent|human, reason, p } on it and records the route
 // with its judgment as a routed event. A trusted high answer waits for a human. An untrusted judge (too few outcomes)
 // routes to the reviewer agent, whose verdict also scores the judge, so it earns trust without a person; agent review
 // needs a reviewer agent with a released version, else a human. No judgment at all (no backend, airlock refusal) merges
 // on green as before routing existed.
 // rule is the target branch's (policy.js): a touched path matching its route goes to a person, and a trusted judge
-// auto-merges only within its risk percentage and judge count.
+// auto-merges only within its risk percentage and judge count. An input.diff (quietDiff) that changes no code routes as
+// a trusted low answer, whatever the judge says.
 export async function routeChange(env, repo, id, input, rule = DEFAULT_RULE) {
   const { risk: { answer, p, trusted } } = await judgeRisk(env, repo, input, id);
   // lazy: a route glob's * stays within one path segment, as in release patterns; add ** if routes need subtrees.
   const routed = rule.route.find((g) => input.files.some((f) => glob(g).test(f.path)));
+  const quiet = quietDiff(input.diff);
   let review;
-  if (answer === "high" && trusted) review = { route: "human", reason: "risk high" };
+  if (quiet && !routed) review = { route: rule.judges > 1 || RISK_PERCENT.low > rule.risk ? "agent" : "auto", reason: quiet };
+  else if (answer === "high" && trusted) review = { route: "human", reason: "risk high" };
   else if (routed) review = { route: "human", reason: `touches ${routed}` };
   // lazy: fails open while no judge answers, so repos without a reachable backend keep merging.
   else if (!answer) review = { route: "auto", reason: "no risk judgment" };

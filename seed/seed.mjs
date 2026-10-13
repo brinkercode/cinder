@@ -520,7 +520,7 @@ export const PEOPLE_EDITS = {
     ["Skip the map delete for an unknown order id", "\t_, ok := s.orders[id]\n\tdelete(s.orders, id)\n\treturn ok\n",
       "\tif _, ok := s.orders[id]; !ok {\n\t\treturn false\n\t}\n\tdelete(s.orders, id)\n\treturn true\n"],
     ["Delete an order only when it exists", "\tdelete(s.orders, id)\n\treturn ok\n", "\tif ok {\n\t\tdelete(s.orders, id)\n\t}\n\treturn ok\n"],
-    ["Say what Delete does with a missing id", "\t_, ok := s.orders[id]\n", "\t// A missing id is not an error: the caller gets false.\n\t_, ok := s.orders[id]\n"],
+    ["Return false for a negative order id", "\t_, ok := s.orders[id]\n", "\tif id < 0 {\n\t\treturn false\n\t}\n\t_, ok := s.orders[id]\n"],
     ["Say why Delete holds the lock throughout", "func (s *Store) Delete(id int) bool {\n",
       "func (s *Store) Delete(id int) bool {\n\t// Held across the lookup and the delete, so both see the same order.\n"],
   ]],

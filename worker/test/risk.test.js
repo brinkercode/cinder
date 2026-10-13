@@ -185,3 +185,51 @@ it("a repo policy requiring a human approval still requires it", async () => {
     expect((await mergeBlockers(env, await stub.get())).map((b) => b.code)).toContain("approval_missing");
   });
 });
+
+describe("comment- and documentation-only routing", () => {
+  // A trusted judge answering high, which alone would hold the change for a person.
+  async function routeTrustedHigh(name, diff) {
+    const repo = await repoId(name);
+    await call(`/api/repos/${name}/judges/risk`, { method: "PUT", body: JSON.stringify({ backend: "clef", model_version: "clef@1", min_outcomes: 1 }) });
+    const scored = crypto.randomUUID();
+    await env.DB.prepare("INSERT INTO judgments (id, repo_id, kind, backend, model_version, state_hash, question, answer, probability, made_at) VALUES (?, ?, 'risk', 'clef', 'clef@1', 's', 'q', 'low', 0.9, '')").bind(scored, repo).run();
+    await env.DB.prepare("INSERT INTO outcomes (judgment_id, actual, correct, observed_at) VALUES (?, 'low', 1, '')").bind(scored).run();
+    const id = crypto.randomUUID();
+    await env.CHANGE_DO.get(env.CHANGE_DO.idFromName(id)).create({ id, repo_id: repo, target_branch: "main", state: "planned", created_at: new Date().toISOString() }, []);
+    await env.DB.prepare("INSERT INTO changes (id, repo_id, target_branch, state, created_at) VALUES (?, ?, 'main', 'planned', '')").bind(id, repo).run();
+    const AI = fakeClefAI(async () => ({ risk: { low: 0.05, medium: 0.05, high: 0.9 } }));
+    return routeChange({ ...env, AI }, repo, id, { ...input, files: diff.map((f) => ({ path: f.path, added: 0, removed: 0 })), diff });
+  }
+
+  it("a change whose diff only edits comments is routed without human review as a comment-only change", async () => {
+    const diff = [
+      { path: "src/a.js", status: "modified", lines: [" const a = 1;", "-// old note", "+// new note", "+", "+/* block note */"] },
+      { path: "run.py", status: "modified", lines: [" x = 1", "+# why x is 1"] },
+      { path: "db/q.sql", status: "modified", lines: ["+-- index hint"] },
+      { path: "index.html", status: "modified", lines: ["+<!-- banner -->"] },
+      { path: "README.md", status: "modified", lines: ["+anything"] },
+    ];
+    expect(await routeTrustedHigh("risk-comment-only", diff)).toMatchObject({ route: "auto", reason: "comment-only change" });
+  });
+
+  it("a change that edits one code line next to comments keeps the risk judge's route", async () => {
+    const diff = [{ path: "src/a.js", status: "modified", lines: ["+// new note", "-const a = 1;", "+const a = 2;"] }];
+    expect(await routeTrustedHigh("risk-comment-code", diff)).toMatchObject({ route: "human", reason: "risk high" });
+  });
+
+  it("code hidden on a comment-looking line keeps the risk judge's route", async () => {
+    for (const line of ["+  * evil()", "+/* a */ evil(); /* b */", "+/* note */ evil()"]) {
+      const diff = [{ path: "src/a.js", status: "modified", lines: ["+// note", line] }];
+      expect(await routeTrustedHigh(`risk-hidden-${line.length}`, diff), line).toMatchObject({ route: "human", reason: "risk high" });
+    }
+  });
+
+  it("a documentation-only change is routed as documentation-only", async () => {
+    const diff = [
+      { path: "docs/usage/changes.md", status: "modified", lines: ["-old", "+new"] },
+      { path: "docs/guide.mdx", status: "added", lines: ["+# Guide"] },
+      { path: "NOTES.txt", status: "added", lines: ["+note"] },
+    ];
+    expect(await routeTrustedHigh("risk-docs-only", diff)).toMatchObject({ route: "auto", reason: "documentation-only change" });
+  });
+});

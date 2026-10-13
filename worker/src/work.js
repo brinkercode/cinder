@@ -27,6 +27,7 @@ import { wikiContext } from "./wiki.js";
 import { budgetUse } from "./overview.js";
 import { forget, NEEDS_FULL_IMAGE, POOL_TAKES, retire, stopIfIdle } from "./workers.js";
 import { changedFiles, recordMerge } from "./merges.js";
+import { changeFiles } from "./change-checks.js";
 
 const LEASE_SECONDS = 7200;
 const MERGE_TOKEN_SECONDS = 600;
@@ -699,6 +700,8 @@ async function report(request, env, { job: id }) {
       // lazy: verify reports carry no diff stats yet, so risk sees only the touched files; send stats once cinder-verify has them.
       files: [...new Set((touched ?? []).map((s) => s.split("#")[0]))].map((path) => ({ path, added: 0, removed: 0 })),
       intent: current.intent, test_delta: 0, lease_overlaps: 0,
+      // The head's line diff, for comment- and documentation-only routing; an unreadable one routes as code.
+      diff: await changeFiles(createArtifacts(env.ARTIFACTS), repo.name, current).catch(() => null),
       // A manifest cinder can't read could do anything, so it goes to a person rather than failing the report.
       deploy_plan: await planDeploy(env, repo.name, current).catch((err) => ({ destructive: `unreadable: ${err.message}`, environments: [] })),
     }, rule);
