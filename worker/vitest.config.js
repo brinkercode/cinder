@@ -39,5 +39,5 @@ export default defineConfig({
     },
   }))],
   // seed/seed.test.js drives the seed through this Worker, so it runs here.
-  test: { include: ["**/*.test.js", "../seed/seed.test.js"], setupFiles: ["./test/setup.js", "../web/src/test-setup.js"], globalSetup: ["./test/helpers/runners.js"], testTimeout: 30000, hookTimeout: 30000 },
+  test: { include: ["**/*.test.js", "../seed/seed.test.js", "../seed/large.test.js"], setupFiles: ["./test/setup.js", "../web/src/test-setup.js"], globalSetup: ["./test/helpers/runners.js"], testTimeout: 30000, hookTimeout: 30000 },
 });

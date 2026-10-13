@@ -855,6 +855,10 @@ if (globalThis.process?.argv[1] && globalThis.process.argv[1] === new URL(import
   }
   const commit = async ({ repo, ...body }) => (await api("POST", `/api/repos/${repo}/seed`, body)).shas;
   process.env.CINDER_PEOPLE_WAIT_MS ??= "180000";
-  await seed(api, commitRelease(api), process.argv.includes("--full") ? "all" : undefined, commit, sources, process.argv.includes("--reset"));
-  console.log(`seeded ${Object.keys(sources).join(", ")}`);
+  const { LARGE, seedLarge } = await import("./large.mjs");
+  const [full, large] = ["--full", "--large"].map((f) => process.argv.includes(f));
+  // --large seeds only atlas-monorepo; --full adds it after every section. The SeedWorkflow leaves it out: tens of MB in one step.
+  if (!large) await seed(api, commitRelease(api), full ? "all" : undefined, commit, sources, process.argv.includes("--reset"));
+  if (full || large) await seedLarge(api, commit);
+  console.log(`seeded ${large ? LARGE : [...Object.keys(sources), ...(full ? [LARGE] : [])].join(", ")}`);
 }

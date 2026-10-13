@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"slices"
 	"strings"
 	"sync"
 )
@@ -31,7 +32,17 @@ func Refresh(claimed, latest string) {
 // are off: a runner has no terminal, and a prompt would hang the slot. Our
 // GIT_CONFIG_* entries come last, and exec keeps the last value of a duplicate key.
 // CINDER_* (the runner token) is dropped: git runs hooks and merge drivers in the repo.
+// In a pool container a clone is blobless: later commands fetch the blobs they need from its remote, and cinder's egress
+// gives those tokenless git reads a short-lived token (worker workers.js gitRead). A BYO runner has no such egress, so
+// it clones in full. A --mirror clone stays full, as the secret scan reads every blob.
 func Command(ctx context.Context, token string, args ...string) *exec.Cmd {
+	i := 0
+	for i+1 < len(args) && (args[i] == "-C" || args[i] == "-c") {
+		i += 2
+	}
+	if pooled() && i < len(args) && args[i] == "clone" && !slices.Contains(args, "--mirror") {
+		args = slices.Concat(args[:i+1], []string{"--filter=blob:none"}, args[i+1:])
+	}
 	cmd := exec.CommandContext(ctx, "git", args...)
 	for _, kv := range os.Environ() {
 		if !strings.HasPrefix(kv, "CINDER_") {
@@ -51,6 +62,9 @@ func Command(ctx context.Context, token string, args ...string) *exec.Cmd {
 
 // HasBranch reports "target <branch> has no commits" when remote has no such branch, so a job on an
 // empty repo fails with that instead of a git error from deep inside it.
+// pooled reports whether this runner is a pool container, which reaches cinder through its egress at cinder.internal.
+func pooled() bool { return strings.HasPrefix(os.Getenv("CINDER_URL"), "http://cinder.internal") }
+
 func HasBranch(ctx context.Context, token, remote, branch string) error {
 	out, err := Command(ctx, token, "ls-remote", "--exit-code", "--", remote, "refs/heads/"+branch).CombinedOutput()
 	var exit *exec.ExitError
