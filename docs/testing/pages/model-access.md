@@ -28,7 +28,7 @@
 | MOD-09 | Click **Connect** on the missing provider. | The dialog opens with that provider already picked. |
 | MOD-10 | In the dialog, switch API key / Subscription login. | The field label changes between "API key" and "Login token". |
 | MOD-11 | Type a key. | The characters are masked. |
-| MOD-12 | Save `manual-key-1`. | The provider's source becomes My key with status unchecked; a reload keeps it. The first run with the key sets connected or failing. |
+| MOD-12 | Save `manual-key-1`. | The provider's source becomes My key, and its status is set by the check on save: failing (the provider refuses this fake key). A reload keeps it. |
 | MOD-13 | Reopen the dialog with **Replace**. | The provider is picked and the key field is empty. |
 | MOD-14 | In the network tab, read the `GET /api/me/models` response. | `manual-key-1` appears nowhere; only the method and status. |
 | MOD-15 | Open the Secrets Store in the dashboard. | A secret named `cinder_<provider>_<alias>` exists for the key you saved. |
@@ -36,7 +36,7 @@
 | MOD-17 | Click **Remove** and confirm. | The provider returns to missing with **Connect**; its Secrets Store secret is gone. |
 | MOD-18 | Save a key Cloudflare refuses (for example on a gateway with no Secrets Store). | The reason, including Cloudflare's message and code, shows above the cards. |
 | MOD-19 | Click **Add key or login** in the Providers header. | The dialog opens with no provider forced. |
-| MOD-26 | Save an Anthropic **Subscription login** from `claude setup-token`, pick your own key or login, then request a change. | The row shows Subscription login, unchecked; after the change's develop job calls the model it shows connected. Saving a login for any other provider is refused. |
+| MOD-26 | Save an Anthropic **Subscription login** from `claude setup-token`, pick your own key or login, then request a change. | The row shows Subscription login, connected once the check on save accepts it; each model call keeps the status current. Saving a login for any other provider is refused. |
 | MOD-27 | Have another person request a change while your login is saved. | Their run doesn't use your login; your Last used doesn't move. |
 | MOD-2095.1 | With Use Cloudflare credits picked, save an Anthropic API key, then reload. | Add my own key or login is now picked; the next change you request runs with your key. |
 | MOD-2095.2 | Signed in as the first email in `OWNERS`, save a key, then start a change with the `cinder` CLI (the owner token). | The change's agent runs use that key. |

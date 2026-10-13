@@ -18,6 +18,7 @@ import { openThread, threadsOf } from "./threads.js";
 import { routeChange } from "./risk.js";
 import { DEFAULT_RULE } from "./policy.js";
 import { planDeploy } from "./deploy.js";
+import { runTick, SLOT_MS } from "./tick.js";
 import { autoQueue, awaitsHuman, changeKey, pendingReviewer, PRIORITY_RANK, scheduleIndexed } from "./changes.js";
 import { error, runnerOf } from "./router.js";
 import { channelAgent } from "./canary.js";
@@ -59,6 +60,23 @@ export class DispatchDO extends DurableObject {
   async wipe() {
     await this.ctx.storage.deleteAlarm();
     await this.ctx.storage.deleteAll();
+    await this.ctx.storage.setAlarm((Math.floor(Date.now() / SLOT_MS) + 1) * SLOT_MS + 30_000); // the tick outlives a reset
+  }
+  // The periodic tick (tick.js): true when the 10-minute slot holding `time` hasn't run yet, which takes it. Keeps the alarm
+  // set for the next slot, 30 s after the cron's, so the alarm runs a slot only when the cron didn't.
+  async takeSlot(time) {
+    const slot = Math.floor(time / SLOT_MS);
+    await this.ctx.storage.setAlarm((slot + 1) * SLOT_MS + 30_000);
+    if ((await this.ctx.storage.get("slot")) === slot) return false;
+    await this.ctx.storage.put("slot", slot);
+    return true;
+  }
+  async arm() {
+    if ((await this.ctx.storage.getAlarm()) === null) await this.ctx.storage.setAlarm(Date.now());
+  }
+  async alarm() {
+    const time = Math.floor(Date.now() / SLOT_MS) * SLOT_MS;
+    if (await this.takeSlot(time)) await runTick(this.env, time);
   }
   // repoId (a managed pool's assignment) limits the claim to that repo's jobs; null claims from any repo.
   // slim (a lite or basic pool worker) skips jobs that need the full image's toolchains.
