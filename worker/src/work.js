@@ -341,8 +341,9 @@ export async function claimWork(request, env) {
 // A change job's tokens last MERGE_TOKEN_SECONDS; the runner's heartbeat (every 5 min) gets fresh ones before they expire.
 async function changeTokens(env, change, kind) {
   const artifacts = createArtifacts(env.ARTIFACTS);
-  // The reviewer and the push guard are read-only: they read the fork and never get a write token.
-  if (kind === "review" || kind === "guard") return { token: null, readToken: (await artifacts.createToken(change.fork, "read", MERGE_TOKEN_SECONDS)).token };
+  // The push guard is read-only: it reads the fork and never gets a write token. The reviewer gets no token at all:
+  // it reads its diff from GET /api/work/jobs/:job/diff (review-diff.js).
+  if (kind === "guard") return { token: null, readToken: (await artifacts.createToken(change.fork, "read", MERGE_TOKEN_SECONDS)).token };
   if (!FORK_KINDS.includes(kind)) return { token: null, readToken: null };
   const target = await env.DB.prepare("SELECT name FROM repos WHERE id = ?").bind(change.repo_id).first();
   return {

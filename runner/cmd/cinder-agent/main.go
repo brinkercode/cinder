@@ -97,7 +97,6 @@ func run(ctx context.Context, c *api.Claim) (rep api.Report) {
 		Remote  string            `json:"remote"`
 		Draft   *draft            `json:"draft"`
 		Batch   []landing         `json:"batch"`
-		Base    string            `json:"base"` // a review's: the target sha its change verified on
 	}
 	if len(c.Payload) > 0 {
 		if err := json.Unmarshal(c.Payload, &p); err != nil {
@@ -130,7 +129,7 @@ func run(ctx context.Context, c *api.Claim) (rep api.Report) {
 	var reviewed api.Report // a review's verdict, sent once usage and limits are checked
 	switch c.Job.Kind {
 	case "review":
-		reviewed, err = reviewChange(ctx, read, fork, branch, p.Base, ch.Intent, agent.Egress, spec, &used)
+		reviewed, err = reviewChange(ctx, client, c.Job.ID, ch.Intent, agent.Egress, spec, &used)
 	case "develop":
 		var runner string
 		if c.Job.RunnerID != nil {

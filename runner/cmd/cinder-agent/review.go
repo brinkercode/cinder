@@ -4,14 +4,13 @@ import (
 	"cmp"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"net/url"
 	"os"
 	"strings"
 
 	"github.com/brinkercode/cinder/runner/internal/api"
 	"github.com/brinkercode/cinder/runner/internal/egress"
-	"github.com/brinkercode/cinder/runner/internal/gitauth"
 	"github.com/brinkercode/cinder/runner/internal/harness"
 )
 
@@ -27,43 +26,25 @@ type verdict struct {
 	Findings []api.Finding `json:"findings"`
 }
 
-// reviewChange clones the fork read-only, diffs its head against base (the target the verify ran on) and asks the
-// harness for a verdict. The returned report is the job's: done on pass, failed with line findings on fail.
-// lazy: a base the fork lacks (the target moved past the fork) reviews the head commit alone.
-func reviewChange(ctx context.Context, readToken, fork, branch, base, intent string, allow []string, spec harness.Spec, used *harness.Result) (api.Report, error) {
+// reviewChange gets the job's diff (its change's fork head against the target the verify ran on) from the Worker and
+// asks the harness for a verdict in an empty directory: no clone, so the run holds no repository token.
+// The returned report is the job's: done on pass, failed with line findings on fail.
+func reviewChange(ctx context.Context, c *api.Client, job, intent string, allow []string, spec harness.Spec, used *harness.Result) (api.Report, error) {
+	if c == nil {
+		return api.Report{}, errors.New("review: no Worker client to read the diff from")
+	}
+	diff, err := c.ReviewDiff(ctx, job)
+	if err != nil {
+		return api.Report{}, err
+	}
 	dir, err := os.MkdirTemp("", "cinder-review-")
 	if err != nil {
 		return api.Report{}, err
 	}
 	defer os.RemoveAll(dir)
-	git := func(args ...string) (string, error) {
-		out, err := gitauth.Command(ctx, readToken, append([]string{"-C", dir}, args...)...).CombinedOutput()
-		if err != nil {
-			return "", fmt.Errorf("git %s: %w: %s", args[0], err, out)
-		}
-		return string(out), nil
-	}
-	if _, err := git("clone", "--quiet", "--branch", branch, fork, "."); err != nil {
-		return api.Report{}, err
-	}
-	diffArgs := []string{"show", "--format=", "HEAD"}
-	if _, err := git("cat-file", "-e", base+"^{commit}"); base != "" && err == nil {
-		diffArgs = []string{"diff", base + "...HEAD"}
-	}
-	diff, err := git(diffArgs...)
-	if err != nil {
-		return api.Report{}, err
-	}
 	spec.Prompt = fmt.Sprintf("%s\n## Intent\n%s\n\n## Diff\n%s\n\n---\n\n%s", reviewAsk, intent, diff, spec.Prompt)
 	spec.Workdir = dir
-	if readToken != "" {
-		spec.Secrets = append(spec.Secrets, readToken)
-	}
-	forkURL, err := url.Parse(fork)
-	if err != nil {
-		return api.Report{}, err
-	}
-	proxy, err := egress.Start(allow, false, harness.ProviderHost(spec), forkURL.Hostname())
+	proxy, err := egress.Start(allow, false, harness.ProviderHost(spec), "")
 	if err != nil {
 		return api.Report{}, err
 	}
