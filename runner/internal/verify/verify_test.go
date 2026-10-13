@@ -4,6 +4,9 @@ import (
 	"context"
 	"go/parser"
 	"go/token"
+	"net/http"
+	"net/http/cgi"
+	"net/http/httptest"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -189,5 +192,39 @@ echo new > target/new.txt; git -C target add new.txt; git -C target commit -qm '
 	rep := Run(context.Background(), filepath.Join(t.TempDir(), "w"), "", j)
 	if rep.Status != "done" || !strings.Contains(rep.Detail, "fork") || rep.Base != strings.TrimSpace(string(out)) || len(rep.Tree) != 40 {
 		t.Fatalf("want the fork merged onto the target tip and that tip reported, got %+v", rep)
+	}
+}
+
+func TestRun_BloblessClone_MergeFetchesMissingBlobsWithToken(t *testing.T) {
+	t.Setenv("CINDER_URL", "http://cinder.internal")
+	tmp := t.TempDir()
+	// Both sides edit a.txt, so the merge needs its base blob, which the blobless clone never fetched.
+	script := `set -e; export GIT_CONFIG_GLOBAL=/dev/null GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t
+git init -q -b main w; printf 'one\ntwo\nthree\n' > w/a.txt; git -C w add .; git -C w commit -qm base
+git clone -q w fork; printf 'ONE\ntwo\nthree\n' > fork/a.txt; git -C fork commit -qam fork
+printf 'one\ntwo\nTHREE\n' > w/a.txt; git -C w commit -qam target
+git clone -q --bare w target.git; git -C target.git config uploadpack.allowFilter true`
+	cmd := exec.Command("sh", "-c", script)
+	cmd.Dir = tmp
+	if out, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("setup: %v\n%s", err, out)
+	}
+	gitPath, err := exec.LookPath("git")
+	if err != nil {
+		t.Fatal(err)
+	}
+	backend := &cgi.Handler{Path: gitPath, Args: []string{"http-backend"}, Env: []string{"GIT_PROJECT_ROOT=" + tmp, "GIT_HTTP_EXPORT_ALL=1"}}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") != "Bearer read-token" {
+			http.Error(w, "no token", http.StatusUnauthorized)
+			return
+		}
+		backend.ServeHTTP(w, r)
+	}))
+	defer srv.Close()
+	j := Job{Target: srv.URL + "/target.git", Branch: "main", Fork: filepath.Join(tmp, "fork"), Head: "main", Check: "cat a.txt"}
+	rep := Run(context.Background(), filepath.Join(t.TempDir(), "w"), "read-token", j)
+	if rep.Status != "done" || checkLog(rep.Detail) != "ONE\ntwo\nTHREE\n" {
+		t.Fatalf("want the merge to fetch the base blob with the token and the check to see both edits, got %+v", rep)
 	}
 }

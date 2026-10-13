@@ -29,7 +29,8 @@ func runResult(ctx context.Context, client *api.Client, c *api.Claim) api.Report
 		return api.Report{Status: "failed", Detail: err.Error()}
 	}
 	defer os.RemoveAll(dir)
-	if out, err := gitauth.Command(ctx, string(c.ReadToken), "clone", "-q", "--no-checkout", "--", c.TargetRemote, dir).CombinedOutput(); err != nil {
+	// Full, never blobless: index, compare and blame read every version they touch, one round trip per missing blob.
+	if out, err := gitauth.Command(ctx, string(c.ReadToken), "clone", "-q", "--no-checkout", "--no-filter", "--", c.TargetRemote, dir).CombinedOutput(); err != nil {
 		return api.Report{Status: "failed", Detail: fmt.Sprintf("git clone: %v\n%s", err, out)}
 	}
 	route := "/api/work/repos/" + url.PathEscape(p.Repo)
