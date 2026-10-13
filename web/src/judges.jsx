@@ -7,7 +7,7 @@ import { getJudges } from "./client.js";
 import { f3, Hist, pct, Rel, Spark, Trend } from "./charts.jsx";
 import { Ic } from "./icons.jsx";
 import { Bone, ListCardSkel, LoadingRegion, useShape } from "./skeleton.jsx";
-import { Dot, EmptyState, ErrorState, Table, Tabs, Toggle, Frame } from "./ui.jsx";
+import { ChangeId, Dot, EmptyState, ErrorState, Table, Tabs, Toggle, Frame } from "./ui.jsx";
 import "./styles/judges.css";
 
 const TONE = { healthy: "ok", degraded: "warn", failing: "bad" };
@@ -177,8 +177,8 @@ function One({ j }) {
       </div>
       <div className="card"><div className="card-h"><h3>Recent verdicts</h3></div>
         {recent.length ? <Table><thead><tr><th>Repo</th><th>Change</th><th className="num">p</th><th>Outcome</th>{when && <th className="num">When</th>}</tr></thead>
-          <tbody>{recent.map((r, i) => <tr key={i}><td className="mono">{r.repo}</td><td className="mono">{r.change_id ?? "inherited"}{r.agent && ` · ${r.agent}`}</td>
-            <td className="num mono">{r.p}</td><td>{r.correct == null ? "pending" : r.correct ? "correct" : "wrong"}</td>{when && <td className="num">{r.made_at ? day(r.made_at) : "—"}</td>}</tr>)}</tbody></Table>
+          <tbody>{recent.map((r, i) => <tr key={i}><td className="mono">{r.repo}</td><td className="mono">{r.change_id ? <ChangeId id={r.change_id} /> : "no change"}{r.agent && ` · ${r.agent}`}</td>
+            <td className="num mono">{f3(r.p)}</td><td>{r.correct == null ? "pending" : r.correct ? "correct" : "wrong"}</td>{when && <td className="num">{r.made_at ? day(r.made_at) : "—"}</td>}</tr>)}</tbody></Table>
           : <div className="card-b"><EmptyState icon="shieldck" title="No recent verdicts" /></div>}</div>
       {c && <Settings key={j.id} j={j} air={air} toggle={toggle} err={err} />}
     </>
