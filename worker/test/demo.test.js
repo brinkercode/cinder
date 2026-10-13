@@ -26,8 +26,12 @@ it("demo loads pulse from demo/pulse with main and develop and no GitHub token",
   await Promise.all([demo(api, commit, PULSE_SOURCES), indexPulse(api)]);
   const first = await snapshot();
   const heads = await git(["--git-dir", `${dir}-${REPO}.git`, "for-each-ref", "--format=%(refname:short) %(objectname)", "refs/heads"]);
-  await demo(api, commit, PULSE_SOURCES);
+  const said = [];
+  await demo(api, commit, PULSE_SOURCES, (line) => said.push(line));
   expect(await snapshot()).toEqual(first);
+  // The command line shows each step and each intent with its change key, so the terminal is never silent.
+  expect(said.filter((l) => /^\s+PULSE-\d+\s/.test(l)).map((l) => l.trim().replace(/^PULSE-\d+\s+/, "").split("  (race")[0])).toEqual(INTENTS.map((t) => t.intent));
+  expect(said.some((l) => l.includes("symbols indexed"))).toBe(true);
   // A re-run leaves the repo as it is.
   expect(await git(["--git-dir", `${dir}-${REPO}.git`, "for-each-ref", "--format=%(refname:short) %(objectname)", "refs/heads"])).toBe(heads);
   expect(heads.split("\n").map((l) => l.split(" ")[0])).toEqual(["develop", "main"]);
