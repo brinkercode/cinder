@@ -9,7 +9,8 @@ from `seed/activity.mjs`. It imports the three full repos from `seed/repos/<name
 ```sh
 set -a; . ~/.config/cinder/live.env; set +a   # CINDER_URL, CINDER_TOKEN and the Access service token
 node seed/seed.mjs          # the default sections
-node seed/seed.mjs --full   # every section, for a pass over every page (seed(api, push, "all", commit, sources) in tests)
+node seed/seed.mjs --full   # every section, for a pass over every page (seed(api, push, "all", commit, sources) in tests), then atlas-monorepo
+node seed/seed.mjs --large  # only atlas-monorepo (see Large repo)
 node seed/seed.mjs --reset  # nonprod only: empty the deployment first (POST /api/admin/reset, polled until done), then seed
 ```
 
@@ -69,6 +70,20 @@ Where each feature is seeded (`--full`), per repo:
 | Races: none; Races shows its empty state until a person files one | – | – | – |
 | Needs you: none; flow and release approvals appear once a runner runs the flows (`seed/activity.mjs`) | – | – | – |
 | Issues: a bug, its TODOs as features, a done issue | ✓ | ✓ | ✓ |
+
+## Large repo
+
+`atlas-monorepo` is large in history and moderate at its head, for partial clones: a blobless clone
+(`git clone --filter=blob:none`) fetches commits and trees, and only the head's file contents on checkout. `seed/large.mjs`
+generates it at seed time from a fixed seed, so every run writes the same repo; none of its files are checked in.
+
+| | |
+|---|---|
+| Head | 1,004 files, about 3.3 MB: 40 packages (`packages/<name>/src/*.js`, 25 files each), a README, a `package.json` and two vendor bundles of 1.25 MB |
+| History | 48 commits, about 62 MB of file contents (about 45 MB compressed): each commit after the first regenerates one vendor bundle and changes one module |
+
+Only `--full` and `--large` seed it, through the seed route in 17 requests of at most 4 MB; Settings › Demo data does not.
+A repo that already has commits on `main` is left as it is; delete it to seed it again.
 
 ## Sections → pages
 
