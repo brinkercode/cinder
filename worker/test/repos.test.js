@@ -196,6 +196,20 @@ describe("repo delete", () => {
   });
 });
 
+describe("repo delete forks", () => {
+  it("deleting a repo deletes its change forks, so a repo made again under its name can fork its first change", async () => {
+    const e = { ...env, ARTIFACTS: fakeArtifacts() };
+    const send = (method, path, body) => worker.fetch(new Request(`http://cinder.test${path}`, { method, headers: OWNER, body: JSON.stringify(body) }), e);
+    expect((await send("POST", "/api/repos", { name: "del-forks" })).status).toBe(201);
+    // A change's fork, as newChange names it.
+    await (await e.ARTIFACTS.get("del-forks")).fork("del-forks--DELFORKS-1");
+    expect((await send("DELETE", "/api/repos/del-forks", { confirm: "del-forks" })).status).toBe(204);
+    expect((await e.ARTIFACTS.list()).repos.map((r) => r.name).filter((n) => n.startsWith("del-forks"))).toEqual([]);
+    expect((await send("POST", "/api/repos", { name: "del-forks" })).status).toBe(201);
+    await (await e.ARTIFACTS.get("del-forks")).fork("del-forks--DELFORKS-1");
+  });
+});
+
 describe("re-import", () => {
   const POLICY = 'branches:\n  integration: ["main","kept"]\n';
   // A repo whose main holds only cinder's .cinder.yml, which re-import replaces.
