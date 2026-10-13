@@ -109,6 +109,16 @@ describe("races", () => {
     expect(await get("?agent=list")).toEqual([]);
   });
 
+  it("the race list leaves out a race that has recorded only one leg so far", async () => {
+    // A race running one leg at a time records the second when it starts developing.
+    await env.DB.prepare("INSERT INTO race_legs (change_id, race_id, agent, started_at) VALUES ('one-leg-c', 'one-leg-race', 'developer@v1', ?)")
+      .bind(new Date().toISOString()).run();
+    const res = await worker.fetch(new Request("http://cinder.test/api/races", { headers: { Authorization: `Bearer ${env.OWNER_TOKEN}` } }), env);
+    const races = await res.json();
+    expect(races.map((r) => r.id)).not.toContain("one-leg-race");
+    for (const r of races) expect(validateRaceSummary(r)).toEqual({ ok: true, errors: [] });
+  });
+
   it("promote sets the change head to the leg head", async () => {
     const { call, race, state } = await setup("race-promote");
     const [a, b] = race.changes;

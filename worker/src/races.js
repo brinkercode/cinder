@@ -110,7 +110,9 @@ export async function listRaces(request, env) {
     race.legs.push(leg);
     if (leg.won === 1) race.winner = leg.leg;
   }
-  return Response.json([...races.values()]);
+  // A race records a leg when that leg starts developing, so a race running fewer legs at once than it has shows one leg
+  // for a while: it is listed once there are two to compare.
+  return Response.json([...races.values()].filter((r) => r.legs.length >= 2));
 }
 
 // POST /api/changes/:id/promote {leg} → the change, carrying leg's fork and head. Every other leg of change :id's race
