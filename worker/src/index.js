@@ -379,7 +379,7 @@ export default {
   // Any successful write may have queued a job, so pools scale after it. lazy: one D1 query per write, runner claims included;
   // move to a DispatchDO alarm armed by the job inserts if that shows in D1 reads.
   fetch: async (request, env, ctx) => {
-    if (!armed && ctx) {
+    if (!armed && ctx?.waitUntil) {
       armed = true;
       ctx.waitUntil(dispatch(env).arm().catch(() => { armed = false; }));
     }
