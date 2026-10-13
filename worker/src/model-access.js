@@ -98,6 +98,30 @@ export async function keyUsed(env, person, provider, method, res) {
     .bind(res.ok ? "connected" : "failing", res.ok ? null : `${name} refused the ${method} (HTTP ${res.status})`, new Date().toISOString(), person, provider).run();
 }
 
+// A free call per provider that only a valid key answers 200 (token counting, moderation), made through the gateway on save.
+const PROBES = {
+  anthropic: ["v1/messages/count_tokens", { model: "claude-haiku-4-5", messages: [{ role: "user", content: "hi" }] }],
+  openai: ["v1/moderations", { input: "hi" }],
+  google: ["v1beta/models/gemini-2.5-flash:countTokens", { contents: [{ parts: [{ text: "hi" }] }] }],
+  xai: ["v1/tokenize-text", { model: "grok-3", text: "hi" }],
+};
+
+// Checks a just-saved key or login with its provider's probe, so the page shows connected or failing without waiting for
+// an agent run. A probe that can't run (no AI binding, a network error) leaves the key unchecked.
+async function checkKey(env, person, provider, method, value) {
+  const [endpoint, query] = PROBES[provider];
+  const headers = { "content-type": "application/json", ...(provider === "anthropic" && { "anthropic-version": "2023-06-01" }) };
+  const extraHeaders = {};
+  if (method === "login") Object.assign(headers, { authorization: `Bearer ${value}`, "anthropic-beta": "oauth-2025-04-20" });
+  else extraHeaders["cf-aig-byok-alias"] = await aliasOf(person);
+  try {
+    const res = await env.AI.gateway(env.AI_GATEWAY_ID).run({ provider: SLUGS[provider], endpoint, headers, query }, { extraHeaders });
+    await keyUsed(env, person, provider, method, res);
+  } catch (err) {
+    console.warn(`model key check ${provider}: ${err.message}`);
+  }
+}
+
 // The providers with an org key: gateway provider configs not under a person's alias. Only slugs are read, never a key.
 // null when the gateway can't be read (no token or permission), so the page says so instead of claiming none.
 async function orgKeys(env) {
@@ -189,6 +213,7 @@ export async function putModelKey(request, env, { provider }) {
   // A replaced key under the same alias keeps its secret and config; only what the new key doesn't reuse goes.
   if (old) await removeKey(env, { config_id: old.config_id !== saved.config_id && old.config_id, secret_id: old.secret_id !== saved.secret_id && old.secret_id });
   if (saved.login_id || old?.login_id) await rebind(env);
+  await checkKey(env, me, provider, b.method, b.value);
   return new Response(null, { status: 204 });
 }
 
