@@ -1,24 +1,17 @@
 /* global WebSocketPair -- Workers runtime global, not in the eslint globals sets */
 import { DurableObject } from "cloudflare:workers";
-import { syncAccounts } from "./accounts.js";
 import { createArtifacts } from "./artifacts.js";
 import { branchHeads } from "./branches.js";
 import { CHANGE_PRIORITIES } from "./api/contract.js";
-import { checkDrift } from "./drift.js";
-import { cronFlows, timeOutFlowJobs } from "./flows.js";
 import { QUEUE_HEADS, queueMergeJob } from "./queue.js";
 import { isAllowedTarget, refreshPolicy } from "./policy.js";
 import { listRefs } from "./git/index.js";
 import { onPushes } from "./pushes.js";
 import { route } from "./router.js";
-import { expireLeases } from "./scheduler.js";
 import { routes } from "./routes.js";
-import { ingestAdvisories } from "./mirror.js";
-import { scanDaily } from "./scans.js";
-import { pullUsage } from "./usage.js";
-import { raiseBudgetNeeds } from "./needs.js";
 import { deliver } from "./webhooks.js";
-import { autoscale, pruneGone } from "./workers.js";
+import { runTick } from "./tick.js";
+import { autoscale } from "./workers.js";
 
 export { ChangeDO } from "./changes.js";
 export { DispatchDO } from "./work.js";
@@ -378,10 +371,18 @@ const SECURITY_HEADERS = {
   "Referrer-Policy": "strict-origin-when-cross-origin",
 };
 
+const dispatch = (env) => env.DISPATCH_DO.get(env.DISPATCH_DO.idFromName("global"));
+// Each isolate arms the tick's alarm on its first request, so it runs after a deploy or reset without the cron.
+let armed = false;
+
 export default {
   // Any successful write may have queued a job, so pools scale after it. lazy: one D1 query per write, runner claims included;
   // move to a DispatchDO alarm armed by the job inserts if that shows in D1 reads.
   fetch: async (request, env, ctx) => {
+    if (!armed && ctx) {
+      armed = true;
+      ctx.waitUntil(dispatch(env).arm().catch(() => { armed = false; }));
+    }
     const res = await route(request, env, routes, ctx);
     if (request.method !== "GET" && res.ok && ctx) ctx.waitUntil(autoscale(env));
     if (res.status === 101) return res; // a WebSocket upgrade can't be re-wrapped
@@ -394,9 +395,8 @@ export default {
     await (batch.queue === "cinder-webhooks" ? deliver(batch, env) : onPushes(batch, env));
     await autoscale(env);
   },
-  // Accounts sync hourly: on the tick in each hour's first ten minutes (the cron runs every 10).
-  // allSettled: under Promise.all one fast rejection (syncAccounts at :00) ended the tick before cron flows were enqueued.
-  scheduled: (controller, env, ctx) => ctx.waitUntil(Promise.allSettled([checkDrift(env), scanDaily(env), pullUsage(env).then(() => raiseBudgetNeeds(env)), ingestAdvisories(env), cronFlows(env, controller.scheduledTime), timeOutFlowJobs(env), expireLeases(env), pruneGone(env).then(() => autoscale(env)),
-    ...(new Date(controller.scheduledTime).getUTCMinutes() < 10 ? [syncAccounts(env)] : [])])
-    .then((rs) => rs.forEach((r) => r.status === "rejected" && console.error(`scheduled: ${r.reason?.message ?? r.reason}`)))),
+  scheduled: (controller, env, ctx) => {
+    const time = controller.scheduledTime ?? Date.now();
+    ctx.waitUntil(dispatch(env).takeSlot(time).then((mine) => mine && runTick(env, time)));
+  },
 };
