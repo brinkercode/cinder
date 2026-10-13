@@ -38,13 +38,13 @@ it("routing to /automation/judges/edge-router%3Arisk%3Aclef%40clef-2 renders tha
   expect(heading(find)).toBe("clef · edge-router");
   expect(find((n) => n.nodeName === "SPAN" && n.attrs.class === "lc-s mono").textContent).toBe("clef-2");
   expect(chart(find)).toBeTruthy();
-  expect(recentRows(root)).toBe("edge-routerc_010.18correctedge-routerinherited0.4pending");
+  expect(recentRows(root)).toBe("edge-routerc_01.180correctedge-routerno change.400pending");
   expect(find((n) => n.nodeName === "TABLE" && n.parentNode.parentNode.textContent.startsWith("Reliability"))).toBeUndefined();
 });
 
 it("Judge detail renders recent verdicts from the API", async () => {
   const { root } = await mount(ONE);
-  expect(recentRows(root)).toBe("edge-routerc_010.18correctedge-routerinherited0.4pending");
+  expect(recentRows(root)).toBe("edge-routerc_01.180correctedge-routerno change.400pending");
 });
 
 it("clicking a judge's leaderboard row on the list navigates to and renders its detail", async () => {
