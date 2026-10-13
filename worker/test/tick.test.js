@@ -3,7 +3,8 @@ import { runInDurableObject } from "cloudflare:test";
 import { afterEach, expect, it, vi } from "vitest";
 import { SLOT_MS } from "../src/tick.js";
 
-const dispatch = () => env.DISPATCH_DO.get(env.DISPATCH_DO.idFromName("global"));
+// Its own instance: other tests' requests arm the shared "global" one's alarm.
+const dispatch = () => env.DISPATCH_DO.get(env.DISPATCH_DO.idFromName("tick-test"));
 
 afterEach(() => vi.unstubAllGlobals());
 
