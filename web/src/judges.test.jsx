@@ -94,6 +94,16 @@ describe("judges page", () => {
     expect(untrusted).toContain("— — Model healthy");
   });
 
+  it("recent verdicts round p and label a verdict made without a change", async () => {
+    const j = { ...judge("claude-sonnet-5", 412, 0.082, "healthy", 0, null, "risk"), id: "j-recent",
+      recent: [{ repo: "pulse", change_id: null, p: 0.7325999999999999, correct: null, made_at: "2026-10-13T20:00:00Z" }] };
+    api(mine([j]));
+    const html = text(await settled("/automation/judges/j-recent"));
+    expect(html).toContain("pulse no change .733 pending");
+    expect(html).not.toContain("0.7325999999999999");
+    expect(html).not.toContain("inherited");
+  });
+
   it("pool() merges one model's series from two repos count-weighted, matching a hand calculation", () => {
     const a = { ...judge("clef@2", 100, 0.1, "healthy", 0, null), trusted: true, bins: [{ lo: 0, hi: 0.1, count: 60, mean_p: 0.05, observed: 0.1 }],
       trend: [{ week: "2026-09-07", count: 10, brier: 0.1 }, { week: "2026-09-14", count: 0, brier: null }], min_outcomes: 200 };

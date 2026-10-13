@@ -75,6 +75,7 @@ import { listBranches } from "./branches.js";
 import { createBranch, deleteBranch } from "./branches.js";
 import { getTool, putTool } from "./toolcache.js";
 import { getCompare, putCompare } from "./compare.js";
+import { getReviewDiff } from "./review-diff.js";
 import { addWikiComment, deleteWikiComment, editWikiComment, listWikiComments } from "./wiki.js";
 import { getWikiPage, getWikiTree, searchWiki } from "./wiki.js";
 import { createWikiPage, deleteWikiPage, editWikiPage, moveWikiPage } from "./wiki.js";
@@ -170,6 +171,7 @@ export const routes = {
   "POST /api/work/jobs/:job/heartbeat": heartbeatWork,
   "POST /api/work/jobs/:job/report": reportWork,
   "POST /api/work/jobs/:job/sign": signMerge,
+  "GET /api/work/jobs/:job/diff": getReviewDiff,
   "GET /api/repos/:name/symbols": getSymbols,
   "PUT /api/work/repos/:name/symbols/:sha": putSymbols,
   "GET /api/repos/:name/queue": getQueue,

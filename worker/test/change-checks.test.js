@@ -1,4 +1,4 @@
-import { env } from "cloudflare:workers";
+import { env, runInDurableObject } from "cloudflare:test";
 import { expect, it } from "vitest";
 import { validateChangeCheck, validateChangeCommit, validateDiffFile } from "../src/api/shapes.js";
 import { newChange } from "../src/changes.js";
@@ -50,6 +50,33 @@ it("files: a change with no head branch and one commit touching 3 files reports 
 it("files: a change with no commits of its own lists no files", async () => {
   const { call, change } = await setup("files-empty-repo");
   expect(await call(`/api/changes/${change.id}/files`)).toEqual([]);
+});
+
+// The change's head c1 merged onto main as m1; the fork is deleted, as the merge transition does.
+async function mergeAndDeleteFork(fake, name, change) {
+  const repo = fake.repos.get(name);
+  const author = { name: "patch", email: "patch@cinder" };
+  repo.refs = { "change-head": [{ hash: "c1", author, message: "feat: first" }, { hash: "base1", message: "base" }] };
+  repo.commits.unshift({ hash: "m1", message: `merge\n\nCinder-Change: ${change.id}` });
+  repo.at = { base1: { "a.md": "old" }, c1: { "a.md": "new", "b.md": "added" } };
+  fake.repos.delete(change.fork);
+  await runInDurableObject(env.CHANGE_DO.get(env.CHANGE_DO.idFromName(change.id)), async (i) => {
+    await i.ctx.storage.put("change", { ...(await i.ctx.storage.get("change")), state: "merged", head: "c1" });
+  });
+}
+
+it("a merged change lists its files from the merge commit after its fork is deleted", async () => {
+  const { fake, call, change } = await setup("merged-files-repo");
+  await mergeAndDeleteFork(fake, "merged-files-repo", change);
+  const got = await call(`/api/changes/${change.id}/files`);
+  expect(got.map((f) => [f.path, f.status])).toEqual([["a.md", "modified"], ["b.md", "added"]]);
+});
+
+it("a merged change lists its commits after its fork is deleted", async () => {
+  const { fake, call, change } = await setup("merged-commits-repo");
+  await mergeAndDeleteFork(fake, "merged-commits-repo", change);
+  const got = await call(`/api/changes/${change.id}/commits`);
+  expect(got.map((c) => [c.sha, c.message])).toEqual([["c1", "feat: first"]]);
 });
 
 it("checks merges verify and guard results for the head sha", async () => {

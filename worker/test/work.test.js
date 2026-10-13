@@ -500,14 +500,14 @@ describe("work api", () => {
     expect(await env.DB.prepare("SELECT status, runner_id FROM jobs WHERE id = ?").bind(job).first()).toEqual({ status: "queued", runner_id: null });
   });
 
-  it("review job has no write token", async () => {
-    const { fake, call, change, addJob } = await setup("work-review-tok");
+  it("review job gets no repository token", async () => {
+    const { fake, call, addJob } = await setup("work-review-tok");
     const reviewer = (await (await call("/api/runners", { name: "rev", kinds: ["review"] })).json()).token;
     await addJob("review");
     const claim = await (await call("/api/work/claim", { kinds: ["review"] }, reviewer)).json();
     expect(claim.token).toBeNull();
-    expect(claim.read_token).toEqual(expect.any(String));
-    expect(fake.calls.filter((c) => c.method === "createToken" && c.args[0] !== "cinder-agents").map((c) => c.args)).toEqual([[change.fork, "read", 600]]);
+    expect(claim.read_token).toBeNull();
+    expect(fake.calls.filter((c) => c.method === "createToken" && c.args[0] !== "cinder-agents")).toEqual([]);
   });
 });
 
@@ -612,7 +612,7 @@ describe("lease enforcement", () => {
     const sites = {
       merge: [["work-mint", "write", 600], [change.fork, "read", 600]],
       develop: fork, resolve: fork, verify: fork, converge: fork,
-      review: [[change.fork, "read", 600]],
+      review: [],
       history: [["work-mint", "write", 600]],
       index: [["work-mint", "read", 600]],
       guard: [[change.fork, "read", 600]],
