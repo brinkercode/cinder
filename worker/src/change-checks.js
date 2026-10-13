@@ -36,8 +36,12 @@ export async function listFiles(request, env, { id }) {
 
 // The change's history, newest first: its fork's branch, or once merged (the fork is deleted) its head in repo name,
 // which the merge brought in. Its own commits are the ones not on the target's log (Artifacts logs first parents only).
+// The binding reads bare branch names only. A person's push to refs/for/<target> lives on in the fork's target-named branch
+// (pushes.js reverify copies it there), so that is the branch read for it.
+const forkBranch = ({ head_branch: h, target_branch: t }) => (!h || h.startsWith("refs/for/") ? t : h.replace(/^refs\/heads\//, ""));
+
 async function changeLog(artifacts, name, change) {
-  if (change.state !== "merged") return artifacts.log(change.fork, change.head_branch ?? change.target_branch);
+  if (change.state !== "merged") return artifacts.log(change.fork, forkBranch(change));
   return change.head ? artifacts.log(name, change.head) : [];
 }
 
