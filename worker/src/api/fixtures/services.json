@@ -1,0 +1,66 @@
+[
+  {
+    "id": "worker:.",
+    "name": "shop",
+    "kind": "worker",
+    "path": ".",
+    "resources": [
+      {
+        "type": "worker",
+        "name": "shop"
+      },
+      {
+        "type": "assets",
+        "name": "./public"
+      },
+      {
+        "type": "d1",
+        "name": "shop-db"
+      },
+      {
+        "type": "kv",
+        "name": "CACHE"
+      }
+    ],
+    "flow": {
+      "name": "worker-root",
+      "yaml": "name: worker-root\non: [manual]\nsteps:\n  install: { stage: check, run: \"npm ci\", needs: [] }\n  dry-run: { stage: check, run: \"npx wrangler deploy --dry-run --outdir dist\", needs: [install] }\n"
+    }
+  },
+  {
+    "id": "container:api",
+    "name": "api",
+    "kind": "container",
+    "path": "api",
+    "resources": [
+      {
+        "type": "container",
+        "name": "api"
+      },
+      {
+        "type": "worker",
+        "name": "api"
+      }
+    ],
+    "flow": {
+      "name": "container-api",
+      "yaml": "name: container-api\non: [manual]\nsteps:\n  image: { stage: check, run: \"cd 'api' && docker build .\", needs: [] }\n"
+    }
+  },
+  {
+    "id": "terraform:infra",
+    "name": "infra",
+    "kind": "terraform",
+    "path": "infra",
+    "resources": [
+      {
+        "type": "cloudflare_r2_bucket",
+        "name": "media"
+      }
+    ],
+    "flow": {
+      "name": "terraform-infra",
+      "yaml": "name: terraform-infra\non: [manual]\nsteps:\n  init: { stage: check, run: \"cd 'infra' && terraform init -backend=false\", needs: [] }\n  plan: { stage: check, run: \"cd 'infra' && terraform plan -refresh=false -input=false\", needs: [init] }\n"
+    }
+  }
+]

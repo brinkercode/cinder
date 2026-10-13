@@ -1,0 +1,9 @@
+{
+  "organization": { "id": "org-nimbus", "name": "Nimbus Edge" },
+  "accounts": [
+    { "id": "acc-staging", "name": "Nimbus Edge Staging", "slug": "nimbus-edge-staging", "git_role": "contributor", "implicit": false, "repos": 3, "can_create": false, "current": false },
+    { "id": "acc-team", "name": "Nimbus Edge Team", "slug": "nimbus-edge-team", "git_role": "admin", "implicit": false, "repos": 7, "can_create": true, "current": true },
+    { "id": "acc-labs", "name": "Nimbus Labs", "slug": "nimbus-labs", "git_role": "admin", "implicit": true, "repos": 12, "can_create": true, "current": false }
+  ],
+  "personal": { "id": "instance", "name": "Cinder", "slug": "instance", "git_role": "admin", "implicit": false, "repos": 3, "can_create": true, "current": false }
+}

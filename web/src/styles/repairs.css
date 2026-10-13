@@ -1,0 +1,9 @@
+/* Repair rounds: the board card's line and the change head's strip. */
+.chg .repairing{display:flex;gap:6px;align-items:center;font-size:var(--fs-12);color:var(--chart)}
+.chg .row{display:flex;gap:var(--s-2)}
+.repair-strip .pips{display:flex;gap:4px}
+.repair-strip .pips i{display:block;width:14px;height:4px;border-radius:2px;background:var(--tint)}
+.repair-strip .pips i.done{background:var(--success-fill)}
+.repair-strip .pips i.cur{background:var(--chart)}
+.repair-strip.out{background:var(--danger-tint);color:var(--danger)}
+.chg .err-line{color:var(--danger);font-size:var(--fs-12)}

@@ -1,0 +1,9 @@
+[
+  { "name": "develop", "kind": "branch", "default": true, "head_sha": "9c03f7e1", "ahead": 0, "behind": 0, "role": "integration", "open_changes": 3,
+    "last_commit": { "sha": "9c03f7e1", "message": "Merge c-1042: strip hop-by-hop headers", "author": "patch@3.2.1" } },
+  { "name": "main", "kind": "branch", "default": false, "head_sha": "4b1d2a90", "ahead": 0, "behind": 12, "role": "integration", "open_changes": 1,
+    "last_commit": { "sha": "4b1d2a90", "message": "Release 2.4.0", "author": "bea" } },
+  { "name": "release/2.5", "kind": "branch", "default": false, "head_sha": "7e44c0b2", "ahead": 2, "behind": 5, "role": "release", "open_changes": 0,
+    "last_commit": { "sha": "7e44c0b2", "message": "Bump version to 2.5.0-rc.1", "author": "bea" } },
+  { "name": "spike/cache", "kind": "branch", "default": false, "head_sha": null, "ahead": 0, "behind": 0, "role": "other", "open_changes": 0, "last_commit": null }
+]

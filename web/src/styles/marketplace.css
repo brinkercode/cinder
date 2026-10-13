@@ -1,0 +1,14 @@
+/* Automation › Marketplace: filters, cards and the detail, install and publish dialogs. */
+.mk .f-body{display:grid;gap:var(--s-3)}
+.mk .lc-t .card-link{border:0;padding:0;background:transparent;font:inherit;color:inherit;cursor:pointer}
+.mk .lc-m{flex-wrap:wrap}
+.mk-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}
+.mk-set{border:0;margin:0;padding:0;display:grid;gap:var(--s-2)}
+.mk-set legend{padding:0;margin-bottom:var(--s-2);font-size:var(--fs-13);color:var(--text-subtle)}
+.mk-set label{display:flex;gap:var(--s-2);align-items:flex-start}
+.mk-note{display:flex;gap:var(--s-2);align-items:flex-start;margin:0;font-size:var(--fs-13);color:var(--text-subtle)}
+@media (max-width:480px){.mk-tiles{grid-template-columns:minmax(0,1fr)}}
+/* .lc-m .btn strips button fills; the card's Install keeps the handoff's primary and secondary buttons. */
+.mk .lc-m .btn-primary{background:var(--interactive)}.mk .lc-m .btn-primary:hover:enabled{background:var(--interactive-hover)}
+.mk .lc-m .btn-secondary{background:var(--base);border:var(--bw) solid var(--line)}
+.mk .lc-m .btn:disabled{opacity:1}.mk .lc-m .btn[aria-busy="true"]{background:var(--interactive-hover);cursor:progress}

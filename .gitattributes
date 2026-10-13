@@ -1,0 +1,5 @@
+# Append-only registries: parallel tasks each add lines, git keeps both. The verifier catches a bad union.
+worker/src/routes.js merge=union
+worker/src/api/shapes.js merge=union
+web/src/pages.jsx merge=union
+worker/test/helpers/fixtures.js merge=union

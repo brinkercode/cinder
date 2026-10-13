@@ -1,0 +1,39 @@
+name: reseed
+# Empties the nonprod deployment (POST /api/admin/reset, refused unless CINDER_ENV=nonprod) and seeds it from scratch, with
+# no deploy. Run it before each test pass so every pass starts from the same state (docs/operations/README.md).
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: Why this reseed
+        default: manual
+permissions:
+  contents: read
+concurrency:
+  group: release   # never reseed while a release deploys or seeds
+  cancel-in-progress: false
+jobs:
+  reseed:
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}   # repo variable RUNNER names a self-hosted runner (this repo: cinder-arc)
+    timeout-minutes: 45
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - if: vars.RUNNER == ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --prefer-offline --no-audit --no-fund
+      - name: Worker URL
+        id: url
+        run: |
+          echo "url=https://cinder.$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain" | jq -er .result.subdomain).workers.dev" >> "$GITHUB_OUTPUT"
+      - name: reset and seed
+        env:
+          CINDER_URL: ${{ steps.url.outputs.url }}
+          CINDER_ACCESS_CLIENT_ID: ${{ secrets.CINDER_ACCESS_CLIENT_ID }}
+          CINDER_ACCESS_CLIENT_SECRET: ${{ secrets.CINDER_ACCESS_CLIENT_SECRET }}
+          CINDER_TOKEN: ${{ secrets.CINDER_OWNER_TOKEN }}
+        run: node seed/seed.mjs --reset --full

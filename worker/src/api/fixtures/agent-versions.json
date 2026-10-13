@@ -1,0 +1,54 @@
+[
+  {
+    "id": "agent/dev/v1",
+    "name": "dev",
+    "version": 1,
+    "harness": "claude-code",
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_hash": "sha256:1f2e3d4c",
+    "tools": [
+      "bash",
+      "edit"
+    ],
+    "limits": {
+      "max_cost_usd": 8,
+      "max_minutes": 120
+    }
+  },
+  {
+    "id": "agent/dev/v2",
+    "name": "dev",
+    "version": 2,
+    "harness": "opencode",
+    "model": "qwen3-coder",
+    "effort": "high",
+    "prompt_hash": "sha256:5a6b7c8d",
+    "tools": [
+      "bash",
+      "edit"
+    ],
+    "limits": {
+      "max_cost_usd": 4,
+      "max_minutes": 120
+    }
+  },
+  {
+    "id": "agent/resolver/v1",
+    "name": "resolver",
+    "version": 1,
+    "harness": "codex",
+    "model": "gpt-5-codex",
+    "effort": "medium",
+    "prompt_hash": "sha256:9e0f1a2b",
+    "tools": [
+      "bash",
+      "edit",
+      "git"
+    ],
+    "limits": {
+      "max_cost_usd": 2,
+      "max_minutes": 30
+    }
+  }
+]

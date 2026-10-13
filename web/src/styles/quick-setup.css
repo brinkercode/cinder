@@ -1,0 +1,10 @@
+/* Quick setup: an empty repo's card, centred in the work area. */
+.frame:has(.qs){min-height:100%;display:flex;flex-direction:column}
+.frame:has(.qs)>.fc{flex:1;width:100%;display:flex;flex-direction:column}.frame:has(.qs) .f-body{flex:1;place-items:center}
+.f-body>[aria-busy]:has(>.qs){place-self:stretch;justify-content:center;align-items:center}
+.qs{width:100%;max-width:760px}
+.qs .panel-head{align-items:flex-start}.qs .panel-head p{margin-top:2px}
+.qs-b{display:flex;flex-direction:column;gap:12px}.qs-b .cl-url{margin:0}
+.qs-ch{display:flex;align-items:center;justify-content:space-between;gap:8px}.qs-ch h3{font-size:var(--fs-13)}
+.qs-cmd pre{margin:4px 0 0;overflow-x:auto}
+.qs-or{display:flex;align-items:center;gap:12px;color:var(--text-subtle);font-size:var(--fs-12)}.qs-or::before,.qs-or::after{content:"";flex:1;border-top:var(--bw) solid var(--line)}

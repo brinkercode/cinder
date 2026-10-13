@@ -1,0 +1,11 @@
+{
+  "items": [
+    { "kind": "change", "n": 12, "change_id": "c-1042", "title": "Paginate GET /orders with limit and after", "lane": "review", "priority": "P2", "labels": ["feature"], "author": "developer@v7", "assignee": "ana.ruiz@brinkercode.dev", "why": null, "updated_at": "2026-10-08T09:12:00Z" },
+    { "kind": "change", "n": null, "change_id": "c-1043", "title": "Retry the payment webhook with backoff", "lane": "verify", "priority": null, "labels": [], "author": "ben.okafor@brinkercode.dev", "assignee": null, "why": "Failed at verify: make check exited 2", "updated_at": "2026-10-08T08:40:00Z" },
+    { "kind": "change", "n": null, "change_id": "c-1044", "title": "Rename the cart cookie", "lane": "queue", "priority": null, "labels": [], "author": "developer@v7", "assignee": null, "why": null, "updated_at": "2026-10-08T08:02:00Z" },
+    { "kind": "change", "n": null, "change_id": "c-1041", "title": "Stream large bodies through rewrite filter", "lane": "verify", "priority": null, "labels": [], "author": "patch@3.3.0", "assignee": null, "why": "Failed at verify: 3 tests failed", "updated_at": "2026-10-04T09:23:20Z" },
+    { "kind": "intent", "n": 14, "change_id": null, "title": "Order totals overflow int for very large quantities", "lane": "intent", "priority": "P1", "labels": ["bug"], "author": "chen.wu@brinkercode.dev", "assignee": "developer@v7", "why": null, "updated_at": "2026-10-07T16:30:00Z" }
+  ],
+  "tiles": { "intents": 1, "in_flight": 3, "review": 1, "merged_24h": 0, "needs_you": 1, "verifier": { "pass": 41, "n": 44, "trusted": false } },
+  "can_write": true
+}

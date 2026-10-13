@@ -1,0 +1,5 @@
+[
+  { "version": 1, "channel": null, "share": 0, "released_at": "2026-10-01T09:00:00Z", "outcomes": { "merged": 40, "n": 52, "trusted": false }, "web": { "mode": "raw", "converted": 0, "saved_bytes": 0 } },
+  { "version": 2, "channel": "stable", "share": 0, "released_at": "2026-10-04T09:00:00Z", "outcomes": { "merged": 171, "n": 214, "trusted": true }, "web": { "mode": "raw", "converted": 0, "saved_bytes": 0 } },
+  { "version": 3, "channel": "canary", "share": 30, "released_at": "2026-10-07T09:00:00Z", "outcomes": { "merged": 25, "n": 29, "trusted": false }, "web": { "mode": "markdown", "converted": 18, "saved_bytes": 412000 } }
+]

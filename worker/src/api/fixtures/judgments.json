@@ -1,0 +1,202 @@
+[
+  {
+    "id": "j_01",
+    "repo_id": "r_trunk",
+    "change_id": "c_02",
+    "kind": "lease",
+    "backend": "stat",
+    "model_version": "stat-1",
+    "state_hash": "sha256:00000001",
+    "question": "lease question",
+    "answer": "yes",
+    "probability": 0.55,
+    "made_at": "2026-10-04T09:00:00.000Z",
+    "source": "inherited",
+    "outcome": {
+      "judgment_id": "j_01",
+      "actual": "yes",
+      "correct": true,
+      "observed_at": "2026-10-04T10:00:00.000Z"
+    }
+  },
+  {
+    "id": "j_02",
+    "repo_id": "r_flow",
+    "change_id": "c_03",
+    "kind": "collision",
+    "backend": "clef",
+    "model_version": "clef-2026-09",
+    "state_hash": "sha256:00000002",
+    "question": "collision question",
+    "answer": "yes",
+    "probability": 0.59,
+    "made_at": "2026-10-04T09:01:00.000Z",
+    "source": "live",
+    "outcome": {
+      "judgment_id": "j_02",
+      "actual": "yes",
+      "correct": true,
+      "observed_at": "2026-10-04T10:01:00.000Z"
+    }
+  },
+  {
+    "id": "j_03",
+    "repo_id": "r_trunk",
+    "change_id": "c_04",
+    "kind": "seam",
+    "backend": "stat",
+    "model_version": "stat-1",
+    "state_hash": "sha256:00000003",
+    "question": "seam question",
+    "answer": "yes",
+    "probability": 0.63,
+    "made_at": "2026-10-04T09:02:00.000Z",
+    "source": "live",
+    "outcome": {
+      "judgment_id": "j_03",
+      "actual": "no",
+      "correct": false,
+      "observed_at": "2026-10-04T10:02:00.000Z"
+    }
+  },
+  {
+    "id": "j_04",
+    "repo_id": "r_flow",
+    "change_id": "c_05",
+    "kind": "risk",
+    "backend": "clef",
+    "model_version": "clef-2026-09",
+    "state_hash": "sha256:00000004",
+    "question": "risk question",
+    "answer": "yes",
+    "probability": 0.67,
+    "made_at": "2026-10-04T09:03:00.000Z",
+    "source": "live",
+    "outcome": {
+      "judgment_id": "j_04",
+      "actual": "yes",
+      "correct": true,
+      "observed_at": "2026-10-04T10:03:00.000Z"
+    }
+  },
+  {
+    "id": "j_05",
+    "repo_id": "r_trunk",
+    "change_id": null,
+    "kind": "flake",
+    "backend": "stat",
+    "model_version": "stat-1",
+    "state_hash": "sha256:00000005",
+    "question": "flake question",
+    "answer": "yes",
+    "probability": 0.71,
+    "made_at": "2026-10-04T09:04:00.000Z",
+    "source": "live",
+    "outcome": {
+      "judgment_id": "j_05",
+      "actual": "yes",
+      "correct": true,
+      "observed_at": "2026-10-04T10:04:00.000Z"
+    }
+  },
+  {
+    "id": "j_06",
+    "repo_id": "r_flow",
+    "change_id": "c_07",
+    "kind": "guard",
+    "backend": "clef",
+    "model_version": "clef-2026-09",
+    "state_hash": "sha256:00000006",
+    "question": "guard question",
+    "answer": "yes",
+    "probability": 0.75,
+    "made_at": "2026-10-04T09:05:00.000Z",
+    "source": "live",
+    "outcome": {
+      "judgment_id": "j_06",
+      "actual": "no",
+      "correct": false,
+      "observed_at": "2026-10-04T10:05:00.000Z"
+    }
+  },
+  {
+    "id": "j_07",
+    "repo_id": "r_trunk",
+    "change_id": "c_08",
+    "kind": "split",
+    "backend": "stat",
+    "model_version": "stat-1",
+    "state_hash": "sha256:00000007",
+    "question": "split question",
+    "answer": "yes",
+    "probability": 0.79,
+    "made_at": "2026-10-04T09:06:00.000Z",
+    "source": "live",
+    "outcome": {
+      "judgment_id": "j_07",
+      "actual": "yes",
+      "correct": true,
+      "observed_at": "2026-10-04T10:06:00.000Z"
+    }
+  },
+  {
+    "id": "j_08",
+    "repo_id": "r_flow",
+    "change_id": "c_09",
+    "kind": "split",
+    "backend": "clef",
+    "model_version": "clef-2026-09",
+    "state_hash": "sha256:00000008",
+    "question": "split question",
+    "answer": "yes",
+    "probability": 0.83,
+    "made_at": "2026-10-04T09:07:00.000Z",
+    "source": "live",
+    "outcome": {
+      "judgment_id": "j_08",
+      "actual": "yes",
+      "correct": true,
+      "observed_at": "2026-10-04T10:07:00.000Z"
+    }
+  },
+  {
+    "id": "j_09",
+    "repo_id": "r_trunk",
+    "change_id": "c_10",
+    "kind": "flake",
+    "backend": "stat",
+    "model_version": "stat-1",
+    "state_hash": "sha256:00000009",
+    "question": "flake question",
+    "answer": "yes",
+    "probability": 0.87,
+    "made_at": "2026-10-04T09:08:00.000Z",
+    "source": "live",
+    "outcome": {
+      "judgment_id": "j_09",
+      "actual": "no",
+      "correct": false,
+      "observed_at": "2026-10-04T10:08:00.000Z"
+    }
+  },
+  {
+    "id": "j_10",
+    "repo_id": "r_flow",
+    "change_id": "c_11",
+    "kind": "risk",
+    "backend": "clef",
+    "model_version": "clef-2026-09",
+    "state_hash": "sha256:0000000a",
+    "question": "risk question",
+    "answer": "yes",
+    "probability": 0.91,
+    "made_at": "2026-10-04T09:09:00.000Z",
+    "source": "live",
+    "outcome": {
+      "judgment_id": "j_10",
+      "actual": "yes",
+      "correct": true,
+      "observed_at": "2026-10-04T10:09:00.000Z"
+    }
+  }
+]

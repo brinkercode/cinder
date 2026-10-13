@@ -1,0 +1,11 @@
+[
+  {
+    "repo_id": "r_trunk",
+    "target_branch": "main",
+    "change_id": "c_09",
+    "position": 0,
+    "speculative_base": "a1b2c3d",
+    "enqueued_at": "2026-10-04T09:30:00.000Z",
+    "blocker": null
+  }
+]

@@ -1,0 +1,5 @@
+.w4-ws{display:grid;gap:var(--s-2)}
+.w4-ws .row{flex-wrap:wrap;gap:var(--s-2)}
+.w4-ws .end{margin-left:auto}
+.w4-ws code{margin-right:6px}
+@media (max-width:720px){.w4-ws .input{min-width:0;flex:1 1 100%}}

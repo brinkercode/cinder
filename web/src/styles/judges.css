@@ -1,0 +1,28 @@
+/* Automation › Judges: the add dialog and a judge's settings card. */
+.jd .block{display:flex;align-items:center;gap:10px;margin:var(--s-4) var(--s-4) 0;padding:10px 12px;border-radius:10px;background:var(--danger-tint);color:var(--text-strong);font-size:var(--fs-13)}
+.jd .block>.ic{color:var(--danger)}.jd .block .end{margin-left:auto}.jd .block.info{margin:0;background:var(--interactive-tint)}.jd .block.info>.ic{color:var(--interactive)}
+.jd .srow .input{width:120px;margin-top:6px}.jd .srow+.srow{border-top:var(--bw) solid var(--line)}.jd .mrow .grow{flex:1;min-width:0}
+.jd .btn:focus-visible,.jd a:focus-visible,.jd input:focus-visible,.jd select:focus-visible{outline:2px solid var(--interactive);outline-offset:2px}
+@media (max-width:900px){.jd .block{flex-wrap:wrap}}
+/* Charts (charts.jsx Rel, Hist, Trend, Spark). */
+.pl{display:block;overflow:visible}.pl-bg{fill:var(--recessed)}.pl-grid{stroke:var(--chart-grid);stroke-width:1}.pl-diag{stroke:var(--text-inactive);stroke-width:1;stroke-dasharray:3 3}
+.pl-band{fill:var(--tint)}.pl-line{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}.pl-line.dash{stroke-dasharray:4 3;stroke-width:1.5}
+.pl-pt{stroke-width:1.5}.pl-t{font-size:10px;fill:var(--text-subtle);font-family:var(--font-mono)}.pl-t.el{font-size:11px}.pl-t.mk{fill:var(--text)}
+.pl-mark{stroke:var(--text-subtle);stroke-dasharray:2 3}.pl-hist{fill:var(--text-inactive)}
+/* The list: one question per tab, its charts and the leaderboard. */
+.q{font-size:var(--fs-14);color:var(--text)}.ct{font-size:var(--fs-11);padding:0 6px;border-radius:99px;background:var(--tint)}
+.g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:var(--gap)}.g2 .card-b{display:grid;gap:10px}
+.lgs{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:var(--fs-12);color:var(--text-subtle)}.lg{display:inline-flex;gap:6px;align-items:center}
+.lg i{width:12px;height:3px;border-radius:2px}.lg.dash i{background:repeating-linear-gradient(90deg,var(--neutral-fill) 0 3px,transparent 3px 5px)}
+.bv{display:grid;grid-template-columns:44px 80px;align-items:center;gap:8px}.bv i{height:6px;border-radius:99px;background:var(--text-inactive)}
+.tbl tr.un td{color:var(--text-subtle)}.card-note{padding:10px 16px;border-top:var(--bw) solid var(--hairline)}.big{font-size:22px;color:var(--text-strong);line-height:1.2}
+/* The detail: calibration beside Brier over time. */
+.g-da{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--gap)}
+.rel-wrap{display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:20px;align-items:start}.rel-wrap .lgs{margin-top:8px}
+.read{list-style:none;margin:0;padding:0;display:grid;gap:18px}.read li{display:grid;gap:2px}
+.meta-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;color:var(--text-subtle)}.meta-row>span{display:inline-flex;gap:6px;align-items:center}
+.jd .tgl{display:inline-flex;gap:8px;align-items:center}.jd .card-h .end{display:inline-flex;gap:8px;align-items:center}
+.prog{display:flex;gap:10px;align-items:center;width:260px;margin-top:6px}.trk{flex:1;height:6px;border-radius:99px;background:var(--tint);overflow:hidden}.trk i{display:block;height:100%;background:var(--neutral-fill)}
+details.jd>summary{list-style:none;cursor:pointer}details.jd>summary::-webkit-details-marker{display:none}
+@media (max-width:900px){.g2,.g-da,.rel-wrap{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:480px){.hide-m{display:none}}

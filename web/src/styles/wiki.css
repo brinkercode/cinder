@@ -1,0 +1,43 @@
+/* Wiki: page tree (248), reading column (760 max, Frame measure) and page rail (248). */
+.wk{display:grid;grid-template-columns:248px minmax(0,1fr) 248px;gap:var(--s-8);align-items:start;max-width:var(--w-content);margin-inline:auto;padding:var(--pad-top) var(--pad-x)}
+.wk:not(:has(.wk-rail)){grid-template-columns:248px minmax(0,1fr)}
+.wk>[role=alert]{grid-column:1/-1}
+.wk .fc{padding-inline:0;margin:0}.wk .f-body{padding-block:0}
+.wk-nav,.wk-rail{position:sticky;top:var(--s-4);display:flex;flex-direction:column;gap:var(--s-2)}
+.wt,.wt ul{list-style:none;margin:0;padding:0}
+.wt-r{display:flex;align-items:center;gap:6px;height:30px;padding-right:var(--s-2);border-radius:var(--r-sm);font-size:var(--fs-13);color:var(--text-strong);text-decoration:none;cursor:pointer}
+.wt-r span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wt-r small{font-size:var(--fs-11);color:var(--text-subtle)}
+.wt-r:hover{background:var(--sb-hover)}.wt-r[aria-current]{background:var(--sb-active);font-weight:var(--weight-medium);cursor:default}
+.wt-f{list-style:none;color:var(--text-subtle);font-size:var(--fs-11);font-weight:var(--weight-medium);text-transform:uppercase;letter-spacing:.03em}.wt-f::-webkit-details-marker{display:none}
+.wt-f a{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:inherit;text-decoration:none}.wt-f [aria-current]{color:var(--text-strong)}
+.wt-tw{display:inline-grid;transition:rotate .15s}details[open]>.wt-f .wt-tw{rotate:90deg}
+.wt-a{display:inline-grid;color:var(--chart)}
+.wk-head{display:flex;align-items:center;gap:var(--s-3);flex-wrap:wrap}.wk-head .end{margin-left:auto}
+.wk-crumb{display:flex;gap:6px;min-width:0;font-size:var(--fs-13)}
+.wk-more{position:relative}.wk-more>summary{list-style:none}
+.wk-more>div{position:absolute;right:0;top:100%;z-index:1;display:flex;flex-direction:column;min-width:160px;padding:var(--s-1);border:var(--bw) solid var(--line);border-radius:var(--r-lg);background:var(--elevated);box-shadow:var(--shadow-pop)}
+.wk-title h1{font-size:28px;line-height:1.25;font-weight:var(--weight-medium);color:var(--text-strong)}
+.wk-title p{margin-top:6px;display:flex;gap:var(--s-2);align-items:center;flex-wrap:wrap}.wk-agc{display:inline-flex;align-items:center;gap:4px;color:var(--chart)}
+.wk-cm{border-top:var(--bw) solid var(--line);padding-top:var(--s-4);display:flex;flex-direction:column;gap:var(--s-2)}.wk-cm h3{font-size:var(--fs-14)}
+.wk-rail{gap:var(--s-5);font-size:var(--fs-13)}.wk-rail section{display:flex;flex-direction:column;gap:var(--s-2)}.wk-rail h4{font-size:var(--fs-12);font-weight:var(--weight-medium);color:var(--text-subtle)}
+.wk-dl{display:grid;grid-template-columns:auto 1fr;gap:4px var(--s-3);margin:0}.wk-dl dt{color:var(--text-subtle)}.wk-dl dd{margin:0;text-align:right}
+.wk-ag{display:flex;gap:10px;align-items:flex-start;cursor:pointer}.wk-ag b{display:block;font-weight:var(--weight-medium);color:var(--text-strong)}.wk-ag small{display:block;margin-top:2px;font-size:var(--fs-12);color:var(--text-subtle)}
+.wk-toc{display:flex;flex-direction:column;gap:2px;border-left:var(--bw) solid var(--line)}.wk-toc a{padding:3px 10px;color:var(--text-subtle);text-decoration:none}.wk-toc a.l3{padding-left:22px}.wk-toc a:hover{color:var(--text-strong)}
+.wk-h{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}.wk-h a{display:flex;gap:var(--s-2);text-decoration:none}
+.wk .pill.brand{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 8px;border:var(--bw) solid var(--brand);border-radius:var(--r-full);background:var(--brand-tint);color:var(--text-strong);font-size:var(--fs-12);line-height:1}
+@media (max-width:1280px){.wk{grid-template-columns:248px minmax(0,1fr)}.wk-rail{grid-column:2;position:static;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}}
+@media (max-width:900px){.wk,.wk:not(:has(.wk-rail)){grid-template-columns:minmax(0,1fr)}.wk-rail{grid-column:auto}.wk-nav{position:static}.wk-title h1{font-size:var(--fs-20)}}
+/* Editor: toolbar, 22px title, Write / Split / Preview panes, footer. History: version list beside the diff. */
+.wk-ed{display:flex;flex-direction:column;padding:0}
+.wk-etb{display:flex;align-items:center;gap:2px;padding:6px 8px;border-bottom:var(--bw) solid var(--line);flex-wrap:wrap}.wk-etb .end{margin-left:auto}
+.wk-tt{border:0;border-bottom:var(--bw) solid var(--line);background:transparent;padding:14px 20px;font-size:22px;font-weight:var(--weight-medium);color:var(--text-strong);outline:none}
+.wk-pane{display:grid;grid-template-columns:1fr 1fr;min-height:440px}
+.wk-pane textarea{border:0;resize:none;outline:none;background:var(--recessed);padding:16px 20px;font-size:var(--fs-13);line-height:1.7;color:var(--text);min-height:440px}
+.wk-prev{padding:16px 24px;border-left:var(--bw) solid var(--line);overflow:auto}
+.wk-pane.t-write,.wk-pane.t-preview{grid-template-columns:1fr}.wk-pane.t-write .wk-prev,.wk-pane.t-preview textarea{display:none}.wk-pane.t-preview .wk-prev{border-left:0}
+.wk-ef{display:flex;align-items:center;gap:12px;padding:10px 12px;border-top:var(--bw) solid var(--line)}.wk-ef input{flex:1;min-width:0;height:34px;border:var(--bw) solid var(--line);border-radius:var(--r-sm);background:var(--elevated);padding:0 10px;font-size:var(--fs-13);color:var(--text)}.wk-ef .meta{white-space:nowrap}
+.wk-hg{display:grid;grid-template-columns:240px minmax(0,1fr)}
+.wk-hl{list-style:none;margin:0;padding:6px;border-right:var(--bw) solid var(--line);display:flex;flex-direction:column;gap:2px}
+.wk-hl a{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;padding:8px 10px;border-radius:var(--r-sm);font-size:var(--fs-13);color:var(--text-strong);text-decoration:none}.wk-hl small{flex-basis:100%;font-size:var(--fs-12)}
+.wk-hl a:hover{background:var(--sb-hover)}.wk-hl a[aria-current]{background:var(--sb-active)}
+@media (max-width:900px){.wk-pane,.wk-hg{grid-template-columns:1fr}.wk-pane.t-split .wk-prev{border-left:0;border-top:var(--bw) solid var(--line)}.wk-hl{border-right:0;border-bottom:var(--bw) solid var(--line)}}

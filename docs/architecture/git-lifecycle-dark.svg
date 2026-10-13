@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" width="1000" height="700" role="img" aria-labelledby="ttl dsc">
+<!--
+Colours and type follow Cloudflare's public brand references (checked 2026-10-06):
+  - Cloudflare Orange #F38020, Tangerine #FAAE40 and dark gray #404041: the official logo colours,
+    as published in the press kit logo files (https://www.cloudflare.com/press-kit/ , Logos.zip).
+  - Naming: Cloudflare trademark guidelines (https://www.cloudflare.com/trademark/); product names are plain text.
+  - Type: the font stack of Cloudflare's developer docs (https://developers.cloudflare.com/):
+    Inter, system-ui ... sans-serif and JetBrains Mono, ui-monospace ... monospace.
+  No Cloudflare logo, cloud mark or other artwork is used.
+-->
+<title id="ttl">cinder git and change lifecycle</title><desc id="dsc">A push lands in Artifacts, which emits cf.artifacts.repo.pushed and starts the cinder-pipeline Workflow; it hands the push to the cinder-events Queue, whose consumer queues guard and verify jobs on the runner pool. A change moves from leased through developing and verifying to in_queue and merged. The risk judge routes a verified change: an untrusted judge sends it to the reviewer agent, a trusted high answer to a person. RepoDO holds the symbol leases and settles a collision by stacking or a seam; ChangeDO holds the change and its merge queue entry. Clef judges on Workers AI answer at each step and are scored against outcomes. At merge the Worker signs the merge commit with a key bound from Secrets Store, and a history job writes the change's record.</desc>
+<style>
+.card{fill:#1B1B1D;stroke:#2E2E32}
+.box{fill:#242427;stroke:#45454B;stroke-width:1}
+.hub{fill:#242427;stroke:#F38020;stroke-width:1.5}
+.edge{fill:#242427;stroke:#FAAE40;stroke-width:1.5}
+.pill{fill:#3A2A12;stroke:#FAAE40;stroke-width:1}
+.plan{stroke-dasharray:5 4}
+.w{fill:none;stroke:#A3A3A9;stroke-width:1.4}
+.as{fill:none;stroke:#A3A3A9;stroke-width:1.2;stroke-dasharray:1 4;stroke-linecap:round}
+.ah{fill:#A3A3A9}
+text{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif}
+.t{fill:#F2F2F3;font-size:13.5px;font-weight:600}
+.s{fill:#A3A3A9;font-size:12.5px}
+.m{fill:#A3A3A9;font-family:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:12px}
+.mi{fill:#F2F2F3;font-family:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:12px}
+.e{fill:#A3A3A9;font-family:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:11px;font-weight:600;letter-spacing:.08em}
+.l{fill:#A3A3A9;font-size:11.5px}
+</style><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ah"/></marker></defs>
+<rect x="0.5" y="0.5" width="999" height="699" rx="16" class="card"/>
+<rect x="20" y="40" width="160" height="78" rx="10" class="box"/>
+<text x="34" y="63" class="t">git push</text>
+<text x="34" y="83" class="s">agents · runners</text>
+<text x="34" y="100" class="s">people · CLI</text>
+<path d="M 180 79 L 206 79" class="w" marker-end="url(#ar)"/>
+<rect x="210" y="40" width="170" height="78" rx="10" class="box"/>
+<text x="224" y="63" class="t">Artifacts 'cinder'</text>
+<text x="224" y="83" class="s">repo + one fork</text>
+<text x="224" y="100" class="s">per change</text>
+<path d="M 380 79 L 406 79" class="w" marker-end="url(#ar)"/>
+<rect x="410" y="63" width="200" height="32" rx="16.0" class="pill"/>
+<text x="510.0" y="83.0" class="mi" text-anchor="middle">cf.artifacts.repo.pushed</text>
+<path d="M 610 79 L 636 79" class="w" marker-end="url(#ar)"/>
+<rect x="640" y="40" width="150" height="78" rx="10" class="box"/>
+<text x="654" y="63" class="t">Workflow</text>
+<text x="654" y="83" class="m">cinder-pipeline</text>
+<path d="M 790 79 L 816 79" class="w" marker-end="url(#ar)"/>
+<rect x="820" y="40" width="160" height="78" rx="10" class="box"/>
+<text x="834" y="63" class="t">Queue</text>
+<text x="834" y="83" class="m">cinder-events</text>
+<text x="834" y="100" class="s">→ guard + verify</text>
+<text x="416" y="114" class="l">event trigger, namespace-wide</text>
+<text x="40" y="184" class="e">CHANGE STATES</text>
+<rect x="40" y="200" width="160" height="36" rx="18.0" class="pill"/>
+<text x="120.0" y="222.0" class="mi" text-anchor="middle">leased</text>
+<path d="M 200 218 L 226 218" class="w" marker-end="url(#ar)"/>
+<rect x="230" y="200" width="160" height="36" rx="18.0" class="pill"/>
+<text x="310.0" y="222.0" class="mi" text-anchor="middle">developing</text>
+<path d="M 390 218 L 416 218" class="w" marker-end="url(#ar)"/>
+<rect x="420" y="200" width="160" height="36" rx="18.0" class="pill"/>
+<text x="500.0" y="222.0" class="mi" text-anchor="middle">verifying</text>
+<path d="M 580 218 L 606 218" class="w" marker-end="url(#ar)"/>
+<rect x="610" y="200" width="160" height="36" rx="18.0" class="pill"/>
+<text x="690.0" y="222.0" class="mi" text-anchor="middle">in_queue</text>
+<path d="M 770 218 L 796 218" class="w" marker-end="url(#ar)"/>
+<rect x="800" y="200" width="160" height="36" rx="18.0" class="hub"/>
+<text x="880.0" y="222.0" class="mi" text-anchor="middle">merged</text>
+<path d="M 900 118 L 900 160 L 500 160 L 500 196" class="w" marker-end="url(#ar)"/>
+<text x="600" y="154" class="l">guard + verify results</text>
+<text x="140" y="258" class="l">also: needs_fix · conflict → resolving · waiting (stacked)</text>
+<text x="140" y="276" class="l">risk route: untrusted → reviewer agent · high → a person</text>
+<rect x="40" y="310" width="280" height="96" rx="10" class="box"/>
+<text x="54" y="333" class="t">RepoDO · per repo</text>
+<text x="54" y="353" class="s">symbol leases while developing</text>
+<text x="54" y="370" class="s">collision → stack or seam</text>
+<text x="54" y="387" class="s">per-target merge queues</text>
+<rect x="360" y="310" width="280" height="96" rx="10" class="box"/>
+<text x="374" y="333" class="t">ChangeDO · per change</text>
+<text x="374" y="353" class="s">state, events, acceptance</text>
+<text x="374" y="370" class="s">its merge queue entry</text>
+<text x="374" y="387" class="s">stacked: merges after its base</text>
+<rect x="680" y="310" width="280" height="96" rx="10" class="box"/>
+<text x="694" y="333" class="t">Clef judges · Workers AI</text>
+<text x="694" y="353" class="s">lease · collision · seam · split</text>
+<text x="694" y="370" class="s">guard · risk · flake</text>
+<text x="694" y="387" class="s">scored against outcomes</text>
+<path d="M 120 236 L 120 310" class="as"/>
+<path d="M 620 236 L 620 310" class="as"/>
+<path d="M 820 236 L 820 310" class="as"/>
+<text x="40" y="474" class="e">MERGE</text>
+<rect x="40" y="490" width="220" height="86" rx="10" class="box"/>
+<text x="54" y="513" class="t">Secrets Store</text>
+<text x="54" y="533" class="s">merge-signing key</text>
+<text x="54" y="550" class="s">bound to the Worker only</text>
+<path d="M 260 533 L 296 533" class="w" marker-end="url(#ar)"/>
+<rect x="300" y="490" width="240" height="86" rx="10" class="hub"/>
+<text x="314" y="513" class="t">cinder Worker</text>
+<text x="314" y="533" class="s">signs the merge commit</text>
+<text x="314" y="550" class="s">runners never see the key</text>
+<path d="M 660 236 L 660 450 L 420 450 L 420 486" class="w" marker-end="url(#ar)"/>
+<path d="M 540 533 L 576 533" class="w" marker-end="url(#ar)"/>
+<rect x="580" y="490" width="160" height="86" rx="10" class="box"/>
+<text x="594" y="513" class="t">target branch</text>
+<text x="594" y="533" class="s">signed merge commit</text>
+<text x="594" y="550" class="s">in Artifacts</text>
+<path d="M 740 533 L 776 533" class="w" marker-end="url(#ar)"/>
+<rect x="780" y="490" width="180" height="86" rx="10" class="box"/>
+<text x="794" y="513" class="t">History job</text>
+<text x="794" y="533" class="s">trailers on the merge</text>
+<text x="794" y="550" class="s">refs/cinder/changes</text>
+<rect x="24" y="640" width="26" height="16" rx="5" class="hub"/>
+<text x="58" y="652.5" class="l">cinder Worker</text>
+<rect x="169.72" y="640" width="26" height="16" rx="5" class="box"/>
+<text x="203.72" y="652.5" class="l">live today</text>
+<rect x="296.12" y="640" width="26" height="16" rx="5" class="box plan"/>
+<text x="330.12" y="652.5" class="l">planned (not yet live)</text>
+</svg>

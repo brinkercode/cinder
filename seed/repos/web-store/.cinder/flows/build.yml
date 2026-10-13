@@ -1,0 +1,5 @@
+name: build
+on: [manual]
+steps:
+  install: { stage: build, run: "npm ci --prefer-offline --no-audit --no-fund", needs: [] }
+  build: { stage: build, run: "npx wrangler deploy --dry-run --outdir dist", needs: [install] }

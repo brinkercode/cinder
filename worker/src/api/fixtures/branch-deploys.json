@@ -1,0 +1,4 @@
+[
+  { "branch": "develop", "environment": "staging" },
+  { "branch": "main", "environment": "production" }
+]

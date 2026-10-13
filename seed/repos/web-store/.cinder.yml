@@ -1,0 +1,15 @@
+branches:
+  integration: [develop, main]
+  release: [release/*]
+  promote:
+    - { from: develop, to: main }
+check: npm ci --prefer-offline --no-audit --no-fund && npm test && npm run build
+# A change that touches these files waits for a person's approval.
+rules:
+  develop:
+    route: [src/index.ts]
+deploy:
+  environments:
+    - { name: dev,        branch: develop }
+    - { name: staging,    branch: main }
+    - { name: production, branch: main, gradual: [10, 50, 100], health: /healthz }

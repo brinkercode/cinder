@@ -1,0 +1,35 @@
+[
+  {
+    "id": "r-88", "change_id": "c_06", "repo_id": "r_flow", "intent": "Cache compiled regex matchers per worker", "target_branch": "develop",
+    "judge": { "name": "Jev", "count": 1840, "brier": 0.071 },
+    "legs": [
+      { "agent": "patch", "ver": "3.2.1", "channel": "stable", "verdict": "pass", "tok": [171000, 21000, 480000], "secs": 702, "adds": 142, "dels": 38, "files": 4, "risk": 0.12 },
+      { "agent": "patch", "ver": "3.3.0", "channel": "canary", "verdict": "pass", "tok": [118000, 15000, 350000], "secs": 425, "adds": 96, "dels": 31, "files": 3, "risk": 0.09 }
+    ]
+  },
+  {
+    "id": "r-87", "change_id": "c_04", "repo_id": "r_flow", "intent": "Stream large bodies through rewrite filter", "target_branch": "develop",
+    "judge": { "name": "Jev", "count": 1840, "brier": 0.071 },
+    "legs": [
+      { "agent": "patch", "ver": "3.2.1", "channel": "stable", "verdict": "pass", "tok": [390000, 44000, 1100000], "secs": 1630, "adds": 310, "dels": 122, "files": 7, "risk": 0.28 },
+      { "agent": "patch", "ver": "3.3.0", "channel": "canary", "verdict": "fail", "tok": [520000, 61000, 1600000], "secs": 2210, "adds": 402, "dels": 140, "files": 9, "risk": 0.41 }
+    ]
+  },
+  {
+    "id": "r-86", "change_id": "c_02", "repo_id": "r_flow", "intent": "Document RouteMatcher trait and migration path", "target_branch": "develop",
+    "judge": { "name": "Jev", "count": 1840, "brier": 0.071 },
+    "legs": [
+      { "agent": "scribe", "ver": "2.1.0", "channel": "stable", "verdict": "pass", "tok": [12000, 1500, 30000], "secs": 180, "adds": 64, "dels": 0, "files": 1, "risk": 0.02 },
+      { "agent": "scribe", "ver": "2.2.0", "channel": "canary", "verdict": "pass", "tok": [9000, 1800, 22000], "secs": 150, "adds": 81, "dels": 0, "files": 2, "risk": 0.02 }
+    ]
+  },
+  {
+    "id": "r-85", "change_id": "c_02", "repo_id": "r_flow", "intent": "Document RouteMatcher trait and migration path", "target_branch": "develop",
+    "judge": { "name": "Jev", "count": 1840, "brier": 0.071 },
+    "legs": [
+      { "agent": "scribe", "ver": "2.1.0", "channel": "stable", "verdict": "pass", "tok": [12000, 1500, 30000], "secs": 180, "adds": 64, "dels": 0, "files": 1, "risk": 0.02 },
+      { "agent": "scribe", "ver": "2.2.0", "channel": "canary", "verdict": "fail", "tok": [9000, 1800, 22000], "secs": 150, "adds": 81, "dels": 0, "files": 2, "risk": 0.03 },
+      { "agent": "scribe", "ver": "2.3.0", "channel": "canary", "verdict": "pass", "tok": [8000, 1200, 20000], "secs": 210, "adds": 50, "dels": 2, "files": 1, "risk": 0.04 }
+    ]
+  }
+]

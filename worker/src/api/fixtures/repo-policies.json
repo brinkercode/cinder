@@ -1,0 +1,11 @@
+[
+  {
+    "repo_id": "r_flow",
+    "version": 14,
+    "branches": [
+      { "branch": "develop", "queue": true, "judges": 1, "risk": 25, "route": "" },
+      { "branch": "main", "queue": true, "judges": 2, "risk": 10, "route": "src/request/**, src/tls/**" },
+      { "branch": "release/2.4", "queue": false, "judges": 2, "risk": 8, "route": "**" }
+    ]
+  }
+]

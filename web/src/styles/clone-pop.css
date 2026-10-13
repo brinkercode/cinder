@@ -1,0 +1,7 @@
+/* Clone popover. The URL stays selectable so a denied clipboard can be copied by hand. */
+[popover].menu.clonep{width:min(440px,calc(100vw - 16px));min-width:0;max-width:none;padding:8px 6px}
+.cl-url{display:flex;align-items:center;gap:4px;height:34px;margin:2px 4px 6px;padding:0 3px 0 10px;border:var(--bw) solid var(--line);border-radius:var(--r-lg);background:var(--recessed)}
+.cl-url code{flex:1;min-width:0;font-family:var(--font-mono);font-size:var(--fs-12);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;user-select:all}
+.clonep .cl-url .iconbtn{width:28px;height:28px;padding:0;display:inline-grid}
+.clonep .meta{margin:0 4px 6px;font-size:var(--fs-12);color:var(--text-subtle)}.clonep .meta .lnk{display:inline;width:auto;height:auto;color:var(--link);font-size:var(--fs-12)}
+.clonep .toast{position:fixed;right:20px;bottom:20px;margin:0;padding:10px 14px;border:var(--bw) solid var(--line);border-radius:var(--r-lg);background:var(--elevated);box-shadow:var(--shadow-pop);font-size:var(--fs-13);color:var(--text-strong)}

@@ -1,0 +1,122 @@
+/* cinder tokens — the only file allowed to hold color literals or font families.
+   Fonts: Inter Variable + Paper Mono, self-hosted OFL woff2 in web/public/fonts. */
+@font-face{font-family:"Inter Variable";font-style:normal;font-weight:100 900;font-display:swap;src:url("/fonts/inter-variable.woff2") format("woff2")}
+@font-face{font-family:"Inter Variable";font-style:italic;font-weight:100 900;font-display:swap;src:url("/fonts/inter-variable-italic.woff2") format("woff2")}
+@font-face{font-family:"Paper Mono";font-style:normal;font-weight:100 800;font-display:swap;src:url("/fonts/paper-mono-variable.woff2") format("woff2")}
+
+:root,.light{
+  color-scheme:light;
+  --font-sans:"Inter Variable",ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+  --font-mono:"Paper Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --weight-regular:400;--weight-medium:500;
+  --icon-nav:16px;--icon-lg:18px;
+
+  /* text */
+  --text:oklch(21% 0.006 285.885);
+  --text-strong:oklch(14.5% 0 0);
+  --text-subtle:oklch(55.6% 0 0);
+  --text-inactive:oklch(87% 0 0);
+  --placeholder:oklch(70.8% 0 0);
+  --text-on-fill:oklch(100% 0 0);
+
+  /* surfaces */
+  --canvas:oklch(98.5% 0 0);
+  --base:oklch(100% 0 0);
+  --elevated:oklch(100% 0 0);
+  --recessed:oklch(97% 0 0);
+  --tint:oklch(96.7% 0.001 286.375);
+  --pg:oklch(98.5% 0 0);
+
+  /* brand + interactive */
+  --brand:#f6821f;
+  --brand-tint:color-mix(in oklch,#f6821f 12%,transparent);
+  --interactive:oklch(0.5772 0.2324 260);
+  --interactive-hover:oklch(48.8% 0.243 264.376);
+  --interactive-tint:color-mix(in oklch,oklch(0.5772 0.2324 260) 10%,transparent);
+  --link:oklch(42.4% 0.199 265.638);
+
+  /* status */
+  --success:oklch(43.2% 0.095 166.913);--success-fill:oklch(59.6% 0.145 163.225);
+  --warning:oklch(59.7% 0.144 57.5);--warning-fill:oklch(73.9% 0.177 58.2);
+  --danger:oklch(50.5% 0.213 27.518);--danger-fill:oklch(63.7% 0.237 25.331);
+  --info:oklch(42.4% 0.199 265.638);--info-fill:oklch(68.5% 0.169 237.323);
+  --neutral-fill:oklch(70.8% 0 0);
+  --success-tint:color-mix(in oklch,oklch(59.6% 0.145 163.225) 12%,transparent);
+  --warning-tint:color-mix(in oklch,oklch(73.9% 0.177 58.2) 14%,transparent);
+  --danger-tint:color-mix(in oklch,oklch(63.7% 0.237 25.331) 12%,transparent);
+
+  /* borders */
+  --hairline:oklch(93.5% 0 0);
+  --line:oklch(14.5% 0 0 / 0.1);
+
+  /* charts */
+  --chart:oklch(0.5772 0.2324 260);--chart-2:oklch(68.5% 0.169 237.323);--chart-grid:oklch(92.2% 0 0);
+  --skel:color-mix(in oklch,var(--tint) 60%,transparent);
+
+  /* type scale */
+  --fs-11:11px;--fs-12:12px;--fs-13:13px;--fs-14:14px;--fs-16:16px;--fs-20:20px;--fs-24:24px;
+  --lh-tight:1.25;--lh:1.5;
+  /* Code gutter: line numbers, then this gap before the code. Monaco's lineNumbersMinChars and lineDecorationsWidth
+     (CODE.digits, CODE.gap in lib/code-metrics.js) must match, so Edit's gutter is View's. */
+  --code-gap:var(--s-4);--code-gutter:calc(5ch + var(--code-gap));
+
+  /* spacing (4px grid) */
+  --s-1:4px;--s-2:8px;--s-3:12px;--s-4:16px;--s-5:20px;--s-6:24px;--s-8:32px;--s-10:40px;
+
+  /* layout frames */
+  --w-content:1440px;--aside:360px;--pad-x:32px;--pad-top:24px;--gap:16px;
+  --w-read:var(--w-content);--w-work:var(--w-content); /* remove after v5 */
+
+  /* radius + borders + motion */
+  --r-sm:4px;--r:6px;--r-lg:8px;--r-full:999px;
+  --bw:1px;
+  --focus:0 0 0 2px var(--pg),0 0 0 4px var(--brand);
+  --shadow-pop:0 1px 2px oklch(0% 0 0 / 0.06),0 8px 24px oklch(0% 0 0 / 0.08);
+  --ease:cubic-bezier(.2,0,0,1);--dur:160ms;
+  --backdrop:oklch(0% 0 0 / 0.4);
+  --ease-sidebar:cubic-bezier(0.77,0,0.175,1);--dur-sidebar:320ms;
+
+  /* sidebar */
+  --sb-bg:oklch(100% 0 0);--sb-fg:oklch(14.5% 0 0);--sb-muted:oklch(55.6% 0 0);--sb-line:oklch(92.2% 0 0);--sb-input:oklch(98.5% 0 0);--sb-active:oklch(97% 0 0);
+  --sb-hover:color-mix(in oklch,var(--sb-active) 60%,transparent);
+  --sb-icon-on:var(--sb-fg); /* a hovered or selected item's icon: white in dark; the sidebar ink in light, where white would vanish */
+}
+
+.dark{
+  color-scheme:dark;
+  --text:oklch(97% 0 0);
+  --text-strong:oklch(98.5% 0 0);
+  --text-subtle:oklch(70.8% 0 0);
+  --text-inactive:oklch(43.9% 0 0);
+  --placeholder:oklch(55.6% 0 0);
+
+  --canvas:oklch(14.5% 0 0);
+  --base:oklch(15.5% 0 0);
+  --elevated:oklch(20.5% 0 0);
+  --recessed:oklch(12% 0 0);
+  --tint:oklch(23% 0 0);
+  --pg:oklch(0.1 0 0);
+
+  --interactive:oklch(0.5772 0.2324 260);
+  --interactive-hover:oklch(48.8% 0.243 264.376);
+  --interactive-tint:color-mix(in oklch,oklch(70.7% 0.165 254.624) 14%,transparent);
+  --link:oklch(70.7% 0.165 254.624);
+
+  --success:oklch(90.5% 0.093 164.15);--success-fill:oklch(76.5% 0.177 163.223);
+  --warning:oklch(75% 0.183 55.934);--warning-fill:oklch(64.5% 0.168 50.0);
+  --danger:oklch(70.4% 0.191 22.216);--danger-fill:oklch(57.7% 0.245 27.325);
+  --info:oklch(70.7% 0.165 254.624);
+  --neutral-fill:oklch(55.6% 0 0);
+  --success-tint:color-mix(in oklch,oklch(76.5% 0.177 163.223) 12%,transparent);
+  --warning-tint:color-mix(in oklch,oklch(64.5% 0.168 50.0) 16%,transparent);
+  --danger-tint:color-mix(in oklch,oklch(57.7% 0.245 27.325) 16%,transparent);
+
+  --hairline:oklch(26.9% 0 0);
+  --line:oklch(32% 0 0);
+  --chart:oklch(70.7% 0.165 254.624);--chart-2:oklch(80.9% 0.105 251.813);--chart-grid:oklch(24% 0 0);
+  --shadow-pop:0 1px 2px oklch(0% 0 0 / 0.4),0 8px 24px oklch(0% 0 0 / 0.5);
+  --sb-bg:oklch(0.1 0 0);--sb-fg:oklch(0.97 0 0);--sb-muted:oklch(0.708 0 0);--sb-line:oklch(0.32 0 0);--sb-input:oklch(0.17 0 0);--sb-active:oklch(0.205 0 0);
+  --sb-icon-on:oklch(100% 0 0);
+}
+@media (width<1100px){:root{--pad-x:24px}}
+@media (width<900px){:root{--pad-x:16px}}

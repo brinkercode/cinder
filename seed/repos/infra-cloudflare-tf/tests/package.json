@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "description": "Bundles tests/fixture.js, the Worker script the plan test uploads. esbuild is pinned below its fix (GHSA-67mh-4wv8-2f99) on purpose: Watchtower reports the advisory.",
+  "devDependencies": {
+    "esbuild": "0.24.2"
+  }
+}

@@ -1,0 +1,4 @@
+/* Change detail rail: the Reviewers Request picker. */
+.cd-rail .rv-pop{max-width:calc(100vw - 2 * var(--s-4))}
+.rq-r small{margin-left:auto;padding-left:var(--s-2);font-size:var(--fs-11);color:var(--text-subtle)}
+.lease-strip.bad{background:var(--danger-tint)}

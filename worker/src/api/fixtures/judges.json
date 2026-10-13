@@ -1,0 +1,148 @@
+{
+  "airlock": false,
+  "trust": { "min_outcomes": 200, "min_races": 30 },
+  "judges": [
+    {
+      "id": "jev",
+      "name": "Jev",
+      "type": "System 1",
+      "kind": "risk",
+      "question": "Will this be reverted or break its target within 7 days?",
+      "backend": "self-hosted",
+      "model_version": "jev-1.6.2",
+      "count": 1840,
+      "inherited": 620,
+      "trusted": true,
+      "health": "healthy", "reason": null, "fallbacks": 0,
+      "brier": 0.071,
+      "since": "2026-08-31T09:12:00Z",
+      "trend": [{"week":"2026-07-27","count":0,"brier":null},{"week":"2026-08-03","count":0,"brier":null},{"week":"2026-08-10","count":0,"brier":null},{"week":"2026-08-17","count":0,"brier":null},{"week":"2026-08-24","count":0,"brier":null},{"week":"2026-08-31","count":48,"brier":0.078},{"week":"2026-09-07","count":48,"brier":0.075},{"week":"2026-09-14","count":48,"brier":0.074},{"week":"2026-09-21","count":48,"brier":0.072},{"week":"2026-09-28","count":48,"brier":0.073},{"week":"2026-10-05","count":48,"brier":0.07},{"week":"2026-10-12","count":48,"brier":0.071}],
+      "bins": [
+        {"lo":0,"hi":0.1,"count":110,"mean_p":0.05,"observed":0.08}, {"lo":0.1,"hi":0.2,"count":184,"mean_p":0.15,"observed":0.11}, {"lo":0.2,"hi":0.3,"count":258,"mean_p":0.25,"observed":0.27}, {"lo":0.3,"hi":0.4,"count":147,"mean_p":0.35,"observed":0.34}, {"lo":0.4,"hi":0.5,"count":221,"mean_p":0.45,"observed":0.5},
+        {"lo":0.5,"hi":0.6,"count":110,"mean_p":0.55,"observed":0.52}, {"lo":0.6,"hi":0.7,"count":184,"mean_p":0.65,"observed":0.66}, {"lo":0.7,"hi":0.8,"count":258,"mean_p":0.75,"observed":0.7}, {"lo":0.8,"hi":0.9,"count":147,"mean_p":0.85,"observed":0.87}, {"lo":0.9,"hi":1,"count":221,"mean_p":0.95,"observed":0.93}
+      ],
+      "recent": [{"repo":"acme/api","change_id":"c_01","p":0.18,"correct":null,"made_at":"2026-10-12T09:54:00Z"}, {"repo":"acme/web","change_id":"c_02","p":0.09,"correct":true,"made_at":"2026-10-12T09:19:00Z"}, {"repo":"acme/api","change_id":"c_03","p":0.41,"correct":true,"made_at":"2026-10-12T08:00:00Z"}, {"repo":"acme/web","change_id":"c_04","p":0.06,"correct":true,"made_at":"2026-10-12T07:00:00Z"}, {"repo":"acme/api","change_id":"c_05","p":0.22,"correct":false,"made_at":"2026-10-12T05:00:00Z"}],
+      "history": [{"backend": "self-hosted", "model_version": "jev-1.5.0", "count": 1220, "trusted": true, "brier": 0.092, "bins": [{"lo":0.0,"hi":0.1,"count":90,"mean_p":0.05,"observed":0.12},{"lo":0.1,"hi":0.2,"count":120,"mean_p":0.15,"observed":0.2},{"lo":0.2,"hi":0.3,"count":160,"mean_p":0.25,"observed":0.33},{"lo":0.3,"hi":0.4,"count":120,"mean_p":0.35,"observed":0.42},{"lo":0.4,"hi":0.5,"count":150,"mean_p":0.45,"observed":0.55},{"lo":0.5,"hi":0.6,"count":90,"mean_p":0.55,"observed":0.6},{"lo":0.6,"hi":0.7,"count":120,"mean_p":0.65,"observed":0.71},{"lo":0.7,"hi":0.8,"count":160,"mean_p":0.75,"observed":0.76},{"lo":0.8,"hi":0.9,"count":100,"mean_p":0.85,"observed":0.84},{"lo":0.9,"hi":1.0,"count":110,"mean_p":0.95,"observed":0.9}], "since": "2026-06-02T08:00:00Z", "until": "2026-08-31T09:11:00Z", "trend": [{"week":"2026-07-27","count":95,"brier":0.094},{"week":"2026-08-03","count":95,"brier":0.091},{"week":"2026-08-10","count":95,"brier":0.093},{"week":"2026-08-17","count":95,"brier":0.089},{"week":"2026-08-24","count":95,"brier":0.09},{"week":"2026-08-31","count":0,"brier":null},{"week":"2026-09-07","count":0,"brier":null},{"week":"2026-09-14","count":0,"brier":null},{"week":"2026-09-21","count":0,"brier":null},{"week":"2026-09-28","count":0,"brier":null},{"week":"2026-10-05","count":0,"brier":null},{"week":"2026-10-12","count":0,"brier":null}]}]
+    },
+    {
+      "id": "kev",
+      "name": "Kev",
+      "type": "System 1",
+      "kind": "guard",
+      "question": "Will verification pass on the first try?",
+      "backend": "hosted",
+      "model_version": "kev-2.0.0-rc1",
+      "count": 64,
+      "inherited": 0,
+      "trusted": false,
+      "health": "degraded", "reason": "Model ID not found on 7 calls; fell back to the default verdict", "fallbacks": 7,
+      "brier": 0.141,
+      "since": "2026-09-14T15:40:00Z",
+      "trend": [{"week":"2026-07-27","count":0,"brier":null},{"week":"2026-08-03","count":0,"brier":null},{"week":"2026-08-10","count":0,"brier":null},{"week":"2026-08-17","count":0,"brier":null},{"week":"2026-08-24","count":0,"brier":null},{"week":"2026-08-31","count":0,"brier":null},{"week":"2026-09-07","count":0,"brier":null},{"week":"2026-09-14","count":12,"brier":0.18},{"week":"2026-09-21","count":12,"brier":0.16},{"week":"2026-09-28","count":12,"brier":0.15},{"week":"2026-10-05","count":12,"brier":0.145},{"week":"2026-10-12","count":12,"brier":0.141}],
+      "bins": [
+        {"lo":0,"hi":0.1,"count":5,"mean_p":0.05,"observed":0.01}, {"lo":0.1,"hi":0.2,"count":8,"mean_p":0.15,"observed":0.2}, {"lo":0.2,"hi":0.3,"count":4,"mean_p":0.25,"observed":0.23}, {"lo":0.3,"hi":0.4,"count":6,"mean_p":0.35,"observed":0.47}, {"lo":0.4,"hi":0.5,"count":9,"mean_p":0.45,"observed":0.38},
+        {"lo":0.5,"hi":0.6,"count":5,"mean_p":0.55,"observed":0.58}, {"lo":0.6,"hi":0.7,"count":8,"mean_p":0.65,"observed":0.53}, {"lo":0.7,"hi":0.8,"count":4,"mean_p":0.75,"observed":0.8}, {"lo":0.8,"hi":0.9,"count":6,"mean_p":0.85,"observed":0.8}, {"lo":0.9,"hi":1,"count":9,"mean_p":0.95,"observed":0.99}
+      ],
+      "recent": [{"repo":"acme/api","change_id":"c_01","p":0.18,"correct":null,"made_at":"2026-10-12T09:54:00Z"}, {"repo":"acme/web","change_id":"c_02","p":0.09,"correct":true,"made_at":"2026-10-12T09:19:00Z"}, {"repo":"acme/api","change_id":"c_03","p":0.41,"correct":true,"made_at":"2026-10-12T08:00:00Z"}, {"repo":"acme/web","change_id":"c_04","p":0.06,"correct":true,"made_at":"2026-10-12T07:00:00Z"}, {"repo":"acme/api","change_id":"c_05","p":0.22,"correct":false,"made_at":"2026-10-12T05:00:00Z"}]
+    },
+    {
+      "id": "flake",
+      "name": "flake-rate",
+      "type": "Statistical",
+      "kind": "flake",
+      "question": "Is this test failure a flake?",
+      "backend": "self-hosted",
+      "model_version": "beta-binomial v3",
+      "count": 4410,
+      "inherited": 3900,
+      "trusted": true,
+      "health": "healthy", "reason": null, "fallbacks": 0,
+      "brier": 0.052,
+      "since": "2025-11-03T08:00:00Z",
+      "trend": [{"week":"2026-07-27","count":42,"brier":0.055},{"week":"2026-08-03","count":42,"brier":0.054},{"week":"2026-08-10","count":42,"brier":0.053},{"week":"2026-08-17","count":42,"brier":0.054},{"week":"2026-08-24","count":42,"brier":0.052},{"week":"2026-08-31","count":42,"brier":0.053},{"week":"2026-09-07","count":42,"brier":0.051},{"week":"2026-09-14","count":42,"brier":0.052},{"week":"2026-09-21","count":42,"brier":0.052},{"week":"2026-09-28","count":42,"brier":0.051},{"week":"2026-10-05","count":42,"brier":0.052},{"week":"2026-10-12","count":42,"brier":0.052}],
+      "bins": [
+        {"lo":0,"hi":0.1,"count":441,"mean_p":0.05,"observed":0.07}, {"lo":0.1,"hi":0.2,"count":617,"mean_p":0.15,"observed":0.14}, {"lo":0.2,"hi":0.3,"count":353,"mean_p":0.25,"observed":0.3}, {"lo":0.3,"hi":0.4,"count":529,"mean_p":0.35,"observed":0.32}, {"lo":0.4,"hi":0.5,"count":265,"mean_p":0.45,"observed":0.46},
+        {"lo":0.5,"hi":0.6,"count":441,"mean_p":0.55,"observed":0.5}, {"lo":0.6,"hi":0.7,"count":617,"mean_p":0.65,"observed":0.67}, {"lo":0.7,"hi":0.8,"count":353,"mean_p":0.75,"observed":0.73}, {"lo":0.8,"hi":0.9,"count":529,"mean_p":0.85,"observed":0.88}, {"lo":0.9,"hi":1,"count":265,"mean_p":0.95,"observed":0.91}
+      ],
+      "recent": [{"repo":"acme/api","change_id":"c_01","p":0.18,"correct":null,"made_at":"2026-10-12T09:54:00Z"}, {"repo":"acme/web","change_id":"c_02","p":0.09,"correct":true,"made_at":"2026-10-12T09:19:00Z"}, {"repo":"acme/api","change_id":"c_03","p":0.41,"correct":true,"made_at":"2026-10-12T08:00:00Z"}, {"repo":"acme/web","change_id":"c_04","p":0.06,"correct":true,"made_at":"2026-10-12T07:00:00Z"}, {"repo":"acme/api","change_id":"c_05","p":0.22,"correct":false,"made_at":"2026-10-12T05:00:00Z"}]
+    },
+    {
+      "id": "bea",
+      "name": "bea",
+      "type": "Person",
+      "kind": "risk",
+      "question": "Will this be reverted or break its target within 7 days?",
+      "backend": "n/a",
+      "model_version": "human",
+      "count": 231,
+      "inherited": 0,
+      "trusted": true,
+      "health": "healthy", "reason": null, "fallbacks": 0,
+      "brier": 0.109,
+      "since": "2026-08-10T10:05:00Z",
+      "trend": [{"week":"2026-07-27","count":0,"brier":null},{"week":"2026-08-03","count":0,"brier":null},{"week":"2026-08-10","count":23,"brier":0.131},{"week":"2026-08-17","count":23,"brier":0.124},{"week":"2026-08-24","count":23,"brier":0.118},{"week":"2026-08-31","count":23,"brier":0.12},{"week":"2026-09-07","count":23,"brier":0.113},{"week":"2026-09-14","count":23,"brier":0.111},{"week":"2026-09-21","count":23,"brier":0.108},{"week":"2026-09-28","count":23,"brier":0.11},{"week":"2026-10-05","count":23,"brier":0.107},{"week":"2026-10-12","count":23,"brier":0.109}],
+      "bins": [
+        {"lo":0,"hi":0.1,"count":28,"mean_p":0.05,"observed":0.04}, {"lo":0.1,"hi":0.2,"count":14,"mean_p":0.15,"observed":0.2}, {"lo":0.2,"hi":0.3,"count":23,"mean_p":0.25,"observed":0.22}, {"lo":0.3,"hi":0.4,"count":32,"mean_p":0.35,"observed":0.36}, {"lo":0.4,"hi":0.5,"count":18,"mean_p":0.45,"observed":0.4},
+        {"lo":0.5,"hi":0.6,"count":28,"mean_p":0.55,"observed":0.57}, {"lo":0.6,"hi":0.7,"count":14,"mean_p":0.65,"observed":0.63}, {"lo":0.7,"hi":0.8,"count":23,"mean_p":0.75,"observed":0.78}, {"lo":0.8,"hi":0.9,"count":32,"mean_p":0.85,"observed":0.81}, {"lo":0.9,"hi":1,"count":19,"mean_p":0.95,"observed":0.97}
+      ],
+      "recent": [{"repo":"acme/api","change_id":"c_01","p":0.18,"correct":null,"made_at":"2026-10-12T09:54:00Z"}, {"repo":"acme/web","change_id":"c_02","p":0.09,"correct":true,"made_at":"2026-10-12T09:19:00Z"}, {"repo":"acme/api","change_id":"c_03","p":0.41,"correct":true,"made_at":"2026-10-12T08:00:00Z"}, {"repo":"acme/web","change_id":"c_04","p":0.06,"correct":true,"made_at":"2026-10-12T07:00:00Z"}, {"repo":"acme/api","change_id":"c_05","p":0.22,"correct":false,"made_at":"2026-10-12T05:00:00Z"}]
+    },
+    {
+      "id": "review",
+      "name": "review@1.2",
+      "type": "Agent reviewer",
+      "kind": "risk",
+      "question": "Will this be reverted or break its target within 7 days?",
+      "backend": "hosted",
+      "model_version": "opus-4.1 (pinned 2026-08-14)",
+      "count": 512,
+      "inherited": 0,
+      "trusted": true,
+      "health": "failing", "reason": "Vectorize index unbound; every call used the default verdict", "fallbacks": 23,
+      "brier": 0.083,
+      "since": "2026-08-14T12:00:00Z",
+      "trend": [{"week":"2026-07-27","count":42,"brier":0.088},{"week":"2026-08-03","count":42,"brier":0.086},{"week":"2026-08-10","count":42,"brier":0.085},{"week":"2026-08-17","count":42,"brier":0.084},{"week":"2026-08-24","count":42,"brier":0.082},{"week":"2026-08-31","count":42,"brier":0.081},{"week":"2026-09-07","count":42,"brier":0.083},{"week":"2026-09-14","count":42,"brier":0.082},{"week":"2026-09-21","count":42,"brier":0.08},{"week":"2026-09-28","count":42,"brier":0.081},{"week":"2026-10-05","count":42,"brier":0.097},{"week":"2026-10-12","count":42,"brier":0.118}],
+      "bins": [
+        {"lo":0,"hi":0.1,"count":72,"mean_p":0.05,"observed":0.1}, {"lo":0.1,"hi":0.2,"count":41,"mean_p":0.15,"observed":0.12}, {"lo":0.2,"hi":0.3,"count":61,"mean_p":0.25,"observed":0.26}, {"lo":0.3,"hi":0.4,"count":31,"mean_p":0.35,"observed":0.3}, {"lo":0.4,"hi":0.5,"count":51,"mean_p":0.45,"observed":0.47},
+        {"lo":0.5,"hi":0.6,"count":72,"mean_p":0.55,"observed":0.53}, {"lo":0.6,"hi":0.7,"count":41,"mean_p":0.65,"observed":0.68}, {"lo":0.7,"hi":0.8,"count":61,"mean_p":0.75,"observed":0.71}, {"lo":0.8,"hi":0.9,"count":31,"mean_p":0.85,"observed":0.87}, {"lo":0.9,"hi":1,"count":51,"mean_p":0.95,"observed":0.94}
+      ],
+      "recent": [{"repo":"acme/api","change_id":"c_01","p":0.18,"correct":null,"made_at":"2026-10-12T09:54:00Z"}, {"repo":"acme/web","change_id":"c_02","p":0.09,"correct":true,"made_at":"2026-10-12T09:19:00Z"}, {"repo":"acme/api","change_id":"c_03","p":0.41,"correct":true,"made_at":"2026-10-12T08:00:00Z"}, {"repo":"acme/web","change_id":"c_04","p":0.06,"correct":true,"made_at":"2026-10-12T07:00:00Z"}, {"repo":"acme/api","change_id":"c_05","p":0.22,"correct":false,"made_at":"2026-10-12T05:00:00Z"}]
+    },
+    {
+      "id": "clef",
+      "name": "Clef",
+      "type": "System 1",
+      "kind": "collision",
+      "question": "Will these two changes collide before both merge?",
+      "backend": "clef",
+      "model_version": "clef@2",
+      "count": 1203,
+      "inherited": 0,
+      "trusted": true,
+      "health": "healthy", "reason": null, "fallbacks": 0,
+      "brier": 0.064,
+      "since": "2026-05-18T08:00:00Z",
+      "trend": [{"week":"2026-07-27","count":100,"brier":0.081},{"week":"2026-08-03","count":100,"brier":0.077},{"week":"2026-08-10","count":100,"brier":0.074},{"week":"2026-08-17","count":100,"brier":0.072},{"week":"2026-08-24","count":100,"brier":0.07},{"week":"2026-08-31","count":100,"brier":0.069},{"week":"2026-09-07","count":100,"brier":0.067},{"week":"2026-09-14","count":100,"brier":0.066},{"week":"2026-09-21","count":100,"brier":0.065},{"week":"2026-09-28","count":100,"brier":0.065},{"week":"2026-10-05","count":100,"brier":0.064},{"week":"2026-10-12","count":100,"brier":0.064}],
+      "bins": [{"lo":0.0,"hi":0.1,"count":310,"mean_p":0.05,"observed":0.04},{"lo":0.1,"hi":0.2,"count":190,"mean_p":0.15,"observed":0.17},{"lo":0.2,"hi":0.3,"count":140,"mean_p":0.25,"observed":0.22},{"lo":0.3,"hi":0.4,"count":110,"mean_p":0.35,"observed":0.38},{"lo":0.4,"hi":0.5,"count":90,"mean_p":0.45,"observed":0.44},{"lo":0.5,"hi":0.6,"count":80,"mean_p":0.55,"observed":0.6},{"lo":0.6,"hi":0.7,"count":70,"mean_p":0.65,"observed":0.62},{"lo":0.7,"hi":0.8,"count":80,"mean_p":0.75,"observed":0.79},{"lo":0.8,"hi":0.9,"count":60,"mean_p":0.85,"observed":0.82},{"lo":0.9,"hi":1.0,"count":73,"mean_p":0.95,"observed":0.96}],
+      "recent": []
+    },
+    {
+      "id": "overlap",
+      "name": "lease-overlap",
+      "type": "Statistical",
+      "kind": "collision",
+      "question": "Will these two changes collide before both merge?",
+      "backend": "lease-overlap",
+      "model_version": "jaccard v2",
+      "count": 880,
+      "inherited": 410,
+      "trusted": true,
+      "health": "healthy", "reason": null, "fallbacks": 0,
+      "brier": 0.097,
+      "since": "2026-03-02T08:00:00Z",
+      "trend": [{"week":"2026-07-27","count":40,"brier":0.1},{"week":"2026-08-03","count":40,"brier":0.099},{"week":"2026-08-10","count":40,"brier":0.098},{"week":"2026-08-17","count":40,"brier":0.099},{"week":"2026-08-24","count":40,"brier":0.097},{"week":"2026-08-31","count":40,"brier":0.098},{"week":"2026-09-07","count":40,"brier":0.096},{"week":"2026-09-14","count":40,"brier":0.097},{"week":"2026-09-21","count":40,"brier":0.097},{"week":"2026-09-28","count":40,"brier":0.098},{"week":"2026-10-05","count":40,"brier":0.097},{"week":"2026-10-12","count":40,"brier":0.097}],
+      "bins": [{"lo":0.0,"hi":0.1,"count":260,"mean_p":0.05,"observed":0.11},{"lo":0.1,"hi":0.2,"count":150,"mean_p":0.15,"observed":0.24},{"lo":0.2,"hi":0.3,"count":110,"mean_p":0.25,"observed":0.35},{"lo":0.3,"hi":0.4,"count":90,"mean_p":0.35,"observed":0.41},{"lo":0.4,"hi":0.5,"count":70,"mean_p":0.45,"observed":0.5},{"lo":0.5,"hi":0.6,"count":60,"mean_p":0.55,"observed":0.55},{"lo":0.6,"hi":0.7,"count":50,"mean_p":0.65,"observed":0.6},{"lo":0.7,"hi":0.8,"count":40,"mean_p":0.75,"observed":0.68},{"lo":0.8,"hi":0.9,"count":30,"mean_p":0.85,"observed":0.74},{"lo":0.9,"hi":1.0,"count":20,"mean_p":0.95,"observed":0.82}],
+      "recent": []
+    }
+  ]
+}

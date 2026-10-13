@@ -1,0 +1,4 @@
+.dlg fieldset.field{border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:var(--s-2);min-width:0}
+.dlg fieldset.field>label{display:flex;align-items:center;gap:var(--s-2)}
+/* Rows keep the skeleton's 44px, so cards don't move when data lands. */
+.access .tbl tbody tr{height:44px}.access .tbl td{padding-block:0}

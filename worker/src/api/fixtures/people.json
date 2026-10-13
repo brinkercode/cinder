@@ -1,0 +1,4 @@
+[
+  { "email": "owner@acme.test", "owner": true, "role": "owner", "created_at": "2026-10-01T08:00:00Z", "last_seen": "2026-10-06T09:58:00Z" },
+  { "email": "sam@acme.test", "owner": false, "role": "developer", "created_at": "2026-10-03T12:00:00Z", "last_seen": null }
+]

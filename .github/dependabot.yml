@@ -1,0 +1,26 @@
+# The repos under seed/repos are seed fixtures with pinned toolchains and dependencies; they change through seed cards,
+# not automated update PRs. open-pull-requests-limit 0 stops version updates; ignore "*" stops security updates too
+# (their vulnerable pins are what Watchtower shows), and the */tests directories are listed so a nested manifest is covered.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directories: ["/seed/repos/*", "/seed/repos/*/tests"]
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 0
+    ignore:
+      - dependency-name: "*"
+  - package-ecosystem: gomod
+    directories: ["/seed/repos/*", "/seed/repos/*/tests"]
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 0
+    ignore:
+      - dependency-name: "*"
+  - package-ecosystem: terraform
+    directories: ["/seed/repos/*", "/seed/repos/*/tests"]
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 0
+    ignore:
+      - dependency-name: "*"

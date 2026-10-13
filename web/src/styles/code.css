@@ -1,0 +1,36 @@
+/* Code file card: path crumbs, and while editing a brand border and the Editing pill. */
+.fcard .panel-head h2 span:not(.cur){color:var(--text-subtle)}
+.fcard.editing{border-color:var(--brand)}
+.fcard .ed-path{flex:1;min-width:220px;height:28px}
+.fcard .pill.brand{display:inline-flex;align-items:center;height:22px;padding:0 8px;border:var(--bw) solid var(--brand);border-radius:var(--r-full);background:var(--brand-tint);color:var(--brand);font-size:var(--fs-12);line-height:1}
+.fcard .ask{gap:8px;border-bottom:var(--bw) solid var(--line)}
+.fcard>.panel-head .toolbar{min-height:36px} /* the View's Seg: Edit's header is as tall, so line 1 stays put */
+.fcard .ask .end{margin-left:auto}
+/* Edit footer: message and destination side by side (stacked under 1100px), sections 16px apart, the bottom bar under a border. */
+.ed-foot{display:flex;flex-direction:column;gap:var(--s-4);padding:var(--s-4)}
+.ed-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--s-4);align-items:start}
+.ed-msgw{display:flex;flex-direction:column;gap:var(--s-2)}
+.ed-dest{display:flex;flex-direction:column;gap:var(--s-2);min-width:0;margin:0;padding:0;border:0}
+.ed-dest legend{margin-bottom:var(--s-2);padding:0;font-size:var(--fs-13);font-weight:500;color:var(--text-strong)}
+.opt{display:flex;align-items:flex-start;gap:var(--s-3);padding:var(--s-2) var(--s-3);border:var(--bw) solid var(--line);border-radius:var(--r-lg);cursor:pointer;font-size:var(--fs-13)}
+.opt:has(input:checked){border-color:var(--interactive);background:var(--interactive-tint)}
+.opt:has(input:disabled){cursor:not-allowed;opacity:.5}
+.opt input{flex:none;margin:var(--s-1) 0 0;accent-color:var(--interactive)}
+.opt b{display:block;font-weight:500;color:var(--text-strong)}
+.opt small{display:block;margin-top:var(--s-1);color:var(--text-subtle);font-size:var(--fs-12)}
+.ed-lease{display:flex;align-items:flex-start;gap:var(--s-2);margin:0;padding:var(--s-2) var(--s-3);border-radius:var(--r-lg);background:var(--interactive-tint);font-size:var(--fs-13)}
+.ed-bar{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-3);padding-top:var(--s-4);border-top:var(--bw) solid var(--line)}
+.ed-bar .end{display:flex;flex-wrap:wrap;gap:var(--s-2);margin-left:auto}
+@media (max-width:1100px){.ed-grid{grid-template-columns:minmax(0,1fr)}}
+/* Staged card: a row per file, then the message and Open change. */
+.stg .panel-head .end{margin-left:auto}
+.stg-r{display:flex;align-items:center;gap:var(--s-3);padding:var(--s-2) var(--s-4);border-top:var(--bw) solid var(--line);font-size:var(--fs-13)}
+.stg-r a{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stg-r .end{margin-left:auto}
+.stg-f{display:flex;flex-wrap:wrap;gap:var(--s-2);padding:var(--s-3) var(--s-4);border-top:var(--bw) solid var(--line)}
+.stg-f input{flex:1;min-width:0}
+.ftree .tr-s{margin-left:auto;font-family:var(--font-mono);font-size:var(--fs-11);color:var(--warning)}.ftree .tr-s+.tr-l{margin-left:var(--s-1)}
+.fcard[aria-busy="true"]>:not(.panel-head){opacity:.6;transition:opacity var(--dur) var(--ease) var(--dur)} /* the delay keeps a cached file, which lands at once, from dimming */
+/* Code toolbar: the Releases link's latest-tag chip, dropped on narrow screens. */
+.code-bar .bcount{display:inline-flex;align-items:center;height:18px;padding:0 6px;border-radius:var(--r-full);background:var(--tint);color:var(--text-subtle);font-size:var(--fs-11);font-weight:500}
+@media (max-width:1100px){.code-bar .bcount{display:none}}

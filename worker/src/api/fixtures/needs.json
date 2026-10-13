@@ -1,0 +1,6 @@
+[
+  { "id": "n1", "kind": "Judges disagree", "repo": "edge-router", "change": "c-1101", "text": "reviewer@v3 gives 0.78, kev gives 0.41 on “Shift EU failover to fra-2 first”. A human call breaks the tie.", "actions": ["Merge", "Reject", "Open change"] },
+  { "id": "n2", "kind": "Lease takeover", "repo": "billing-api", "change": "c-1034", "text": "maya wants lines 7–19 of src/payments/retry.ts, leased by developer@v7 for 18 more minutes.", "actions": ["Grant to maya", "Keep agent lease"] },
+  { "id": "n3", "kind": "Untrusted judge", "repo": "ledger-ui", "change": "c-1033", "text": "jev has 9 outcomes on ledger-ui. Its approval can't merge alone until it reaches 20.", "actions": ["Approve change", "Open change"] },
+  { "id": "n4", "kind": "Critical advisory", "repo": "billing-api", "change": null, "text": "undici 6.19.2 has a critical advisory (GHSA-c76h). Auto-fix is off for this package.", "actions": ["Open fix change", "Watchtower"] }
+]

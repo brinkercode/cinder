@@ -1,0 +1,19 @@
+{
+  "feed": [
+    {
+      "id": "col-1", "conflict_id": "cf-1", "ours": "c-1042", "theirs": "c-1037", "symbol": "src/route/matcher.rs#RouteMatcher", "kind": "signature",
+      "severity": "high", "p": 1, "message": "c-1037 leases RouteMatcher and your change changes its signature. Stopped until a person resolves the collision.",
+      "action": "Stopped; the change moved to conflict", "detected_at": "2026-10-04T09:30:00.000Z", "resolution": null, "resolved_at": null,
+      "suggested": { "action": "stack", "why": "c-1037 is in queue; stacking waits the least." }, "resolved_by": null
+    },
+    {
+      "id": "col-2", "conflict_id": "cf-0", "ours": "c-1043", "theirs": "c-1042", "symbol": "src/headers/map.rs#HeaderMap", "kind": "body",
+      "severity": "low", "p": 1, "message": "c-1042 leases HeaderMap and your change edits its body. Stopped until a person resolves the collision.",
+      "action": "Stopped; the change moved to conflict", "detected_at": "2026-10-04T08:10:00.000Z", "resolution": "stack", "resolved_at": "2026-10-04T08:40:00.000Z",
+      "suggested": null, "resolved_by": { "type": "human", "id": "bea" }
+    }
+  ],
+  "editing": [
+    { "symbol": "src/route/matcher.rs#RouteMatcher", "change_id": "c-1042", "kind": "signature", "at": "2026-10-04T09:29:00.000Z" }
+  ]
+}

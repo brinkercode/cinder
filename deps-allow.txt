@@ -1,0 +1,21 @@
+# One dependency name per line. Only the owner edits this file.
+@cloudflare/ci
+@cloudflare/containers
+@cloudflare/sandbox
+@cloudflare/vitest-plugin
+eslint
+@eslint/js
+globals
+monaco-editor
+@monaco-editor/react
+shiki
+@shikijs/monaco
+@playwright/test
+react
+react-dom
+react-icons
+react-router
+vite
+@vitejs/plugin-react
+vitest
+wrangler

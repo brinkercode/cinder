@@ -1,0 +1,4 @@
+name: destroy
+on: [manual]
+steps:
+  plan-destroy: { stage: plan, run: "terraform plan -destroy -refresh=false -input=false -lock=false", needs: [] }

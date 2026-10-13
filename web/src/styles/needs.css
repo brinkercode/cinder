@@ -1,0 +1,5 @@
+/* Needs you: a Wiki comment's inline reply. */
+.lc-f .nd-reply{display:flex;flex:1;min-width:200px;gap:var(--s-2)}
+.lc-f .nd-reply .input{flex:1;min-width:0}
+/* Needs you: a tab's item count. */
+.seg .nd-n{margin-left:var(--s-2);color:var(--text-subtle);font-size:var(--fs-11)}

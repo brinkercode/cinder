@@ -1,0 +1,4 @@
+/* Repositories › Token budget settings: the when-reached choice and who can raise the budget. */
+.budget-set{border:0;margin:0;padding:0;display:grid;gap:var(--s-2)}
+.budget-set legend{padding:0;margin-bottom:var(--s-2)}
+.budget-set label{display:flex;gap:var(--s-2);align-items:flex-start}

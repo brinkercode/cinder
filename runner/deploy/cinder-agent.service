@@ -1,0 +1,13 @@
+[Unit]
+Description=cinder-agent: claims and runs develop jobs
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+EnvironmentFile=%h/.config/cinder/agent.env
+ExecStart=%h/.local/bin/cinder-agent
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,2 @@
+.acct{display:flex;align-items:center;gap:var(--s-2);flex:1;min-width:0;padding:0;border:0;background:none;color:inherit;font:inherit;cursor:pointer}.acct>.ico{margin-left:auto}
+.acct-pop button{height:auto;min-height:30px;gap:8px;padding:4px 8px;text-align:left}.acct-pop small{display:block;font-size:var(--fs-12);color:var(--text-subtle)}.acct-pop button>.ico:last-child{margin-left:auto}

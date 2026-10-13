@@ -1,0 +1,6 @@
+name: deploy
+on: [push, manual]
+steps:
+  test: { stage: build, run: "go vet ./... && go test -v ./...", needs: [] }
+  # The dry run: builds the static binary the Dockerfile ships; nothing is pushed.
+  build: { stage: build, run: "CGO_ENABLED=0 go build -o bin/svc-orders-go .", needs: [test] }

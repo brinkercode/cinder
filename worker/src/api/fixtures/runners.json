@@ -1,0 +1,5 @@
+[
+  { "id": "r_lab1", "name": "lab-1", "kinds": ["develop", "merge"], "slots": 1, "last_heartbeat_at": "2026-10-05T09:59:40Z", "online": true, "created_at": "2026-10-01T08:00:00Z", "pool": "p_build",
+    "claims": [{ "job": "j_101", "kind": "develop", "change_id": "c_01", "lease_expires_at": "2026-10-05T10:04:40Z" }] },
+  { "id": "r_lab2", "name": "lab-2", "kinds": ["verify"], "slots": null, "last_heartbeat_at": "2026-10-05T09:40:00Z", "online": false, "created_at": "2026-10-02T08:00:00Z", "pool": null, "claims": [] }
+]

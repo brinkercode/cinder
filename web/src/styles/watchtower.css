@@ -1,0 +1,5 @@
+/* Network host rows with an Allow or Deny button. */
+.wt .hbar.act{grid-template-columns:120px minmax(0,1fr) 48px auto}
+@media (max-width:720px){.wt .hbar.act{grid-template-columns:96px minmax(0,1fr) 40px auto}}
+/* A long host name ends in an ellipsis inside its column; its title holds the full name. */
+.wt .hbar .host{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

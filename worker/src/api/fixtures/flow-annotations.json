@@ -1,0 +1,4 @@
+[
+  { "job_key": "test/unit", "step": "unit", "line": 41, "level": "error", "message": "expected 2 to be 3", "file": "src/a.test.js", "file_line": 12 },
+  { "job_key": "check/lint", "step": "lint", "line": 7, "level": "warning", "message": "'x' is assigned a value but never used" }
+]

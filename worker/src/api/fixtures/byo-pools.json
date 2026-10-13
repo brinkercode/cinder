@@ -1,0 +1,6 @@
+[
+  { "id": "b_gpu", "name": "eu-gpu", "labels": ["gpu", "large-disk"], "cloud": "AWS", "region": "eu-west-1", "members": 4, "online": 3, "last_heartbeat_at": "2026-10-05T09:59:48Z", "created_at": "2026-10-01T08:00:00Z",
+    "max_concurrent": 4, "keep_warm_s": 0, "placement": "eu-west-1", "egress": "open", "egress_allow": [], "repos": "*" },
+  { "id": "b_arm", "name": "arm", "labels": ["arm64"], "cloud": "GCP", "region": "us-central1", "members": 1, "online": 0, "last_heartbeat_at": null, "created_at": "2026-10-02T08:00:00Z",
+    "max_concurrent": 8, "keep_warm_s": 60, "placement": "nearest", "egress": "none", "egress_allow": ["proxy.golang.org"], "repos": ["cinder"] }
+]

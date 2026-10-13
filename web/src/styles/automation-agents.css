@@ -1,0 +1,8 @@
+/* Agent detail › Settings: the draft card and its diff. */
+.ag .draft{border-color:var(--brand)}
+.ag .draft .card-h{flex-wrap:wrap}
+.ag .draft-diff{margin:0;padding:var(--s-2) 0;font:var(--fs-12)/1.65 var(--font-mono);white-space:pre-wrap;overflow-wrap:anywhere}
+.ag .draft-diff .a{background:var(--success-tint)}.ag .draft-diff .d{background:var(--danger-tint)}
+.ag .draft fieldset{border:0;padding:0;margin:0 0 var(--s-3)}
+/* Agent detail › Versions: the canary traffic slider. */
+.ag .share{display:inline-flex;align-items:center;gap:8px}.ag .share input{width:140px;accent-color:var(--interactive)}

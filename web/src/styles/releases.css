@@ -1,0 +1,12 @@
+.lc-f .live-in{flex-wrap:wrap}
+.live-in .pill{display:inline-flex;align-items:center;gap:6px;height:22px;text-decoration:none;color:var(--text-strong)}
+.live-in .pill:hover{border-color:var(--interactive);color:var(--interactive)}
+/* New tag dialog */
+.tag-hint{font-size:var(--fs-12);color:var(--text-subtle)}
+.tag-err{font-size:var(--fs-12);color:var(--danger)}
+.tag-commits{display:grid;max-height:240px;overflow-y:auto;border:var(--bw) solid var(--line);border-radius:var(--r)}
+.tag-commit{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-2);padding:var(--s-2) var(--s-3);font-size:var(--fs-12);cursor:pointer}
+.tag-commit+.tag-commit{border-top:var(--bw) solid var(--line)}
+.tag-commit:has(input:focus-visible){box-shadow:var(--focus)}
+.tag-msg{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag-skel{height:28px;margin:var(--s-2)}

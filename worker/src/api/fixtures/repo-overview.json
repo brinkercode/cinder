@@ -1,0 +1,115 @@
+{
+  "account": {
+    "id": "0123456789abcdef0123456789abcdef",
+    "name": "Nimbus",
+    "git_host": "git.nimbus.dev"
+  },
+  "budget": {
+    "tokens": 18100000,
+    "spent": 11400000,
+    "resets_at": "2026-11-01T00:00:00.000Z",
+    "alerts": [
+      80
+    ]
+  },
+  "slots": 32,
+  "merged_today": 47,
+  "repos": [
+    {
+      "repo_id": "r_trunk",
+      "description": "Public HTTP API and auth edge",
+      "language": "Go",
+      "active": 14,
+      "agents": 6,
+      "spent": 7200000,
+      "lead_judge": {
+        "name": "Jev",
+        "count": 1840,
+        "brier": 0.071,
+        "trusted": true
+      },
+      "last_merge": {
+        "sha": "a3f9c21",
+        "branch": "main",
+        "at": "2026-10-04T09:58:00.000Z"
+      },
+      "merged": 18,
+      "conflicts": 2,
+      "verifier": {
+        "pass": 94.2,
+        "n": 412
+      },
+      "pushed_at": "2026-10-04T09:58:00.000Z"
+    },
+    {
+      "repo_id": "r_flow",
+      "description": "Customer dashboard and docs",
+      "language": "TypeScript",
+      "active": 11,
+      "agents": 5,
+      "spent": 3900000,
+      "lead_judge": {
+        "name": "Kev",
+        "count": 64,
+        "brier": 0.141,
+        "trusted": false
+      },
+      "last_merge": {
+        "sha": "19ab7f0",
+        "branch": "develop",
+        "at": "2026-10-04T09:20:00.000Z"
+      },
+      "merged": 9,
+      "conflicts": 0,
+      "verifier": {
+        "pass": null,
+        "n": 9
+      },
+      "pushed_at": "2026-10-04T09:20:00.000Z"
+    },
+    {
+      "repo_id": "r_release",
+      "description": "Cross-region KV replication",
+      "language": "Rust",
+      "active": 0,
+      "agents": 0,
+      "spent": 300000,
+      "lead_judge": null,
+      "last_merge": {
+        "sha": "c0d41ee",
+        "branch": "release/2.0",
+        "at": "2026-10-01T10:00:00.000Z"
+      },
+      "merged": 0,
+      "conflicts": 0,
+      "verifier": {
+        "pass": null,
+        "n": 0
+      },
+      "pushed_at": "2026-10-01T10:00:00.000Z"
+    },
+    {
+      "repo_id": "r_empty",
+      "description": "Public status page for Nimbus services",
+      "language": null,
+      "active": 0,
+      "agents": 0,
+      "spent": 0,
+      "lead_judge": null,
+      "last_merge": null,
+      "merged": 0,
+      "conflicts": 0,
+      "verifier": {
+        "pass": null,
+        "n": 0
+      },
+      "pushed_at": "2026-10-04T09:03:00.000Z"
+    }
+  ],
+  "archived": [
+    {
+      "name": "legacy-billing",
+      "archived_at": "2026-09-12T08:00:00.000Z"
+    }
+  ]
+}

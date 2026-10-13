@@ -1,0 +1,8 @@
+.chg-acts{display:flex;flex-wrap:wrap;gap:6px}
+.chg.intent{border-style:dashed;cursor:pointer}
+.wc-live{display:flex;align-items:center;gap:6px;font-size:var(--fs-12);color:var(--text-subtle)}
+.chg{min-width:0;overflow-wrap:anywhere}
+.chg h4{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.chg-h,.chg-f,.chg-m,.chg .row{flex-wrap:wrap}
+.chg-h>*,.chg-f>*,.chg-m>*,.chg .why>*{min-width:0}
+.chg .why{align-items:flex-start}

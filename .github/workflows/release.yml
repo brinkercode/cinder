@@ -1,0 +1,95 @@
+name: release
+# Deploys main to Cloudflare on every push to main. Work iterates on develop; develop merges into main only when a bulk of
+# work is ready for the owner to test, so a merge to main is a release. Secrets already on the Worker (OWNER_TOKEN, deploy and import tokens, Access) are left as they are; missing ones are put.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: Why this release
+        default: manual
+permissions:
+  contents: write   # pushes the release tag
+concurrency:
+  group: release
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}   # repo variable RUNNER names a self-hosted runner (this repo: cinder-arc)
+    timeout-minutes: 45
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - if: vars.RUNNER == ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --prefer-offline --no-audit --no-fund
+      - run: npm run build -w web
+      - name: reconcile Cloudflare resources
+        # Creates whatever resource the install gained since the last make up (AI Gateway, Secrets Store, queues, buckets, Vectorize); never deletes.
+        env:
+          CINDER_OWNER_TOKEN: ${{ secrets.CINDER_OWNER_TOKEN }}
+        run: deploy/reconcile.sh
+      - name: migrations
+        run: npx --prefix worker wrangler --cwd worker d1 migrations apply cinder --remote
+      - name: deploy cinder-secrets
+        # Before cinder: its SECRETS service binding points here. Rolling it resets no Durable Object or container.
+        run: '[ ! -f worker/secrets/wrangler.jsonc ] || npx --prefix worker wrangler --cwd worker/secrets deploy'
+      - name: release kind
+        id: kind
+        # runner/ decides whether the container images are built, pushed and rolled: each roll kills running jobs and takes 10-12 min.
+        # No release tag yet, or a changed runner/ since the last one, rolls them. A failed release leaves no tag, so the next one compares to the last good one.
+        run: |
+          last=$(git describe --tags --abbrev=0 --match 'release-*' 2>/dev/null || true)
+          if [ -n "$last" ] && git diff --quiet "$last" HEAD -- runner; then echo "containers=none" >> "$GITHUB_OUTPUT"; else echo "containers=gradual" >> "$GITHUB_OUTPUT"; fi
+      - name: deploy
+        id: deploy
+        run: |
+          out=$(npx --prefix worker wrangler --cwd worker deploy --containers-rollout ${{ steps.kind.outputs.containers }} 2>&1) || { echo "$out" | tail -200; exit 1; }; echo "$out" | tail -5
+          echo "url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' <<<"$out" | head -1)" >> "$GITHUB_OUTPUT"
+          echo "version=$(grep -oE 'Version ID: [0-9a-f-]+' <<<"$out" | cut -d' ' -f3)" >> "$GITHUB_OUTPUT"
+      - name: Worker secrets
+        # A first release has no Worker for reconcile to put secrets on until the deploy above: put the missing ones now.
+        # OWNER_TOKEN keeps the value make up generated when CINDER_OWNER_TOKEN is set.
+        env:
+          CINDER_OWNER_TOKEN: ${{ secrets.CINDER_OWNER_TOKEN }}
+        run: deploy/reconcile.sh
+      - name: health
+        env:
+          CINDER_URL: ${{ steps.deploy.outputs.url }}
+        run: |
+          # The Worker sits behind Cloudflare Access: pass the runner service token to reach /api/health.
+          for i in 1 2 3 4 5 6; do
+            curl -fsS -H "CF-Access-Client-Id: ${{ secrets.CINDER_ACCESS_CLIENT_ID }}" -H "CF-Access-Client-Secret: ${{ secrets.CINDER_ACCESS_CLIENT_SECRET }}" \
+              $CINDER_URL/api/health && exit 0
+            sleep 10
+          done; exit 1
+      - name: warm
+        # A deploy restarts the Durable Objects and drops their caches: request each repo's main pages once so the first
+        # visitors don't pay to rebuild them.
+        env:
+          CINDER_URL: ${{ steps.deploy.outputs.url }}
+          H_ID: ${{ secrets.CINDER_ACCESS_CLIENT_ID }}
+          H_SECRET: ${{ secrets.CINDER_ACCESS_CLIENT_SECRET }}
+          H_TOKEN: ${{ secrets.CINDER_OWNER_TOKEN }}
+        run: |
+          # Best-effort: a page that errors (an empty repo has no tree, a cold Durable Object can 500) is printed, never fails the release.
+          get() { curl -sS -o /dev/null -w "%{http_code} %{time_total}s $1\n" -H "CF-Access-Client-Id: $H_ID" -H "CF-Access-Client-Secret: $H_SECRET" -H "Authorization: Bearer $H_TOKEN" "$CINDER_URL$1"; }
+          for r in $(curl -fsS -H "CF-Access-Client-Id: $H_ID" -H "CF-Access-Client-Secret: $H_SECRET" -H "Authorization: Bearer $H_TOKEN" "$CINDER_URL/api/repos" \
+            | node -e 'for (const r of JSON.parse(require("fs").readFileSync(0))) console.log(`${encodeURIComponent(r.name)}=${r.default_branch}`)'); do
+            e=${r%%=*}; b=${r#*=}
+            for p in "" "/tree?ref=$b&path=&recursive=1" /changes /branches "/flows?ref=$b"; do get "/api/repos/$e$p"; done
+          done
+      # Releases never seed: reseed (reseed.yml or Settings › Demo data) and `make e2e-live` run by hand.
+      - name: tag
+        run: |
+          tag="release-$(date -u +%Y%m%d-%H%M)"
+          git -c user.name=cinder-release -c user.email=brinkercode@users.noreply.github.com tag -a "$tag" -m "Release ${{ steps.deploy.outputs.version }} (${{ inputs.reason || github.event.head_commit.message }})"
+          git push origin "$tag"
+          echo "Released $tag (Worker version ${{ steps.deploy.outputs.version }})" >> "$GITHUB_STEP_SUMMARY"

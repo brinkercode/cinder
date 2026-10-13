@@ -1,0 +1,4 @@
+[
+  { "id": "p_build", "name": "build", "size": "basic", "min": 1, "max": 4, "repo": "cinder", "kinds": ["develop", "merge"], "draining": false, "workers": 1, "online": 1, "created_at": "2026-10-01T08:00:00Z", "default": true, "runs_per_hour": 12, "median_start_s": 4,
+    "labels": ["linux"], "max_concurrent": 8, "keep_warm_s": 60, "placement": "nearest", "egress": "allowlist", "egress_allow": ["registry.npmjs.org", "*.github.com"], "repos": ["cinder"] }
+]

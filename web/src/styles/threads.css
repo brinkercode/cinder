@@ -1,0 +1,3 @@
+.th-c{display:grid;gap:2px}.th-c p{margin:0;white-space:pre-wrap}
+.th-s{display:grid;gap:var(--s-2);justify-items:start}.th-s code{display:block;width:100%;padding:2px var(--s-2);white-space:pre-wrap}
+.th summary{cursor:pointer}

@@ -1,0 +1,15 @@
+{
+  "policy": {
+    "integration": ["main"],
+    "release": ["release/*"],
+    "check": "npm test",
+    "sources": { "integration": "repo", "release": "repo", "check": "repo", "rules": "default" },
+    "defaulted": false,
+    "base_sha": "c1",
+    "rules": [{ "branch": "main", "queue": true, "judges": 1, "risk": 10, "route": [] }]
+  },
+  "changes": [
+    { "key": "integration", "from": ["develop", "main"], "to": ["main"] },
+    { "key": "release", "from": [], "to": ["release/*"] }
+  ]
+}

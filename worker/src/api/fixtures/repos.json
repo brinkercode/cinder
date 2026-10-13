@@ -1,0 +1,66 @@
+[
+  {
+    "id": "r_trunk",
+    "name": "acme/api",
+    "default_branch": "main",
+    "strategy": "trunk",
+    "branch_policy": {
+      "integration": [
+        "main"
+      ],
+      "release": [],
+      "check": "make check"
+    },
+    "created_at": "2026-10-04T09:00:00.000Z"
+  },
+  {
+    "id": "r_flow",
+    "name": "acme/web",
+    "default_branch": "develop",
+    "strategy": "gitflow",
+    "branch_policy": {
+      "integration": [
+        "develop",
+        "main"
+      ],
+      "release": [
+        "release/*"
+      ],
+      "check": "npm test"
+    },
+    "created_at": "2026-10-04T09:01:00.000Z"
+  },
+  {
+    "id": "r_release",
+    "name": "acme/kv",
+    "default_branch": "main",
+    "strategy": "release",
+    "branch_policy": {
+      "integration": [
+        "main",
+        "release/2.0"
+      ],
+      "release": [
+        "release/*"
+      ],
+      "check": "make check"
+    },
+    "created_at": "2026-10-04T09:02:00.000Z"
+  },
+  {
+    "id": "r_empty",
+    "name": "acme/status-page",
+    "default_branch": "main",
+    "strategy": "trunk",
+    "branch_policy": {
+      "integration": [
+        "main"
+      ],
+      "release": [],
+      "check": "make check"
+    },
+    "created_at": "2026-10-04T09:03:00.000Z",
+    "description": "Public status page for Nimbus services",
+    "empty": true
+  }
+]

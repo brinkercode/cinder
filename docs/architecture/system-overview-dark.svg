@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 980" width="1000" height="980" role="img" aria-labelledby="ttl dsc">
+<!--
+Colours and type follow Cloudflare's public brand references (checked 2026-10-06):
+  - Cloudflare Orange #F38020, Tangerine #FAAE40 and dark gray #404041: the official logo colours,
+    as published in the press kit logo files (https://www.cloudflare.com/press-kit/ , Logos.zip).
+  - Naming: Cloudflare trademark guidelines (https://www.cloudflare.com/trademark/); product names are plain text.
+  - Type: the font stack of Cloudflare's developer docs (https://developers.cloudflare.com/):
+    Inter, system-ui ... sans-serif and JetBrains Mono, ui-monospace ... monospace.
+  No Cloudflare logo, cloud mark or other artwork is used.
+-->
+<title id="ttl">cinder system overview</title><desc id="dsc">Browsers, the cinder CLI and BYO runners reach cinder through Cloudflare Access. One cinder Worker serves the static React app and the API, and every resource behind it is a Cloudflare product: D1, Durable Objects, Artifacts, R2, Queues, Workflows, Cron, Containers, Workers AI, AI Gateway, Vectorize, Secrets Store, Workers Logs and Analytics Engine. Jobs run on an autoscaled Containers pool. Deploys go to Cloudflare targets through Workflows and to other clouds from the runner pool.</desc>
+<style>
+.card{fill:#1B1B1D;stroke:#2E2E32}
+.box{fill:#242427;stroke:#45454B;stroke-width:1}
+.hub{fill:#242427;stroke:#F38020;stroke-width:1.5}
+.edge{fill:#242427;stroke:#FAAE40;stroke-width:1.5}
+.pill{fill:#3A2A12;stroke:#FAAE40;stroke-width:1}
+.plan{stroke-dasharray:5 4}
+.w{fill:none;stroke:#A3A3A9;stroke-width:1.4}
+.as{fill:none;stroke:#A3A3A9;stroke-width:1.2;stroke-dasharray:1 4;stroke-linecap:round}
+.ah{fill:#A3A3A9}
+text{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif}
+.t{fill:#F2F2F3;font-size:13.5px;font-weight:600}
+.s{fill:#A3A3A9;font-size:12.5px}
+.m{fill:#A3A3A9;font-family:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:12px}
+.mi{fill:#F2F2F3;font-family:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:12px}
+.e{fill:#A3A3A9;font-family:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:11px;font-weight:600;letter-spacing:.08em}
+.l{fill:#A3A3A9;font-size:11.5px}
+</style><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ah"/></marker></defs>
+<rect x="0.5" y="0.5" width="999" height="979" rx="16" class="card"/>
+<rect x="110" y="32" width="220" height="62" rx="10" class="box"/>
+<text x="124" y="55" class="t">Browser</text>
+<text x="124" y="75" class="s">React SPA</text>
+<path d="M 220.0 94 L 220.0 136" class="w" marker-end="url(#ar)"/>
+<rect x="390" y="32" width="220" height="62" rx="10" class="box"/>
+<text x="404" y="55" class="t">cinder CLI · git</text>
+<text x="404" y="75" class="s">HTTPS + git smart HTTP</text>
+<path d="M 500.0 94 L 500.0 136" class="w" marker-end="url(#ar)"/>
+<rect x="670" y="32" width="220" height="62" rx="10" class="box"/>
+<text x="684" y="55" class="t">BYO runner pools</text>
+<text x="684" y="75" class="s">self-hosted · clouds · GPU</text>
+<path d="M 780.0 94 L 780.0 136" class="w" marker-end="url(#ar)"/>
+<rect x="110" y="140" width="780" height="62" rx="10" class="edge"/>
+<text x="124" y="163" class="t">Cloudflare Access</text>
+<text x="124" y="183" class="s">app 'cinder' · owners policy · runner service token</text>
+<path d="M 500 202 L 500 238" class="w" marker-end="url(#ar)"/>
+<rect x="290" y="242" width="420" height="96" rx="10" class="hub"/>
+<text x="304" y="265" class="t">cinder Worker</text>
+<text x="304" y="285" class="s">static assets: the React SPA</text>
+<text x="304" y="302" class="s">/api router · queue consumers · cron */10</text>
+<text x="304" y="319" class="s">container egress · pool autoscale · merge signing</text>
+<path d="M 500 338 L 500 368" class="w"/>
+<path d="M 68 368 L 758 368" class="w"/>
+<path d="M 68 368 L 68 412" class="w" marker-end="url(#ar)"/>
+<text x="80" y="392" class="e">STATE</text>
+<rect x="50" y="412" width="210" height="72" rx="10" class="box"/>
+<text x="64" y="435" class="t">D1 'cinder'</text>
+<text x="64" y="455" class="s">index, jobs, issues,</text>
+<text x="64" y="472" class="s">judgments, deploys</text>
+<rect x="50" y="494" width="210" height="72" rx="10" class="box"/>
+<text x="64" y="517" class="t">Durable Objects</text>
+<text x="64" y="537" class="s">RepoDO · ChangeDO</text>
+<text x="64" y="554" class="s">DispatchDO (SQLite)</text>
+<rect x="50" y="576" width="210" height="72" rx="10" class="box"/>
+<text x="64" y="599" class="t">Artifacts 'cinder'</text>
+<text x="64" y="619" class="s">repos · change forks</text>
+<text x="64" y="636" class="s">agents · org wiki</text>
+<rect x="50" y="658" width="210" height="72" rx="10" class="box"/>
+<text x="64" y="681" class="t">R2 cinder-ci-cache</text>
+<text x="64" y="701" class="s">flow toolchain cache</text>
+<text x="64" y="718" class="s">checksummed releases</text>
+<rect x="50" y="740" width="210" height="72" rx="10" class="box"/>
+<text x="64" y="763" class="t">R2 cinder-logs</text>
+<text x="64" y="783" class="s">flow step logs</text>
+<text x="64" y="800" class="s">masked before storage</text>
+<path d="M 298 368 L 298 412" class="w" marker-end="url(#ar)"/>
+<text x="310" y="392" class="e">EXECUTION</text>
+<rect x="280" y="412" width="210" height="72" rx="10" class="box"/>
+<text x="294" y="435" class="t">Queues</text>
+<text x="294" y="455" class="s">cinder-events</text>
+<text x="294" y="472" class="s">cinder-webhooks</text>
+<rect x="280" y="494" width="210" height="72" rx="10" class="box"/>
+<text x="294" y="517" class="t">Workflows</text>
+<text x="294" y="537" class="s">cinder-pipeline · cinder-reset</text>
+<text x="294" y="554" class="s">cinder-seed</text>
+<text x="294" y="571" class="s">flow deploy steps</text>
+<rect x="280" y="576" width="210" height="72" rx="10" class="box"/>
+<text x="294" y="599" class="t">Cron Triggers</text>
+<text x="294" y="619" class="s">*/10: drift, scans, usage,</text>
+<text x="294" y="636" class="s">leases, flows, autoscale</text>
+<rect x="280" y="658" width="210" height="72" rx="10" class="box"/>
+<text x="294" y="681" class="t">Rate limits</text>
+<text x="294" y="701" class="s">claims · changes</text>
+<text x="294" y="718" class="s">previews</text>
+<rect x="280" y="740" width="210" height="72" rx="10" class="box"/>
+<text x="294" y="763" class="t">Containers runner pool</text>
+<text x="294" y="783" class="s">lite · basic · standard</text>
+<text x="294" y="800" class="s">one job per instance</text>
+<path d="M 528 368 L 528 412" class="w" marker-end="url(#ar)"/>
+<text x="540" y="392" class="e">AI</text>
+<rect x="510" y="412" width="210" height="72" rx="10" class="box"/>
+<text x="524" y="435" class="t">Workers AI</text>
+<text x="524" y="455" class="s">Clef judges · agent models</text>
+<text x="524" y="472" class="s">embeddings · toMarkdown</text>
+<rect x="510" y="494" width="210" height="72" rx="10" class="box"/>
+<text x="524" y="517" class="t">AI Gateway 'cinder'</text>
+<text x="524" y="537" class="s">stored keys (BYOK)</text>
+<text x="524" y="554" class="s">logs · usage metadata</text>
+<rect x="510" y="576" width="210" height="72" rx="10" class="box"/>
+<text x="524" y="599" class="t">Vectorize</text>
+<text x="524" y="619" class="s">VULN_INDEX</text>
+<text x="524" y="636" class="s">advisory embeddings</text>
+<path d="M 758 368 L 758 412" class="w" marker-end="url(#ar)"/>
+<text x="770" y="392" class="e">SECRETS + LOGS</text>
+<rect x="740" y="412" width="210" height="72" rx="10" class="box"/>
+<text x="754" y="435" class="t">Secrets Store</text>
+<text x="754" y="455" class="s">one binding per secret</text>
+<text x="754" y="472" class="s">via cinder-secrets</text>
+<rect x="740" y="494" width="210" height="72" rx="10" class="box"/>
+<text x="754" y="517" class="t">Workers Logs + traces</text>
+<text x="754" y="537" class="s">Worker and containers</text>
+<rect x="740" y="576" width="210" height="72" rx="10" class="box"/>
+<text x="754" y="599" class="t">Analytics Engine</text>
+<text x="754" y="619" class="s">insight time series</text>
+<text x="754" y="636" class="s">SQL API</text>
+<text x="510" y="680" class="l">AI Gateway → Anthropic · OpenAI ·</text>
+<text x="510" y="697" class="l">Google · xAI · Workers AI</text>
+<text x="50" y="844" class="e">DEPLOY TARGETS (MULTI-CLOUD)</text>
+<rect x="50" y="856" width="420" height="62" rx="10" class="box"/>
+<text x="64" y="879" class="t">Other clouds</text>
+<text x="64" y="899" class="s">AWS · Google Cloud · Azure · SSH, from the runner pool</text>
+<rect x="530" y="856" width="420" height="62" rx="10" class="box"/>
+<text x="544" y="879" class="t">Cloudflare targets</text>
+<text x="544" y="899" class="s">Workers versions · previews · rollouts · D1/KV/Queues/R2</text>
+<path d="M 385 812 L 385 856" class="w" marker-end="url(#ar)"/>
+<path d="M 490 530 L 500 530 L 500 887 L 530 887" class="w" marker-end="url(#ar)"/>
+<rect x="24" y="948" width="26" height="16" rx="5" class="hub"/>
+<text x="58" y="960.5" class="l">cinder Worker</text>
+<rect x="169.72" y="948" width="26" height="16" rx="5" class="box"/>
+<text x="203.72" y="960.5" class="l">live today</text>
+<rect x="296.12" y="948" width="26" height="16" rx="5" class="box plan"/>
+<text x="330.12" y="960.5" class="l">planned (not yet live)</text>
+</svg>

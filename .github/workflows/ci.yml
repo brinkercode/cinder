@@ -1,0 +1,114 @@
+name: ci
+# A PR from a fork never runs on the self-hosted runner: it gets a GitHub-hosted one and no secrets.
+on:
+  pull_request:   # PRs only: main gets the same tree that passed on the PR; releases deploy from main (release.yml)
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  # The repo variable RUNNER names a self-hosted runner (this repo: the cinder-arc scale set, whose image bakes in Go, Node,
+  # staticcheck, gcc and make). Without it the jobs run on ubuntu-latest and install Node, Go and staticcheck first.
+  # The two halves of make check run in parallel.
+  # `ts` is the required check name: it passes only when every Worker shard and the web job did.
+  worker:
+    # The Worker suite (about 1,200 tests) in 3 parallel shards.
+    runs-on: ${{ (github.event.pull_request.head.repo.full_name == github.repository && vars.RUNNER != '') && vars.RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+      - if: ${{ !(github.event.pull_request.head.repo.full_name == github.repository && vars.RUNNER != '') }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --prefer-offline --no-audit --no-fund
+      - run: npm exec -w worker -- vitest run --shard=${{ matrix.shard }}/3
+  web:
+    # Everything else make check-ts runs: Worker lint, web lint and tests, the git fsck test, and the PR guards.
+    runs-on: ${{ (github.event.pull_request.head.repo.full_name == github.repository && vars.RUNNER != '') && vars.RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - if: ${{ !(github.event.pull_request.head.repo.full_name == github.repository && vars.RUNNER != '') }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --prefer-offline --no-audit --no-fund
+      - run: make check-deps
+      - run: npm exec -w worker -- eslint --max-warnings 0 src test
+      - run: npm run check -w web
+      - run: node --test e2e/git-fsck.test.js
+  ts:
+    needs: [worker, web]
+    if: always()
+    runs-on: ${{ (github.event.pull_request.head.repo.full_name == github.repository && vars.RUNNER != '') && vars.RUNNER || 'ubuntu-latest' }}
+    steps:
+      - run: '[ "${{ needs.worker.result }}" = success ] && [ "${{ needs.web.result }}" = success ]'
+  seed:
+    # The seed repos' own checks (make check-seed, about 7 min) in parallel, so a broken seed repo fails CI.
+    runs-on: ${{ (github.event.pull_request.head.repo.full_name == github.repository && vars.RUNNER != '') && vars.RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - if: ${{ !(github.event.pull_request.head.repo.full_name == github.repository && vars.RUNNER != '') }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --prefer-offline --no-audit --no-fund
+      - run: make check-seed
+  go:
+    runs-on: ${{ (github.event.pull_request.head.repo.full_name == github.repository && vars.RUNNER != '') && vars.RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - if: ${{ !(github.event.pull_request.head.repo.full_name == github.repository && vars.RUNNER != '') }}
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: runner/go.mod
+      - if: ${{ !(github.event.pull_request.head.repo.full_name == github.repository && vars.RUNNER != '') }}
+        run: go install honnef.co/go/tools/cmd/staticcheck@latest
+      - run: make check-go
+  # Builds the slim runner image when a Dockerfile changes and reports its size and cold start. ubuntu-latest has Docker;
+  # the self-hosted runners don't. The full image's multi-GB build is left to release.
+  image:
+    runs-on: ${{ (github.event.pull_request.head.repo.full_name == github.repository && vars.RUNNER != '') && vars.RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: changed
+        run: git diff --quiet origin/${{ github.base_ref }}...HEAD -- 'runner/Dockerfile*' || echo dockerfile=1 >> "$GITHUB_OUTPUT"
+      - if: steps.changed.outputs.dockerfile
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: runner/go.mod
+      - if: steps.changed.outputs.dockerfile
+        run: make check-image
+      - if: steps.changed.outputs.dockerfile
+        name: image size and cold start
+        run: |
+          img=cinder-runner-slim-test
+          size=$(docker image inspect -f '{{.Size}}' $img)
+          start=$(date +%s%N); docker run --rm --entrypoint true $img; ms=$(( ($(date +%s%N) - start) / 1000000 ))
+          echo "$img: $((size / 1000000)) MB, cold start ${ms} ms" | tee -a "$GITHUB_STEP_SUMMARY"
+  image-full:
+    # Builds runner/Dockerfile.full when it changes, so a broken full image fails the PR instead of the release.
+    runs-on: ${{ (github.event.pull_request.head.repo.full_name == github.repository && vars.RUNNER != '') && vars.RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: changed
+        run: git diff --quiet origin/${{ github.base_ref }}...HEAD -- runner/Dockerfile.full || echo full=1 >> "$GITHUB_OUTPUT"
+      - if: steps.changed.outputs.full
+        name: build the full runner image
+        run: docker build -f runner/Dockerfile.full -t cinder-runner-full-test runner

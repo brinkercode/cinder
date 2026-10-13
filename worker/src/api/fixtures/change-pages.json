@@ -1,0 +1,80 @@
+[
+  {
+    "id": "c_10", "agent": "patch", "ver": "3.2.1", "tok": [412000, 38000, 1210000], "driver": null,
+    "head": "9c03f7e", "lease": ["ok", "lease held · 2"], "intent_by": "bea",
+    "need": "Resolver gave up on 1 hunk in src/headers/normalize.rs. resolver@1.4 confidence is untrusted (41 outcomes), below auto-accept.",
+    "judges": {
+      "clef": { "name": "Clef", "count": 2210, "brier": 0.088 }, "jev": { "name": "Jev", "count": 1840, "brier": 0.071 },
+      "kev": { "name": "Kev", "count": 64, "brier": 0.141 }, "flake": { "name": "flake", "count": 4410, "brier": 0.032 },
+      "resolv": { "name": "resolv", "count": 41 }, "review": { "name": "review", "count": 612, "brier": 0.094 }
+    },
+    "timeline": [
+      { "t": "09:12:04", "kind": "event", "h": "Planned by bea", "d": "Written in the intent box · target develop" },
+      { "t": "09:12:05", "kind": "judge", "judge": "clef", "q": "Will this collide with an active change?", "a": "Yes, with c-1050", "p": 0.72, "outcome": "correct" },
+      { "t": "09:12:05", "kind": "judge", "judge": "jev", "q": "Reverted or breaks develop within 7 days?", "a": "Unlikely", "p": 0.18, "outcome": "pending" },
+      { "t": "09:12:06", "kind": "event", "h": "Lease granted", "d": "fn normalize_headers exclusive · type HeaderMap shared" },
+      { "t": "09:31:40", "kind": "stage", "h": "Develop", "agent": "patch@3.2.1", "model": "sonnet-4.5", "tok": [312000, 29000, 980000], "dur": "19m 34s" },
+      { "t": "09:31:41", "kind": "judge", "judge": "kev", "q": "Will verification pass on the first try?", "a": "Yes", "p": 0.77, "outcome": "wrong" },
+      { "t": "09:34:02", "kind": "stage", "h": "Verify", "agent": "verifier@5.0.1", "model": "local: qwen3-coder-32b", "tok": [41000, 2000, 120000], "dur": "2m 21s", "note": "1 test failed: headers::tests::forwarded_case" },
+      { "t": "09:49:05", "kind": "stage", "h": "Converge → conflict", "agent": "resolver@1.4.0", "model": "sonnet-4.5", "tok": [33000, 3100, 90000], "dur": "3m 12s", "note": "Resolved 2 of 3 hunks; gave up on 1" }
+    ],
+    "diff": { "file": "src/headers/normalize.rs", "adds": 6, "dels": 1, "lines": [
+      ["h", "", "", "", "@@ -41,6 +41,11 @@ pub fn normalize_headers(map: &mut HeaderMap, hop: Hop)"],
+      ["c", 41, 41, "", "    let mut out = HeaderMap::with_capacity(map.len());"],
+      ["d", 42, "", "", "    for (name, value) in map.iter_mut() {"],
+      ["a", "", 42, "patch@3.2.1", "    for (name, value) in map.iter_ordered_mut() {"],
+      ["a", "", 43, "patch@3.2.1", "        if hop.is_h1() && is_forwarded(name) {"],
+      ["a", "", 44, "patch@3.2.1", "            continue;"],
+      ["a", "", 45, "patch@3.2.1", "        }"],
+      ["c", 43, 46, "", "        let lower = name.as_str().to_ascii_lowercase();"],
+      ["h", "", "", "", "@@ -88,0 +91,3 @@ fn is_forwarded"],
+      ["a", "", 91, "resolver@1.4.0", "fn is_forwarded(name: &HeaderName) -> bool {"],
+      ["a", "", 92, "resolver@1.4.0", "    name.as_str().to_ascii_lowercase().starts_with(\"x-forwarded-\")"]
+    ] },
+    "threads": [
+      { "id": "t_1", "path": "src/headers/normalize.rs", "side": "new", "line": 42, "head_sha": "9c03f7e", "outdated": false, "resolved": false, "state_by": null, "applied_sha": null,
+        "suggestion": { "from": "    for (name, value) in map.iter_mut() {", "to": "    for (name, value) in map.iter_ordered() {" },
+        "comments": [{ "actor": "bea", "body": "Nothing here needs a mutable borrow.\n```suggestion\n    for (name, value) in map.iter_ordered() {\n```\n", "at": "2026-10-05T09:40:00Z" }] },
+      { "id": "t_2", "path": "src/headers/normalize.rs", "side": "new", "line": 44, "head_sha": "4be21a0", "outdated": true, "resolved": false, "state_by": null, "applied_sha": null,
+        "suggestion": { "from": "            continue;", "to": "            break;" },
+        "comments": [{ "actor": "bea", "body": "```suggestion\n            break;\n```\n", "at": "2026-10-05T09:20:00Z" }] }
+    ],
+    "conflict": {
+      "where": "Hunk 3 of 3 · src/headers/normalize.rs @ line 42 · rebasing onto develop@e81a2c0", "resolved_head": "b81d2f4",
+      "sides": [
+        ["Base · 4be21a0", "for (name, value) in map.iter_mut() {\n    let lower = name.as_str().to_ascii_lowercase();\n}"],
+        ["Ours · c_10", "for (name, value) in map.iter_mut() {\n    if hop.is_h1() && is_forwarded(name) {\n        continue;\n    }\n    let lower = name.as_str().to_ascii_lowercase();\n}"],
+        ["Theirs · develop (c-1039)", "for (name, value) in map.iter_ordered_mut() {\n    let lower = name.as_str().to_ascii_lowercase();\n}"]
+      ],
+      "resolver": "resolver@1.4.0", "p": 0.58,
+      "code": "for (name, value) in map.iter_ordered_mut() {\n    if hop.is_h1() && is_forwarded(name) {\n        continue;\n    }\n    let lower = name.as_str().to_ascii_lowercase();\n}",
+      "note": "Kept theirs' ordered iteration and ours' h1 skip. Not sure whether is_forwarded should see names before or after ordering."
+    },
+    "transcript": [
+      ["09:52:01", "read_file", "src/headers/normalize.rs", "212 lines"],
+      ["09:52:03", "diff3", "normalize.rs hunk 3", "base/ours/theirs"],
+      ["09:52:09", "run", "cargo test -p headers", "47 passed · 1 failed"],
+      ["09:52:17", "handoff", "needs you", "confidence below 0.90"]
+    ],
+    "verdicts": "09:34:02 verifier@5.0.1 verify c_10 @ 3e7d1a2 on develop@b2c9f04\n09:34:02   suite headers ........ 47/48  FAIL headers::tests::forwarded_case\n09:34:03   flake-rate p=0.06 (trusted, 4,410 outcomes) → not a flake\n09:34:03   verdict REJECT → back to develop\n09:48:59 verifier@5.0.1 verify c_10 @ 9c03f7e on develop@e81a2c0\n09:52:17   resolver@1.4 p=0.58 (untrusted, 41 outcomes) → below auto-accept\n09:52:17   verdict HOLD → needs you",
+    "provenance": [
+      { "file": "src/headers/normalize.rs", "shares": [["patch@3.2.1", 62], ["resolver@1.4.0", 30], ["bea", 8]] },
+      { "file": "CHANGELOG.md", "shares": [["scribe@2.1.0", 100]] }
+    ],
+    "approvals": [
+      { "who": "bea", "kind": "person", "sha": "4be21a0" },
+      { "who": "review@1.2", "kind": "agent reviewer", "sha": "9c03f7e", "p": 0.91, "judge": "review" }
+    ],
+    "blockers": [
+      { "title": "Conflict unresolved", "reason": "resolver@1.4.0 gave up on 1 of 3 hunks in src/headers/normalize.rs.", "to": "changes/c_10/conflict", "link": "Resolve" },
+      { "title": "Approval is stale", "reason": "bea approved 4be21a0; head is now 9c03f7e after convergence." },
+      { "title": "Stacked on c_06", "reason": "c_06 must land on develop first. It is #1 in queue.", "to": "queues", "link": "Queue" },
+      { "title": "Not enough trusted judges", "reason": "Kev is untrusted (64 outcomes), so only Jev counts.", "to": "/judges/kev", "link": "Kev" }
+    ]
+  },
+  { "id": "c_11", "agent": "patch", "ver": "3.2.1", "tok": [98000, 9000, 210000], "driver": "bea", "head": "51c0e9a", "lease": ["ok", "lease held · 1"], "intent_by": "bea" },
+  {
+    "id": "c_08", "agent": "bea", "ver": null, "tok": [0, 0, 0], "driver": null, "head": "3e7d1a2", "lease": ["ok", "lease held · 1"], "intent_by": "bea",
+    "diff": { "file": "src/route/sni.rs", "adds": 1, "dels": 1, "lines": [["h", "", "", "", "@@ -12,1 +12,1 @@"], ["d", 12, "", "", "    let host = req.host();"], ["a", "", 12, "bea", "    let host = req.sni().or(req.host());"]] }
+  }
+]

@@ -1,0 +1,12 @@
+// Test config: same Worker without bindings that need a remote session (Artifacts has no local simulator).
+// Tests inject a fake Artifacts namespace instead (see test/fakes/).
+{
+  "name": "cinder-test",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-03",
+  "d1_databases": [{ "binding": "DB", "database_name": "cinder-test", "database_id": "cinder-test", "migrations_dir": "migrations" }],
+  "r2_buckets": [{ "binding": "LOGS", "bucket_name": "cinder-logs" }, { "binding": "TOOL_CACHE", "bucket_name": "cinder-ci-cache" }],
+  "ratelimits": [{ "name": "CLAIM_LIMIT", "namespace_id": "1001", "simple": { "limit": 60, "period": 60 } }, { "name": "CHANGE_LIMIT", "namespace_id": "1002", "simple": { "limit": 30, "period": 60 } }, { "name": "PREVIEW_LIMIT", "namespace_id": "1003", "simple": { "limit": 30, "period": 60 } }],
+  "durable_objects": { "bindings": [{ "name": "REPO_DO", "class_name": "RepoDO" }, { "name": "CHANGE_DO", "class_name": "ChangeDO" }, { "name": "DISPATCH_DO", "class_name": "DispatchDO" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["RepoDO"] }, { "tag": "v2", "new_sqlite_classes": ["ChangeDO"] }, { "tag": "v3", "new_sqlite_classes": ["DispatchDO"] }]
+}

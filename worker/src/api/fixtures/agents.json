@@ -1,0 +1,41 @@
+[
+  {
+    "name": "patch", "role": "Implements an intent end to end",
+    "versions": [
+      { "version": "3.3.0", "channel": "canary", "model": "sonnet-4.5", "released_at": "2026-10-02T09:00:00Z", "wins": 41, "races": 68, "active": 2 },
+      { "version": "3.2.1", "channel": "stable", "model": "sonnet-4.5", "released_at": "2026-09-25T09:00:00Z", "wins": 212, "races": 390, "active": 5 },
+      { "version": "3.1.4", "channel": "retired", "model": "sonnet-4", "released_at": "2026-08-31T09:00:00Z", "wins": 301, "races": 612, "active": 0 }
+    ],
+    "config": {
+      "3.2.1": {"model": "sonnet-4.5", "tools": ["read", "edit", "search", "run_tests"], "egress": ["crates.io"], "max_output_tokens": 32000, "token_budget": 600000, "max_parallel": 4, "prompt": "You implement one intent per change.\nStay inside your leased symbols.\nAsk before widening a public interface.\nRun the package tests before handing off."},
+      "3.3.0": {"model": "sonnet-4.5", "tools": ["read", "edit", "search", "run_tests", "shell.exec"], "egress": ["crates.io", "api.github.com"], "max_output_tokens": 64000, "token_budget": 600000, "max_parallel": 6, "prompt": "You implement one intent per change.\nStay inside your leased symbols.\nAsk before widening a public interface.\nRun the package tests and clippy before handing off.\nPrefer small diffs; split if over 300 lines."}
+    },
+    "races": [
+      {"id": "r-88", "change_id": "c_05", "intent": "Cache compiled regex matchers per worker", "legs": ["patch@3.2.1", "patch@3.3.0"]},
+      {"id": "r-87", "change_id": "c_06", "intent": "Stream large bodies through rewrite filter", "legs": ["patch@3.2.1", "patch@3.3.0"]}
+    ]
+  },
+  {
+    "name": "scribe", "role": "Docs, changelogs, migration notes",
+    "versions": [
+      { "version": "2.2.0", "channel": "canary", "model": "haiku-4.5", "released_at": "2026-10-03T09:00:00Z", "wins": 4, "races": 6, "active": 1 },
+      { "version": "2.1.0", "channel": "stable", "model": "haiku-4.5", "released_at": "2026-09-14T09:00:00Z", "wins": 88, "races": 140, "active": 0 }
+    ],
+    "config": {
+      "2.1.0": {"model": "haiku-4.5", "tools": ["read", "edit"], "egress": [], "max_output_tokens": 16000, "token_budget": 200000, "max_parallel": 2, "prompt": "Write docs, changelogs and migration notes."}
+    },
+    "races": [
+      {"id": "r-86", "change_id": "c_07", "intent": "Document RouteMatcher trait and migration path", "legs": ["scribe@2.1.0", "scribe@2.2.0"]}
+    ]
+  },
+  {
+    "name": "verifier", "role": "Owns every merge: runs checks, asks judges",
+    "versions": [
+      { "version": "5.0.1", "channel": "stable", "model": "local: qwen3-coder-32b", "released_at": "2026-09-28T09:00:00Z", "wins": null, "races": 0, "active": 3 }
+    ],
+    "config": {
+      "5.0.1": {"model": "local: qwen3-coder-32b", "tools": ["read", "run_tests"], "egress": [], "max_output_tokens": 16000, "token_budget": 200000, "max_parallel": 4, "prompt": "Run every check and ask the judges before a merge."}
+    },
+    "races": []
+  }
+]

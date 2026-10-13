@@ -1,0 +1,4 @@
+name: ci
+on: [manual]
+steps:
+  test: { stage: build, run: "npm test", needs: [] }

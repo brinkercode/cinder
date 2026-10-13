@@ -1,0 +1,5 @@
+name: check
+on: [change, manual]
+steps:
+  vet: { stage: build, run: "go vet ./...", needs: [] }
+  test: { stage: test, run: "go test -v -count=1 ./...", needs: [vet] }

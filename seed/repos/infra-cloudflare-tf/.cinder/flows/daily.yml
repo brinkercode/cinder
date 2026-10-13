@@ -1,0 +1,6 @@
+name: daily
+on: [cron, manual]
+cron: "0 3 * * *"
+# terraform test plans against a mocked provider (tests/plan.tftest.hcl): no Cloudflare credentials or API calls.
+steps:
+  test: { stage: plan, run: "terraform init -backend=false -input=false && terraform test", needs: [] }

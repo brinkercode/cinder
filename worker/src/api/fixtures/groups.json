@@ -1,0 +1,4 @@
+[
+  { "name": "eng-payments", "source": "Access group", "role": "maintainer", "repos": ["billing-api", "ledger-ui"] },
+  { "name": "platform-oncall", "source": "IdP group (Okta)", "role": "owner", "repos": [] }
+]

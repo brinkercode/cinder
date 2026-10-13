@@ -1,0 +1,15 @@
+{
+  "findings": [
+    { "id": "f-1", "source": "dependency", "severity": "critical", "title": "lodash 4.17.20: prototype pollution (CVE-2021-23337)", "location": "package-lock.json", "state": "open", "rule": "CVE-2021-23337", "path": "package-lock.json", "line": null, "first_seen": "2026-10-03T08:12:00Z", "dismiss_reason": null, "fix_change": null, "fixed_in": "4.17.21", "also_fixes": 1 },
+    { "id": "f-2", "source": "dependency", "severity": "medium", "title": "semver 7.5.1: ReDoS (CVE-2022-25883)", "location": "package-lock.json", "state": "open", "rule": "CVE-2022-25883", "path": "package-lock.json", "line": null, "first_seen": "2026-10-04T08:10:00Z", "dismiss_reason": null, "fix_change": null },
+    { "id": "f-3", "source": "secret", "severity": "high", "title": "GitHub token", "location": "deploy/env.sh", "state": "open", "rule": "github-token", "path": "deploy/env.sh", "line": 12, "first_seen": "2026-10-05T08:12:00Z", "dismiss_reason": null, "fix_change": null },
+    { "id": "f-4", "source": "code", "severity": "low", "title": "gosec G104: unhandled error", "location": "runner/internal/claim/claim.go", "state": "open", "rule": "gosec-G104", "path": "runner/internal/claim/claim.go", "line": 88, "first_seen": "2026-10-05T08:12:00Z", "dismiss_reason": null, "fix_change": null }
+  ],
+  "scans": [
+    { "id": "s-2", "ran_at": "2026-10-05T08:12:00Z", "status": "passed", "findings": 4 },
+    { "id": "s-1", "ran_at": "2026-10-04T08:10:00Z", "status": "failed", "findings": 0 }
+  ],
+  "paused": false,
+  "scan_worker_online": true,
+  "fix_changes_open": 0
+}

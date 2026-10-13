@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 730" width="1000" height="730" role="img" aria-labelledby="ttl dsc">
+<!--
+Colours and type follow Cloudflare's public brand references (checked 2026-10-06):
+  - Cloudflare Orange #F38020, Tangerine #FAAE40 and dark gray #404041: the official logo colours,
+    as published in the press kit logo files (https://www.cloudflare.com/press-kit/ , Logos.zip).
+  - Naming: Cloudflare trademark guidelines (https://www.cloudflare.com/trademark/); product names are plain text.
+  - Type: the font stack of Cloudflare's developer docs (https://developers.cloudflare.com/):
+    Inter, system-ui ... sans-serif and JetBrains Mono, ui-monospace ... monospace.
+  No Cloudflare logo, cloud mark or other artwork is used.
+-->
+<title id="ttl">cinder pages and their Cloudflare resources</title><desc id="dsc">Each sidebar page and the Cloudflare resource behind it. Repo pages: Code, with Releases on its toolbar, on Artifacts and D1; Changes, which holds the repo's issues, on D1, RepoDO, ChangeDO and guard and verify jobs on the runner pool; Watchtower on D1, scan jobs, Vectorize and Clef; Insights on Analytics Engine and AI Gateway logs; repo Settings on D1 and .cinder.yml in Artifacts. Automation: Agents on Artifacts cinder-agents, D1 and AI Gateway; Marketplace on D1 and release jobs; Judges on Clef through AI Gateway and D1; Flows on runner pool jobs, Workflows and R2 logs; Environments on Workflows and the Workers API; Workers on the Containers pool and DispatchDO. Organization: Repositories on D1 and Artifacts; Wiki on an org Artifacts repo and D1; Needs you on D1 and ChangeDO; Access and people on Cloudflare Access and D1; Keystore on Secrets Store; My model access on Secrets Store and AI Gateway.</desc>
+<style>
+.card{fill:#1B1B1D;stroke:#2E2E32}
+.box{fill:#242427;stroke:#45454B;stroke-width:1}
+.hub{fill:#242427;stroke:#F38020;stroke-width:1.5}
+.edge{fill:#242427;stroke:#FAAE40;stroke-width:1.5}
+.pill{fill:#3A2A12;stroke:#FAAE40;stroke-width:1}
+.plan{stroke-dasharray:5 4}
+.w{fill:none;stroke:#A3A3A9;stroke-width:1.4}
+.as{fill:none;stroke:#A3A3A9;stroke-width:1.2;stroke-dasharray:1 4;stroke-linecap:round}
+.ah{fill:#A3A3A9}
+text{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif}
+.t{fill:#F2F2F3;font-size:13.5px;font-weight:600}
+.s{fill:#A3A3A9;font-size:12.5px}
+.m{fill:#A3A3A9;font-family:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:12px}
+.mi{fill:#F2F2F3;font-family:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:12px}
+.e{fill:#A3A3A9;font-family:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:11px;font-weight:600;letter-spacing:.08em}
+.l{fill:#A3A3A9;font-size:11.5px}
+</style><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ah"/></marker></defs>
+<rect x="0.5" y="0.5" width="999" height="729" rx="16" class="card"/>
+<text x="22" y="34" class="e">REPO PAGES · CODE ▸ REPO</text>
+<rect x="20" y="46" width="225" height="74" rx="10" class="box"/>
+<text x="34" y="69" class="t">Code · Releases</text>
+<text x="34" y="89" class="s">Artifacts repo · RepoDO</text>
+<text x="34" y="106" class="s">D1 index · tags · releases</text>
+<rect x="265" y="46" width="225" height="74" rx="10" class="box"/>
+<text x="279" y="69" class="t">Changes · issues</text>
+<text x="279" y="89" class="s">D1 · RepoDO · ChangeDO</text>
+<text x="279" y="106" class="s">guard + verify jobs</text>
+<rect x="510" y="46" width="225" height="74" rx="10" class="box"/>
+<text x="524" y="69" class="t">Watchtower</text>
+<text x="524" y="89" class="s">D1 · scan jobs</text>
+<text x="524" y="106" class="s">Vectorize · Clef</text>
+<rect x="755" y="46" width="225" height="74" rx="10" class="box"/>
+<text x="769" y="69" class="t">Insights</text>
+<text x="769" y="89" class="s">Analytics Engine</text>
+<text x="769" y="106" class="s">AI Gateway logs</text>
+<rect x="20" y="134" width="225" height="74" rx="10" class="box"/>
+<text x="34" y="157" class="t">Repo settings</text>
+<text x="34" y="177" class="s">D1 · .cinder.yml</text>
+<text x="34" y="194" class="s">webhooks: Queue</text>
+<text x="22" y="248" class="e">AUTOMATION</text>
+<rect x="20" y="260" width="225" height="74" rx="10" class="box"/>
+<text x="34" y="283" class="t">Agents</text>
+<text x="34" y="303" class="s">Artifacts cinder-agents</text>
+<text x="34" y="320" class="s">D1 · AI Gateway</text>
+<rect x="265" y="260" width="225" height="74" rx="10" class="box"/>
+<text x="279" y="283" class="t">Marketplace</text>
+<text x="279" y="303" class="s">D1 listings</text>
+<text x="279" y="320" class="s">release jobs</text>
+<rect x="510" y="260" width="225" height="74" rx="10" class="box"/>
+<text x="524" y="283" class="t">Judges &amp; calibration</text>
+<text x="524" y="303" class="s">Clef on Workers AI via</text>
+<text x="524" y="320" class="s">AI Gateway · D1</text>
+<rect x="755" y="260" width="225" height="74" rx="10" class="box"/>
+<text x="769" y="283" class="t">Flows</text>
+<text x="769" y="303" class="s">runner pool jobs</text>
+<text x="769" y="320" class="s">Workflows · R2 logs</text>
+<rect x="20" y="348" width="225" height="74" rx="10" class="box"/>
+<text x="34" y="371" class="t">Environments</text>
+<text x="34" y="391" class="s">Workflows</text>
+<text x="34" y="408" class="s">Workers API deploys</text>
+<rect x="265" y="348" width="225" height="74" rx="10" class="box"/>
+<text x="279" y="371" class="t">Workers</text>
+<text x="279" y="391" class="s">Containers pool</text>
+<text x="279" y="408" class="s">DispatchDO claims</text>
+<text x="22" y="462" class="e">ORGANIZATION</text>
+<rect x="20" y="474" width="225" height="74" rx="10" class="box"/>
+<text x="34" y="497" class="t">Repositories</text>
+<text x="34" y="517" class="s">D1 · Artifacts</text>
+<text x="34" y="534" class="s">create and import</text>
+<rect x="265" y="474" width="225" height="74" rx="10" class="box"/>
+<text x="279" y="497" class="t">Wiki</text>
+<text x="279" y="517" class="s">org Artifacts repo</text>
+<text x="279" y="534" class="s">D1 index · search</text>
+<rect x="510" y="474" width="225" height="74" rx="10" class="box"/>
+<text x="524" y="497" class="t">Needs you</text>
+<text x="524" y="517" class="s">D1 · ChangeDO</text>
+<rect x="755" y="474" width="225" height="74" rx="10" class="box"/>
+<text x="769" y="497" class="t">Access &amp; people</text>
+<text x="769" y="517" class="s">Cloudflare Access</text>
+<text x="769" y="534" class="s">D1 roles</text>
+<rect x="20" y="562" width="225" height="74" rx="10" class="box"/>
+<text x="34" y="585" class="t">Keystore</text>
+<text x="34" y="605" class="s">Secrets Store</text>
+<text x="34" y="622" class="s">via cinder-secrets</text>
+<rect x="265" y="562" width="225" height="74" rx="10" class="box"/>
+<text x="279" y="585" class="t">My model access</text>
+<text x="279" y="605" class="s">Secrets Store</text>
+<text x="279" y="622" class="s">AI Gateway keys</text>
+<text x="22" y="666" class="l">Folded into a host page: Issues (inside Changes) and Releases (from the Code toolbar).</text>
+<rect x="24" y="690" width="26" height="16" rx="5" class="box"/>
+<text x="58" y="702.5" class="l">live today</text>
+<rect x="150.4" y="690" width="26" height="16" rx="5" class="box plan"/>
+<text x="184.4" y="702.5" class="l">planned (not yet live)</text>
+</svg>

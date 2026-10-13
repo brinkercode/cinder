@@ -1,0 +1,10 @@
+[
+  { "repo_id": "r_flow", "words": ["header", "forward"], "symbols": ["fn normalize_headers", "type HeaderMap"] },
+  { "repo_id": "r_flow", "words": ["route", "match", "sni"], "symbols": ["trait RouteMatcher", "fn compile_matcher"] },
+  { "repo_id": "r_flow", "words": ["retry", "backoff", "budget"], "symbols": ["fn retry_with_budget", "struct RetryPolicy"] },
+  { "repo_id": "r_flow", "words": ["tls", "cert", "mtls"], "symbols": ["struct TlsClientConfig"] },
+  { "repo_id": "r_flow", "words": ["metric", "latency", "histogram"], "symbols": ["fn record_latency"] },
+  { "repo_id": "r_flow", "words": ["pool", "upstream", "health", "round robin"], "symbols": ["struct UpstreamPool"] },
+  { "repo_id": "r_flow", "words": ["trace"], "symbols": ["type TraceCtx"] },
+  { "repo_id": "r_flow", "words": ["host", "validat"], "symbols": ["fn validate_host"] }
+]

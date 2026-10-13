@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 760" width="1000" height="760" role="img" aria-labelledby="ttl dsc">
+<!--
+Colours and type follow Cloudflare's public brand references (checked 2026-10-06):
+  - Cloudflare Orange #F38020, Tangerine #FAAE40 and dark gray #404041: the official logo colours,
+    as published in the press kit logo files (https://www.cloudflare.com/press-kit/ , Logos.zip).
+  - Naming: Cloudflare trademark guidelines (https://www.cloudflare.com/trademark/); product names are plain text.
+  - Type: the font stack of Cloudflare's developer docs (https://developers.cloudflare.com/):
+    Inter, system-ui ... sans-serif and JetBrains Mono, ui-monospace ... monospace.
+  No Cloudflare logo, cloud mark or other artwork is used.
+-->
+<title id="ttl">cinder job execution</title><desc id="dsc">A change, push or Flow run queues a job row in D1. The Worker starts a container in the autoscaled Containers pool for each queued job, up to the pool's max; DispatchDO serialises claims, gate jobs first. One job per instance, scaling to zero with an optional warm buffer. Every outbound request passes the Worker's container egress: a per-job allowlist, web pages as Markdown, and model calls to AI Gateway, which adds the stored key. Flow secrets are read from Secrets Store for the job's lease and masked. Results return as git commits to Artifacts and masked logs to R2. Cloudflare targets deploy through Workflows; other clouds deploy from the instance.</desc>
+<style>
+.card{fill:#F7F7F8;stroke:#E4E4E7}
+.box{fill:#FFFFFF;stroke:#CFCFD4;stroke-width:1}
+.hub{fill:#FFFFFF;stroke:#F38020;stroke-width:1.5}
+.edge{fill:#FFFFFF;stroke:#FAAE40;stroke-width:1.5}
+.pill{fill:#FEF3E2;stroke:#FAAE40;stroke-width:1}
+.plan{stroke-dasharray:5 4}
+.w{fill:none;stroke:#66666B;stroke-width:1.4}
+.as{fill:none;stroke:#66666B;stroke-width:1.2;stroke-dasharray:1 4;stroke-linecap:round}
+.ah{fill:#66666B}
+text{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif}
+.t{fill:#404041;font-size:13.5px;font-weight:600}
+.s{fill:#66666B;font-size:12.5px}
+.m{fill:#66666B;font-family:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:12px}
+.mi{fill:#404041;font-family:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:12px}
+.e{fill:#66666B;font-family:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:11px;font-weight:600;letter-spacing:.08em}
+.l{fill:#66666B;font-size:11.5px}
+</style><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ah"/></marker></defs>
+<rect x="0.5" y="0.5" width="999" height="759" rx="16" class="card"/>
+<rect x="30" y="40" width="220" height="78" rx="10" class="box"/>
+<text x="44" y="63" class="t">Change or Flow run</text>
+<text x="44" y="83" class="s">push · change · cron · manual</text>
+<path d="M 140 118 L 140 156" class="w" marker-end="url(#ar)"/>
+<rect x="30" y="160" width="220" height="78" rx="10" class="box"/>
+<text x="44" y="183" class="t">D1 jobs</text>
+<text x="44" y="203" class="s">one row per job</text>
+<text x="44" y="220" class="s">gate jobs claimed first</text>
+<path d="M 140 238 L 140 276" class="w" marker-end="url(#ar)"/>
+<rect x="30" y="280" width="220" height="96" rx="10" class="hub"/>
+<text x="44" y="303" class="t">Worker · DispatchDO</text>
+<text x="44" y="323" class="s">queued jobs → pool size</text>
+<text x="44" y="340" class="s">claims serialised, leased</text>
+<text x="44" y="357" class="s">lease expiry returns a job</text>
+<rect x="300" y="40" width="350" height="420" rx="10" class="box"/>
+<text x="316" y="66" class="t">Runner pool · Containers</text>
+<text x="316" y="86" class="s">autoscaled from queue depth</text>
+<text x="316" y="103" class="s">same image, runs any job kind</text>
+<path d="M 250 328 L 300 328" class="w" marker-end="url(#ar)"/>
+<rect x="318" y="128" width="150" height="70" rx="10" class="box"/>
+<text x="332" y="151" class="t">instance</text>
+<text x="332" y="171" class="s">job A · running</text>
+<rect x="482" y="128" width="150" height="70" rx="10" class="box"/>
+<text x="496" y="151" class="t">instance</text>
+<text x="496" y="171" class="s">job B · running</text>
+<rect x="318" y="212" width="150" height="70" rx="10" class="box"/>
+<text x="332" y="235" class="t">warm buffer</text>
+<text x="332" y="255" class="s">idle, accepts fast</text>
+<rect x="482" y="212" width="150" height="70" rx="10" class="box"/>
+<text x="496" y="235" class="t">scale to zero</text>
+<text x="496" y="255" class="s">no work, no instances</text>
+<text x="316" y="330" class="s">one job per instance</text>
+<text x="316" y="347" class="s">no state carried between jobs</text>
+<text x="316" y="364" class="s">destroyed when the job reports</text>
+<text x="316" y="400" class="l">git: scoped, expiring Artifacts tokens</text>
+<text x="316" y="417" class="l">egress: only through the container egress</text>
+<rect x="710" y="40" width="260" height="78" rx="10" class="box"/>
+<text x="724" y="63" class="t">Secrets Store</text>
+<text x="724" y="83" class="s">flow secrets, read for the</text>
+<text x="724" y="100" class="s">job's lease, masked in logs</text>
+<path d="M 840 118 L 840 156" class="w" marker-end="url(#ar)"/>
+<rect x="710" y="160" width="260" height="96" rx="10" class="box"/>
+<text x="724" y="183" class="t">Container egress</text>
+<text x="724" y="203" class="s">per-job host allowlist</text>
+<text x="724" y="220" class="s">web pages as Markdown</text>
+<text x="724" y="237" class="s">no model key enters</text>
+<path d="M 650 208 L 710 208" class="w" marker-end="url(#ar)"/>
+<text x="656" y="200" class="l">egress</text>
+<path d="M 840 256 L 840 296" class="w" marker-end="url(#ar)"/>
+<rect x="710" y="300" width="260" height="78" rx="10" class="box"/>
+<text x="724" y="323" class="t">AI Gateway 'cinder'</text>
+<text x="724" y="343" class="s">adds the stored key (BYOK)</text>
+<text x="724" y="360" class="s">→ Workers AI · Anthropic · OpenAI</text>
+<path d="M 970 208 L 985 208 L 985 449 L 970 449" class="w" marker-end="url(#ar)"/>
+<rect x="710" y="410" width="260" height="78" rx="10" class="box"/>
+<text x="724" y="433" class="t">Other clouds</text>
+<text x="724" y="453" class="s">AWS · Google Cloud · Azure · SSH</text>
+<text x="724" y="470" class="s">deploy steps run from the job</text>
+<path d="M 390 460 L 390 536" class="w" marker-end="url(#ar)"/>
+<path d="M 560 460 L 560 536" class="w" marker-end="url(#ar)"/>
+<text x="398" y="506" class="l">commits</text>
+<text x="568" y="506" class="l">logs</text>
+<rect x="300" y="540" width="160" height="78" rx="10" class="box"/>
+<text x="314" y="563" class="t">Artifacts</text>
+<text x="314" y="583" class="s">git commits on the</text>
+<text x="314" y="600" class="s">change's fork</text>
+<rect x="480" y="540" width="170" height="78" rx="10" class="box"/>
+<text x="494" y="563" class="t">R2 · Workers Logs</text>
+<text x="494" y="583" class="s">secrets masked</text>
+<text x="494" y="600" class="s">before storage</text>
+<path d="M 300 440 L 140 440 L 140 536" class="w" marker-end="url(#ar)"/>
+<text x="152" y="432" class="l">Cloudflare deploy step</text>
+<rect x="30" y="540" width="220" height="78" rx="10" class="box"/>
+<text x="44" y="563" class="t">Workflows</text>
+<text x="44" y="583" class="s">cloudflare/workflow steps</text>
+<text x="44" y="600" class="s">cinder-pipeline sync</text>
+<path d="M 250 579 L 275 579 L 275 660 L 710 660" class="w" marker-end="url(#ar)"/>
+<rect x="710" y="630" width="260" height="62" rx="10" class="box"/>
+<text x="724" y="653" class="t">Cloudflare targets</text>
+<text x="724" y="673" class="s">Workers versions · previews · rollouts</text>
+<rect x="24" y="712" width="26" height="16" rx="5" class="hub"/>
+<text x="58" y="724.5" class="l">dispatcher</text>
+<rect x="150.4" y="712" width="26" height="16" rx="5" class="box"/>
+<text x="184.4" y="724.5" class="l">live today</text>
+<rect x="276.8" y="712" width="26" height="16" rx="5" class="box plan"/>
+<text x="310.8" y="724.5" class="l">planned (not yet live)</text>
+</svg>

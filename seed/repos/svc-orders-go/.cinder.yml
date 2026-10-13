@@ -1,0 +1,8 @@
+branches:
+  integration: [main]
+  release: [release/*]
+check: go vet ./... && go test ./...
+# A change that touches these files waits for a person's approval.
+rules:
+  main:
+    route: [orders.go]

@@ -1,0 +1,12 @@
+branches:
+  integration: [main]
+  release: [release/*]
+check: terraform fmt -check -recursive && terraform init -backend=false -input=false && terraform validate && terraform test
+# A change that touches these files waits for a person's approval.
+rules:
+  main:
+    route: [versions.tf]
+deploy:
+  environments:
+    - { name: staging,    branch: main }
+    - { name: production, branch: main }

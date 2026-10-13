@@ -1,0 +1,6 @@
+[
+  { "kind": "canary", "version": 3, "share": 30, "by": "maya@example.com", "at": "2026-10-07T10:00:00Z" },
+  { "kind": "released", "version": 3, "share": null, "by": null, "at": "2026-10-07T09:00:00Z" },
+  { "kind": "rolled_back", "version": 2, "share": null, "by": "maya@example.com", "at": "2026-10-05T12:00:00Z" },
+  { "kind": "promoted", "version": 2, "share": null, "by": "owner", "at": "2026-10-04T10:00:00Z" }
+]

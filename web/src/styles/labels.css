@@ -1,0 +1,8 @@
+.lbl-edit{display:grid;gap:var(--s-2)}
+.lbl-edit .row{flex-wrap:wrap}
+.lbl-edit .tag{display:inline-flex;align-items:center;gap:2px}
+.lbl-edit .tag .iconbtn{width:18px;height:18px}
+.lbl-menu{display:grid;gap:2px}.lbl-menu .input{width:100%;margin-bottom:4px}
+.lbl-menu button{display:flex;align-items:center;gap:6px;height:30px;padding:0 8px;border:0;border-radius:var(--r);background:none;color:inherit;font:inherit;cursor:pointer}.lbl-menu button:hover,.lbl-menu button:focus-visible{background:var(--tint)}
+.lbl-empty{display:grid;gap:var(--s-2);max-width:260px;padding:var(--s-2)}
+.chg-l{display:flex;flex-wrap:wrap;align-items:center;gap:4px}

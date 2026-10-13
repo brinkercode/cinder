@@ -1,0 +1,16 @@
+/* Target-branch menu: every row shares one grid, so a long name truncates and the role chip and counts stay put. */
+[popover].menu.bm{width:min(380px,calc(100vw - 16px));padding:0}
+.bm-h{display:flex;flex-direction:column;gap:2px;padding:12px 14px 10px}.bm-h b{font-size:var(--fs-13);font-weight:var(--weight-medium);color:var(--text-strong)}.bm-h span{font-size:var(--fs-12);color:var(--text-subtle)}
+.bm>.input{display:block;width:calc(100% - 12px);margin:0 6px 6px}
+.bm-s{padding:2px 6px 6px;border-top:var(--bw) solid var(--line)}.bm-s:first-child{border-top:0}
+.bm .bm-r{display:grid;grid-template-columns:16px minmax(0,1fr) auto 56px 16px;align-items:center;gap:10px;height:34px;padding:0 8px;width:100%}
+.bm .bm-r.ws{grid-template-columns:16px minmax(0,1fr) 16px;height:44px}
+.bm .bm-r.on{background:var(--sb-active)}
+.bm-r .ic{width:14px;height:14px;color:var(--text-subtle)}
+.bm-n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--fs-13);color:var(--text-strong)}
+.bm-n small{display:block;font-size:var(--fs-12);color:var(--text-subtle);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--font-sans)}
+.bm-role:not(:empty){font-size:var(--fs-11);font-weight:var(--weight-medium);height:18px;padding:0 6px;border-radius:var(--r);background:var(--tint);color:var(--text-subtle);display:inline-flex;align-items:center}
+.bm-ab{font-size:var(--fs-11);color:var(--text-subtle);text-align:right}
+.bm-none{padding:16px;text-align:center;font-size:var(--fs-13);color:var(--text-subtle)}
+.bm-f{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:6px;border-top:var(--bw) solid var(--line)}.bm-f button{gap:8px;height:32px}.bm-f .kbd{margin-left:auto}
+.menu-scroll:has(.bm-s) .bm-none{display:none}

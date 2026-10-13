@@ -1,0 +1,43 @@
+{
+  "conflicts": { "merges": 214, "conflicted": 13, "days": 7 },
+  "changes": [
+    { "id": "c-1037", "state": "in_queue", "intent": "Introduce RouteMatcher trait (interface first)", "seam": true, "stacked_on": null },
+    { "id": "c-1042", "state": "conflict", "intent": "Preserve case of X-Forwarded-* headers during normalization", "seam": false, "stacked_on": "c-1037" },
+    { "id": "c-1043", "state": "developing", "intent": "Add per-route retry budget with jittered backoff", "seam": false, "stacked_on": null },
+    { "id": "c-1044", "state": "verifying", "intent": "Rotate mTLS client certs without dropping in-flight streams", "seam": false, "stacked_on": null },
+    { "id": "c-1045", "state": "waiting", "intent": "Document RouteMatcher trait and migration path", "seam": false, "stacked_on": "c-1037" },
+    { "id": "c-1046", "state": "converging", "intent": "Cache compiled regex matchers per worker", "seam": false, "stacked_on": null },
+    { "id": "c-1049", "state": "leased", "intent": "Expose upstream latency histogram on /metrics", "seam": false, "stacked_on": null },
+    { "id": "c-1050", "state": "waiting", "intent": "Route by SNI before Host header when both present", "seam": false, "stacked_on": "c-1042" },
+    { "id": "c-1051", "state": "resolving", "intent": "Backport Content-Length fix to release/2.4", "seam": false, "stacked_on": null },
+    { "id": "c-1052", "state": "developing", "intent": "Add health-check endpoint for each upstream pool", "seam": false, "stacked_on": null },
+    { "id": "c-1053", "state": "verifying", "intent": "Reject requests with duplicate Host headers", "seam": false, "stacked_on": null },
+    { "id": "c-1056", "state": "developing", "intent": "Propagate trace-id through retries", "seam": false, "stacked_on": null },
+    { "id": "c-1060", "state": "verifying", "intent": "Tighten default upstream connect timeout to 2s", "seam": false, "stacked_on": null }
+  ],
+  "leases": [
+    { "symbol": "fn normalize_headers", "file": "src/headers/normalize.rs", "holder": "c-1042", "mode": "exclusive", "waiting": ["c-1050"] },
+    { "symbol": "type HeaderMap", "file": "src/headers/map.rs", "holder": "c-1042", "mode": "shared", "waiting": [] },
+    { "symbol": "trait RouteMatcher", "file": "src/route/matcher.rs", "holder": "c-1037", "mode": "seam", "waiting": ["c-1045", "c-1050"] },
+    { "symbol": "fn compile_matcher", "file": "src/route/compile.rs", "holder": "c-1046", "mode": "exclusive", "waiting": [] },
+    { "symbol": "fn retry_with_budget", "file": "src/upstream/retry.rs", "holder": "c-1043", "mode": "exclusive", "waiting": ["c-1056"] },
+    { "symbol": "struct RetryPolicy", "file": "src/upstream/retry.rs", "holder": "c-1043", "mode": "shared", "waiting": [] },
+    { "symbol": "struct UpstreamPool", "file": "src/upstream/pool.rs", "holder": "c-1052", "mode": "shared", "waiting": [] },
+    { "symbol": "struct TlsClientConfig", "file": "src/tls/client.rs", "holder": "c-1044", "mode": "exclusive", "waiting": [] },
+    { "symbol": "fn record_latency", "file": "src/metrics/upstream.rs", "holder": "c-1049", "mode": "exclusive", "waiting": [] },
+    { "symbol": "type TraceCtx", "file": "src/trace/ctx.rs", "holder": "c-1056", "mode": "shared", "waiting": [] },
+    { "symbol": "fn connect_upstream", "file": "src/upstream/pool.rs", "holder": "c-1060", "mode": "exclusive", "waiting": [] },
+    { "symbol": "fn validate_host", "file": "src/request/validate.rs", "holder": "c-1053", "mode": "exclusive", "waiting": [] }
+  ],
+  "edges": [
+    { "a": "c-1042", "b": "c-1050", "p": 0.72, "judge": { "name": "Clef", "count": 1203, "trusted": true } },
+    { "a": "c-1042", "b": "c-1046", "p": 0.14, "judge": { "name": "Clef", "count": 1203, "trusted": true } },
+    { "a": "c-1043", "b": "c-1056", "p": 0.48, "judge": { "name": "Clef", "count": 1203, "trusted": true } },
+    { "a": "c-1037", "b": "c-1046", "p": 0.33, "judge": { "name": "Clef", "count": 1203, "trusted": true } },
+    { "a": "c-1052", "b": "c-1043", "p": 0.22, "judge": { "name": "Clef", "count": 1203, "trusted": true } },
+    { "a": "c-1049", "b": "c-1052", "p": 0.09, "judge": { "name": "Clef", "count": 1203, "trusted": true } },
+    { "a": "c-1044", "b": "c-1051", "p": 0.41, "judge": { "name": "Kev", "count": 64, "trusted": false } },
+    { "a": "c-1056", "b": "c-1049", "p": 0.12, "judge": { "name": "lease-overlap", "count": 880, "trusted": true } },
+    { "a": "c-1053", "b": "c-1042", "p": 0.06, "judge": { "name": "Clef", "count": 1203, "trusted": true } }
+  ]
+}

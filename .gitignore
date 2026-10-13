@@ -1,0 +1,18 @@
+node_modules
+dist/
+bin/
+.wrangler/
+.dev.vars
+.cinder/
+# pulse's flows, which the seed runs (/:repo/flows).
+!demo/pulse/.cinder/
+test-results/
+# The seed repos' own flows, which the seed imports with them.
+!seed/repos/*/.cinder/
+
+# Local tooling, kept out of the repo
+CLAUDE.md
+.claude/
+
+# The seed sources the Worker bundles (seed/bundle.mjs writes it at build).
+seed/bundle.json

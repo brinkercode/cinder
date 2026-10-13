@@ -1,0 +1,37 @@
+# Contributing
+
+## Develop
+
+Needs Node 22+, Go 1.27+, `staticcheck` and `git` (`make check-ts` runs `e2e/git-fsck.test.js`, which checks the git
+objects the Worker writes with `git index-pack --strict` and `git fsck --strict`).
+
+```sh
+npm ci
+make check      # everything CI runs, plus make check-seed
+set -a; . ~/.config/cinder/cloudflare.env; set +a   # the token make up saved
+make deploy     # build the SPA and deploy the Worker
+```
+
+CI runs `make check-ts` as parallel jobs: the Worker suite in three vitest shards (`worker`, shards 1 to 3 of 3), and `web` (Worker and web lint, web tests, the git fsck test, `make check-deps` and the PR guards). The `ts` job needs all of them and fails unless each passed, so `ts` stays the one required check. Run one shard locally with `npm exec -w worker -- vitest run --shard=2/3`.
+
+`make check-seed` builds and tests the seed repos in `seed/repos/` with their own toolchains (Go, Python 3.12 with
+pip, Node, Rust, .NET 10); a repo whose toolchain is missing is skipped. CI doesn't run it.
+
+In `web/` tests and the Worker tests that render web pages, `web/src/test-setup.js` drops the GET answers `fetchJson()` keeps after each test and whenever a test
+stubs `fetch`. Listeners share one socket per repo, so a test that mounts a live page unmounts it when it finishes
+(`onTestFinished`), or the next test's `WebSocket` stub never sees a socket.
+
+- Design: [docs/DESIGN.md](docs/DESIGN.md)
+- Rules for every change: [below](#rules-every-change-follows)
+
+## Rules every change follows
+
+`make check` enforces these, and CI runs the same targets.
+
+- **Tests.** Every acceptance item has a test named after the behaviour, and it fails without the change. Never skip or weaken a test.
+- **Checks.** `worker/`, `web/`: `eslint --max-warnings 0`, `vitest run`. Plain JavaScript only: no TypeScript and no JSDoc types used as a type system. `runner/`: `gofmt -l` empty, `go vet`, `staticcheck`, `go test -race`.
+- **Dependencies.** A new entry in a `package.json` or `go.mod` fails unless its name is in `deps-allow.txt`.
+- **Frontend.** No component kits; the banned list and CSS rules are in [docs/FRONTEND-AVOID.md](docs/FRONTEND-AVOID.md). Styling uses the tokens in `web/src/styles/tokens.css`.
+- **Shared files.** A route is one import and one line in `worker/src/routes.js`; a page is one import and one line in `web/src/pages.jsx`; a new API shape goes in `worker/src/api/shapes/<name>.js`; migrations are named by UTC time (`worker/migrations/YYYYMMDDHHMM_<what>.sql`).
+- **Security.** Never weaken input validation at a trust boundary, data-loss handling or token handling. Artifacts tokens are never logged or returned to the browser.
+- **Docs.** A change that alters what a user or operator sees updates the doc in the same change: `docs/usage/<page>.md`, `docs/testing/pages/<page>.md` (retired check IDs are never reused), `docs/ARCHITECTURE-CLOUDFLARE.md` for bindings and resources, `docs/operations/README.md` for operations, the README for deploy and access.

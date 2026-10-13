@@ -1,0 +1,15 @@
+{
+  "base": "develop", "head": "release/2.5", "base_sha": "9c03f7e1", "head_sha": "7e44c0b2",
+  "diff": {
+    "ahead": 2, "behind": 5, "truncated": true,
+    "stats": { "files_changed": 214, "additions": 6120, "deletions": 840 },
+    "commits": [
+      { "sha": "7e44c0b2", "message": "Bump version to 2.5.0-rc.1" },
+      { "sha": "51aa09d3", "message": "Freeze cache config for 2.5" }
+    ],
+    "files": [
+      { "path": "package.json", "status": "modified", "additions": 1, "deletions": 1,
+        "patch": "@@ -2,3 +2,3 @@\n   \"name\": \"web\",\n-  \"version\": \"2.4.0\",\n+  \"version\": \"2.5.0-rc.1\",\n   \"private\": true," }
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+name: daily
+on: [cron, manual]
+cron: "0 3 * * *"
+steps:
+  build: { stage: build, run: "go build -o bin/svc-orders-go .", needs: [] }
+  test: { stage: test, run: "go test -v -count=1 -shuffle=on ./...", needs: [build] }

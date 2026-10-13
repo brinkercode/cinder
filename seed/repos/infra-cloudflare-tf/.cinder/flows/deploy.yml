@@ -1,0 +1,4 @@
+name: deploy
+on: [push, manual]
+steps:
+  plan: { stage: plan, run: "terraform init -backend=false -input=false && terraform plan -refresh=false -input=false -lock=false", needs: [] }

@@ -1,0 +1,23 @@
+{
+  "window": "7d",
+  "versions": [
+    {
+      "agent": "developer@v3",
+      "counts": { "allowed": 500, "denied": 4, "would_deny": 0 },
+      "allowed": [{ "host": "registry.npmjs.org", "count": 412 }, { "host": "proxy.golang.org", "count": 88 }],
+      "denied": [{ "host": "pastebin.com", "count": 3 }, { "host": "api.openai.com", "count": 1 }],
+      "would_deny": []
+    },
+    {
+      "agent": "reviewer@v1",
+      "counts": { "allowed": 14, "denied": 0, "would_deny": 2 },
+      "allowed": [{ "host": "pkg.go.dev", "count": 14 }],
+      "denied": [],
+      "would_deny": [{ "host": "sum.golang.org", "count": 2 }]
+    }
+  ],
+  "jobs": [
+    { "job_id": "job_01", "agent": "developer@v3", "counts": { "allowed": 500, "denied": 4, "would_deny": 0 } },
+    { "job_id": "job_02", "agent": "reviewer@v1", "counts": { "allowed": 14, "denied": 0, "would_deny": 2 } }
+  ]
+}

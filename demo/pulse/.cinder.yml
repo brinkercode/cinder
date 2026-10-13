@@ -1,0 +1,14 @@
+# No dependencies: the check passes on a fresh clone without an install step.
+branches:
+  integration: [develop, main]
+  release: [release/*]
+check: npm test
+deploy:
+  environments:
+    - { name: preview,    from: change }
+    - { name: staging,    branch: develop, auto_sync: true }
+    - { name: production, branch: main, auto_sync: true, gradual: [10, 50, 100], health: /healthz }
+  worker: wrangler.jsonc
+  resources:
+    - { type: d1, name: pulse-db, migrations: migrations }
+    - { type: kv, name: pulse-cache }
