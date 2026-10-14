@@ -27,6 +27,7 @@
 | CHD-07 | Click **Review ⌄**. | A popover: an optional comment, Comment / Approve / Request changes with a line each, and **Submit review**. |
 | CHD-08 | Submit **Approve** on the awaiting-approval change. | Human approval turns green in Merge readiness; you appear as Approved under Reviewers; a review card joins the timeline; no reload needed. |
 | CHD-53 | Submit **Approve** on a verifying change not routed to a person and with no requested reviewers. | Human approval reads "Human approval given"; you appear as Approved under Reviewers; the state doesn't change and the change isn't queued. |
+| CHD-1044.1 | Open a merged change that no person approved and that risk routing sent past human review (e.g. a documentation-only change). | Human approval reads "No human approval needed" with the routing reason, not "Human approval given". |
 | CHD-59 | On a verified change with Auto-queue on and you as its only requested reviewer, submit **Approve**. | Before: it stays Verifying. After: it moves to the merge queue. |
 | CHD-09 | Submit **Request changes** with a comment. | The state pill reads Changes requested; readiness shows it with your reason; the card moves to Changes requested on the board. |
 | CHD-10 | Submit **Comment** with text. | A comment card joins the timeline; the state doesn't change; the popover closes and reopens empty with Comment selected. |
