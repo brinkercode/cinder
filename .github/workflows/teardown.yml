@@ -1,0 +1,23 @@
+name: teardown
+# Runs make down every night so cinder costs nothing while no one is using it. Deletes every cinder resource and its
+# data on the account (docs/operations/README.md#tear-down); make up and make seed bring it back.
+on:
+  schedule:
+    - cron: "59 6 * * *"   # 23:59 PDT (22:59 PST); GitHub schedules are UTC and can start late
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: release   # never tear down while a release deploys or a reseed runs
+  cancel-in-progress: false
+jobs:
+  teardown:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CINDER_YES: 1
+    steps:
+      - uses: actions/checkout@v4
+      - run: deploy/teardown.sh
