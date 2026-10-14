@@ -4,7 +4,7 @@
 - **Sidebar:** Settings ▸ Access & people (also in the user menu)
 - **Backed by:** Cloudflare Access (Zero Trust) for sign-in; roles, group mappings and allowed service tokens in D1 ([map](../../ARCHITECTURE-CLOUDFLARE.md#2-page-by-page-map))
 
-**Setup:** no seeded mappings (map one with ACC-07 before ACC-03 to ACC-05); the seeded people `ana.ruiz@brinkercode.dev` (Maintainer), `ben.okafor@brinkercode.dev` and `chen.wu@brinkercode.dev` (developer), `dara.novak@brinkercode.dev` (Contributor) and `emeka.obi@brinkercode.dev` (viewer), plus the owner once signed in. Use group names `manual-group-<n>` and invite `manual+<n>@` addresses on your own domain.
+**Setup:** no seeded mappings (map one with ACC-07 before ACC-03 to ACC-05); the seeded people `ana.ruiz@example.com` (Maintainer), `ben.okafor@example.com` and `chen.wu@example.com` (developer), `dara.novak@example.com` (Contributor) and `emeka.obi@example.com` (viewer), plus the owner once signed in. Use group names `manual-group-<n>` and invite `manual+<n>@` addresses on your own domain.
 
 | ID | Check | Expected |
 |---|---|---|

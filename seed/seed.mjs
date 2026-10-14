@@ -5,7 +5,7 @@
 
 // Five placeholder people, created by seedAccess through POST /api/people with ROLES[i]; page sections use the ones with
 // write roles as commit and change authors. syncPolicy adds every person to the Access policy, so they sit on a domain the owner owns.
-export const PEOPLE = ["ana.ruiz@brinkercode.dev", "ben.okafor@brinkercode.dev", "chen.wu@brinkercode.dev", "dara.novak@brinkercode.dev", "emeka.obi@brinkercode.dev"];
+export const PEOPLE = ["ana.ruiz@example.com", "ben.okafor@example.com", "chen.wu@example.com", "dara.novak@example.com", "emeka.obi@example.com"];
 export const ROLES = ["maintainer", "developer", "developer", "contributor", "viewer"];
 const WRITERS = PEOPLE.filter((_, i) => ROLES[i] !== "viewer");
 // The owner's email: the person cinder reports as owner. lazy: only listed once the owner has signed in (a reset empties
@@ -737,13 +737,16 @@ async function seedWork(api) {
 // Terraform repo's flows can init.
 async function seedPools(api) {
   const pools = await api("GET", "/api/workers/pools");
-  // build takes the JS repos' agent work: 12 so the demo's twelve intents can all run at once (min 0: no idle cost).
-  if (!pools.some((p) => p.name === "build")) await api("POST", "/api/workers/pools", { name: "build", size: "basic", min: 0, max: 12 });
+  // Both pools take up to 12 so the demo's twelve intents all run at once (min 0: no idle cost), and keep a worker 10 min
+  // after its job, so the run's later jobs start on a warm worker instead of a cold container.
+  let build = pools.find((p) => p.name === "build");
+  if (!build) build = await api("POST", "/api/workers/pools", { name: "build", size: "basic", min: 0, max: 12 });
   let toolchains = pools.find((p) => p.name === "toolchains");
   if (!toolchains) {
-    toolchains = await api("POST", "/api/workers/pools", { name: "toolchains", size: "standard-2", min: 0, max: 4 });
+    toolchains = await api("POST", "/api/workers/pools", { name: "toolchains", size: "standard-2", min: 0, max: 12 });
     await api("PUT", `/api/workers/pools/${toolchains.id}`, { labels: ["linux", "full-image"] });
   }
+  for (const p of [build, toolchains]) await api("PUT", `/api/workers/pools/${p.id}`, { max: 12, keep_warm_s: 600 });
   if (!toolchains.egress_allow?.length) {
     await api("PUT", `/api/workers/pools/${toolchains.id}`, { egress_allow: [...EGRESS, "registry.terraform.io", "github.com", "release-assets.githubusercontent.com"] });
   }

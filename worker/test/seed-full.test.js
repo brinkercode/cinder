@@ -52,7 +52,7 @@ const snapshot = async () => {
 };
 
 // The owner, signed in through Access before the first seed, so the import credits them too.
-const OWNER = "owner@brinkercode.dev";
+const OWNER = "owner@example.com";
 beforeAll(async () => {
   fake = await agentsFake(dir, SEED_IMPORTS);
   env.ARTIFACTS = fake;
@@ -198,7 +198,7 @@ it("the seed releases only the agents the platform runs, each on web markdown", 
 
 it("the full seed still produces its initial trees with distinct authors without a policy job", async () => {
   await full();
-  expect(await repoGit(REPOS.trunk, "log", "--format=%an <%ae>", "main")).toMatch(/^([\w.]+ <[\w.]+@brinkercode.dev>\n?){4}$/);
+  expect(await repoGit(REPOS.trunk, "log", "--format=%an <%ae>", "main")).toMatch(/^([\w.]+ <[\w.]+@example.com>\n?){4}$/);
   expect(await repoGit(REPOS.trunk, "show", "main:.cinder.yml")).toContain("integration: [main]");
   expect(await env.DB.prepare("SELECT count(*) AS n FROM jobs WHERE kind = 'policy'").first("n")).toBe(0);
 }, 120000);
