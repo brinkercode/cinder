@@ -34,3 +34,13 @@
 /* Code toolbar: the Releases link's latest-tag chip, dropped on narrow screens. */
 .code-bar .bcount{display:inline-flex;align-items:center;height:18px;padding:0 6px;border-radius:var(--r-full);background:var(--tint);color:var(--text-subtle);font-size:var(--fs-11);font-weight:500}
 @media (max-width:1100px){.code-bar .bcount{display:none}}
+/* Live on this file: the header chip (green Free to edit, or a lease count with a dot per holder), its popover, and the
+   collision banner over the code. Holder colours follow the gutter bands: agent --chart, person --brand. */
+.fcard .lchip{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border:0;border-radius:var(--r-full);font:inherit;font-size:var(--fs-12);cursor:pointer;white-space:nowrap}
+.lchip.free{background:var(--success-tint);color:var(--success)}
+.lchip.held{background:var(--interactive-tint);color:var(--link)}.lchip.held.warn{background:var(--danger-tint);color:var(--danger)}
+.lchip .dot{width:6px;height:6px}.lchip .dot+.dot{margin-left:-2px}.lchip .dot.agent{background:var(--chart)}.lchip .dot.human{background:var(--brand)}
+.lchip:focus-visible{outline:2px solid var(--interactive);outline-offset:1px}
+.lpop{width:min(360px,calc(100vw - 16px))}.lpop-h{display:flex;align-items:center;gap:var(--s-2);padding:6px 10px 8px;border-bottom:var(--bw) solid var(--hairline)}.lpop-h .live-s{margin-left:auto}
+.lpop .list>li{padding:8px 10px}
+.lwarn{list-style:none;margin:0;padding:var(--s-2) var(--s-4);display:grid;gap:4px;background:var(--danger-tint);border-bottom:var(--bw) solid var(--hairline)}

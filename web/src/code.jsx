@@ -20,7 +20,7 @@ import { Markdown } from "./lib/markdown.jsx";
 import { viewStyle } from "./lib/code-metrics.js";
 import { langOf, tokenize } from "./lib/tokenize.js";
 import { Bone, BoneText, LoadingRegion, useShape } from "./skeleton.jsx";
-import { ChangeId, Diff, LiveLabel, Panel, Prob, Region, Seg, State, Tag, Frame } from "./ui.jsx";
+import { ChangeId, Diff, LiveLabel, Panel, Popover, Prob, Region, Seg, State, Tag, Frame } from "./ui.jsx";
 import { ChangeWho } from "./who.jsx";
 
 const TONE = { conflict: "bad", failed: "bad", waiting: "warn", resolving: "warn", merged: "ok" };
@@ -385,6 +385,29 @@ function CodeView({ repo, page, at: ref, path, staged, setStaged, pending, openi
       })}</div></div>
     </>);
   }
+  // Live on this file is a chip in the file header: Free to edit, or the lease count with a dot per holder. It opens the
+  // list; collision warnings stay out of the popover, in a banner over the code.
+  const live = perChange(leases.filter((l) => l.file === path));
+  const warns = path ? warnings(col.data, leases, path) : [];
+  const leaseChip = (
+    <Popover className={live.length ? `lchip held${warns.length ? " warn" : ""}` : "lchip free"}
+      title={`Live on this file: ${live.length ? `${live.length} lease${live.length > 1 ? "s" : ""}` : "no leases"}`}
+      label={live.length ? <>{live.map((l) => <span key={l.holder} className={`dot ${kindOf(l)}`} />)}{live.length} lease{live.length > 1 && "s"}</> : <><span className="dot ok" />Free to edit</>}>
+      <div className="lpop">
+        <div className="lpop-h"><b>Live on this file</b><LiveLabel /></div>
+        <Region><ul className="list">
+          {live.map((l) => (
+            <li key={l.symbol}>
+              <div className="row">{link(l.holder)}<StateTag state={byId[l.holder].state} /></div><span>{byId[l.holder].intent}</span>
+              <span className="meta"><code>{l.symbol}</code> · <ChangeWho change={byId[l.holder]} /> · {l.mode}
+                {col.data?.editing.some((e) => e.change_id === l.holder && e.symbol.split("#")[0] === path) && " · editing now"}</span>
+            </li>
+          ))}
+          {!live.length && <li className="meta">No one holds a lease here. Edit freely; your change takes the leases it needs.</li>}
+        </ul></Region>
+      </div>
+    </Popover>
+  );
   const main = (
     <section className={editing ? "panel fcard editing" : "panel fcard"} aria-busy={pending || undefined}>
       <div className="panel-head"><PiFile />{editing ? <>
@@ -392,7 +415,7 @@ function CodeView({ repo, page, at: ref, path, staged, setStaged, pending, openi
         <datalist id="code-dirs">{[...new Set(files.flatMap((x) => x.path.split("/").slice(0, -1).map((_, i, a) => `${a.slice(0, i + 1).join("/")}/`)))].map((d) => <option key={d} value={d} />)}</datalist>
       </> : <h2 className="mono">{hits ? `Matches for ${search.get("q")}` : page.commits || mode === "commits" ? `Commits on ${ref}` : mode === "new" ? "New file"
         : (opening || f?.path || "").split("/").map((s, i, a) => (i < a.length - 1 ? <span key={i}>{`${s}/`}</span> : <span key={i} className="cur">{s}</span>))}</h2>}
-        {!path && !hits && !page.commits && mode !== "new" && mode !== "commits" && editable && <Link className="btn btn-secondary btn-sm" to={`${codePath(repo.name, ref, f.path)}?v=edit`} onMouseEnter={loadMonaco} onFocus={loadMonaco}>Edit</Link>}{path && <><span className="meta">{pending ? "…" : lines.length} lines</span>
+        {!path && !hits && !page.commits && mode !== "new" && mode !== "commits" && editable && <Link className="btn btn-secondary btn-sm" to={`${codePath(repo.name, ref, f.path)}?v=edit`} onMouseEnter={loadMonaco} onFocus={loadMonaco}>Edit</Link>}{path && <><span className="meta">{pending ? "…" : lines.length} lines</span>{leaseChip}
         <div className="toolbar">{editing ? <><span className="pill brand">Editing</span>
           <button type="button" className="btn btn-secondary btn-sm" onClick={() => put({ path, delete: true, hits: touched([]) })}><PiTrash />Stage delete</button>
           <button type="button" className="btn btn-secondary btn-sm" onClick={cancel}>Cancel</button></> : <>
@@ -402,6 +425,7 @@ function CodeView({ repo, page, at: ref, path, staged, setStaged, pending, openi
       {asking && <div className="ask pad row" role="alert"><span>Discard your edits to <b className="mono">{path.split("/").at(-1)}</b>?</span>
         <button type="button" className="btn btn-secondary btn-sm end" onClick={() => setAsking(false)}>Keep editing</button>
         <button type="button" className="btn btn-secondary btn-sm" onClick={discard}>Discard</button></div>}
+      {warns.length > 0 && <ul className="lwarn">{warns.map((w) => <li key={w.key} className="col-warn" role="status"><Ic name="tri" />{w.text}</li>)}</ul>}
       {body}
     </section>
   );
@@ -438,30 +462,20 @@ function CodeView({ repo, page, at: ref, path, staged, setStaged, pending, openi
     </section>
   );
 
-  const live = perChange(leases.filter((l) => l.file === path));
-  const rail = (
-    <>
-      <Panel title={path ? "Live on this file" : `Active in ${repo.name}`} aside={<LiveLabel />}>
-        <Region><ul className="list">
-          {path ? live.map((l) => (
-            <li key={l.symbol}>
-              <div className="row">{link(l.holder)}<StateTag state={byId[l.holder].state} /></div><span>{byId[l.holder].intent}</span>
-              <span className="meta"><code>{l.symbol}</code> · <ChangeWho change={byId[l.holder]} /> · {l.mode}
-                {col.data?.editing.some((e) => e.change_id === l.holder && e.symbol.split("#")[0] === path) && " · editing now"}</span>
-            </li>
-          )) : active.slice(0, ACTIVE).map((l) => (
-            <li key={`${l.holder} ${l.symbol}`}>
-              <Link to={`${root}/changes/${l.holder}`}>{byId[l.holder].intent}</Link>
-              <span className="meta"><ChangeWho change={byId[l.holder]} /> · <code>{l.file}</code> · <code>{l.symbol}</code></span>
-            </li>
-          ))}
-          {path && warnings(col.data, leases, path).map((w) => <li key={w.key} className="col-warn" role="status"><Ic name="tri" />{w.text}</li>)}
-          {path && !live.length && <li className="meta">No one holds a lease here. Edit freely; your change takes the leases it needs.</li>}
-          {!path && !active.length && <li className="meta">No active leases.</li>}
-          {!path && active.length > ACTIVE && <li><Link to={`${root}/changes`}>See all {active.length}</Link></li>}
-        </ul></Region>
-      </Panel>
-    </>
+  // Only the repo root has a rail: a file's leases are its header chip.
+  const rail = !path && (
+    <Panel title={`Active in ${repo.name}`} aside={<LiveLabel />}>
+      <Region><ul className="list">
+        {active.slice(0, ACTIVE).map((l) => (
+          <li key={`${l.holder} ${l.symbol}`}>
+            <Link to={`${root}/changes/${l.holder}`}>{byId[l.holder].intent}</Link>
+            <span className="meta"><ChangeWho change={byId[l.holder]} /> · <code>{l.file}</code> · <code>{l.symbol}</code></span>
+          </li>
+        ))}
+        {!active.length && <li className="meta">No active leases.</li>}
+        {active.length > ACTIVE && <li><Link to={`${root}/changes`}>See all {active.length}</Link></li>}
+      </ul></Region>
+    </Panel>
   );
 
   const rows = [];
@@ -500,7 +514,7 @@ function CodeView({ repo, page, at: ref, path, staged, setStaged, pending, openi
         </div>
       )}
       {ws && <WorkspaceStrip key={ws.id} ws={ws} symbols={leases.filter((l) => l.holder === ws.id).map((l) => l.symbol)} driving={driving} setDriving={setDriving} />}
-      <div className="code-wrap">
+      <div className={rail ? "code-wrap" : "code-wrap norail"}>
         <nav className="panel ftree-wrap" aria-label="Files">
           <details className="ft-d" open ref={tree}>
             <summary className="panel-head"><h2>Files</h2><span className="meta">{isWs(ref) ? <ChangeId id={ref} label={ws?.key} /> : ref}</span></summary>
@@ -509,7 +523,7 @@ function CodeView({ repo, page, at: ref, path, staged, setStaged, pending, openi
           </details>
         </nav>
         <div className="col-main">{stagedPanel}{main}</div>
-        <aside className="rail">{rail}</aside>
+        {rail && <aside className="rail">{rail}</aside>}
       </div>
     </>
   );
@@ -620,14 +634,14 @@ const DEPTH = [0, 1, 2, 2, 1, 2, 2, 0, 1, 1, 0, 0];
 const ViewerSkel = ({ lines }) => <div className="codev"><div className="codev-in" style={viewStyle}>{Array.from({ length: lines }, (_, i) =>
   <div key={i} className="cl"><span className="ln"><Bone w={16} h={10} row={i} /></span><span className="src"><BoneText i={i * 3} /></span></div>)}
 </div></div>;
-function CodeSkel({ repo }) {
+function CodeSkel({ repo, path }) {
   const files = useShape(`code/${repo.name}/files`, 12).n, lines = useShape(`code/${repo.name}/lines`, 24).n, active = useShape(`code/${repo.name}/active`, 3).n;
   if (!files) return <LoadingRegion page="code" busy><section className="panel qs"><div className="panel-head"><h2>Quick setup</h2></div>
     <div className="pad qs-b">{[0, 1, 2, 3].map((i) => <BoneText key={i} i={i} />)}</div></section></LoadingRegion>;
   return <LoadingRegion page="code" busy>
     {idleBar}
     <div className="panel cmd"><div className="panel-head"><h2>Commits</h2><BoneText w="40%" /></div></div>
-    <div className="code-wrap">
+    <div className={path ? "code-wrap norail" : "code-wrap"}>
       <nav className="panel ftree-wrap" aria-label="Files">
         <div className="panel-head"><h2>Files</h2></div>
         <ul className="ftree">{Array.from({ length: files }, (_, i) => <li key={i} className="skel-row" style={{ paddingLeft: DEPTH[i % 12] * 12 + 8 }}><BoneText i={i} /></li>)}</ul>
@@ -636,9 +650,9 @@ function CodeSkel({ repo }) {
         <div className="panel-head"><BoneText large w="30%" /></div>
         <ViewerSkel lines={lines} />
       </section></div>
-      <aside className="rail"><Panel title={`Active in ${repo.name}`}>
+      {!path && <aside className="rail"><Panel title={`Active in ${repo.name}`}>
         <ul className="list">{Array.from({ length: active }, (_, i) => <li key={i}><BoneText i={i} /><BoneText i={i + 3} /></li>)}</ul>
-      </Panel></aside>
+      </Panel></aside>}
     </div>
   </LoadingRegion>;
 }
@@ -753,7 +767,7 @@ export function Code() {
   const at = pending ? shown : { page, path };
   return (
     <Frame>
-      <Suspense key={ref} fallback={<CodeSkel repo={repo} />}>
+      <Suspense key={ref} fallback={<CodeSkel repo={repo} path={path} />}>
         <Await resolve={at.page} errorElement={<LoadError />}>{(p) => {
           const view = (q) => <CodeView repo={repo} page={q} at={p.missing ? p.ref : ref} path={at.path} opening={path} staged={staged} setStaged={setStaged} pending={pending} />;
           // The file shows at once; changes, leases and symbols fill in when page.wide lands (first view of a repo and ref).

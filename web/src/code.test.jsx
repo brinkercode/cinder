@@ -285,7 +285,11 @@ describe("code page", () => {
     expect(text(readme)).toContain("Active in acme/web live Preserve case of X-Forwarded-* headers during normalization patch@3.2.1 · src/headers/normalize.rs · fn normalize_headers Introduce RouteMatcher");
     // Four leases from three changes: one row per change, all within the cap.
     expect(text(readme)).not.toMatch(/See all \d/);
-    expect(text(await page("/acme%2Fweb/code/develop/cinder.toml", settled))).toContain("Live on this file live No one holds a lease here. Edit freely; your change takes the leases it needs.");
+    // A file has no rail: Free to edit is a chip in its header, and the chip's popover says why.
+    const free = await page("/acme%2Fweb/code/develop/cinder.toml", settled);
+    expect(free).not.toContain('<aside class="rail"');
+    expect(free).toMatch(/<button type="button" class="lchip free"[^>]*aria-label="Live on this file: no leases"/);
+    expect(text(free)).toContain("Free to edit Live on this file live No one holds a lease here. Edit freely; your change takes the leases it needs.");
     expect(text(await page("/acme%2Fweb/code/develop/Cargo.toml", settled))).toContain("File Cargo.toml not found It may have been merged and archived, or the link is wrong. Back to files");
   });
 

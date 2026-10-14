@@ -384,11 +384,14 @@ describe("code page (live)", () => {
   it("an agent-driven change renders its agent as holder with the agent lease class", async () => {
     vi.stubGlobal("matchMedia", () => ({ matches: false }));
     const root = await render("main/src/app.js", leased({ agent: "dev", ver: "v3" }));
-    expect(all(root).find((n) => n.nodeName === "ASIDE").textContent).toContain("run · dev@v3");
+    // A file has no rail: its leases are the header chip's popover.
+    expect(all(root).find((n) => n.nodeName === "ASIDE")).toBeUndefined();
+    expect(byClass(root, "lchip held")[0].textContent).toBe("1 lease");
+    expect(byClass(root, "lpop")[0].textContent).toContain("run · dev@v3");
     expect(byClass(root, "cl leased exclusive agent").map((n) => n.childNodes[0].textContent)).toEqual(["1", "2"]);
     // Once a person takes over, they hold it with the human lease class.
     const person = await render("main/src/app.js", leased({ agent: "dev", ver: "v3", driver: "ana@example.com" }));
-    expect(all(person).find((n) => n.nodeName === "ASIDE").textContent).toContain("run · ana@example.com · person");
+    expect(byClass(person, "lpop")[0].textContent).toContain("run · ana@example.com · person");
     expect(byClass(person, "cl leased exclusive human")).toHaveLength(2);
   });
 
@@ -404,7 +407,9 @@ describe("code page (live)", () => {
   it("History rows render an age from the log date", async () => {
     vi.stubGlobal("matchMedia", () => ({ matches: false }));
     const root = await render("main/src/app.js?v=history", leased({}));
-    const row = all(all(root).find((n) => n.nodeName === "SECTION")).find((n) => n.nodeName === "LI");
+    // The first LI outside the lease chip's popover.
+    const pop = all(byClass(root, "lpop")[0]);
+    const row = all(all(root).find((n) => n.nodeName === "SECTION")).find((n) => n.nodeName === "LI" && !pop.includes(n));
     expect(byClass(row, "meta end").map((n) => n.textContent)).toEqual(["2d"]);
   });
 

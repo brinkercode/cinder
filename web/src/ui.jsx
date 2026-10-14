@@ -193,7 +193,7 @@ export function Tabs({ label, options, value, onChange }) {
 }
 
 // Native popover under its anchor, flipped above it or left of the edge to stay in the viewport.
-export function Popover({ label, title, children }) {
+export function Popover({ label, title, className = "btn btn-secondary", children }) {
   const id = useId();
   const anchor = useRef(null);
   const place = (pop) => {
@@ -206,7 +206,7 @@ export function Popover({ label, title, children }) {
     pop.addEventListener("toggle", open);
     return () => pop.removeEventListener("toggle", open);
   };
-  return <><button type="button" className="btn btn-secondary" ref={anchor} popoverTarget={id} aria-label={title}>{label}</button><div className="pop" id={id} popover="auto" ref={place}>{children}</div></>;
+  return <><button type="button" className={className} ref={anchor} popoverTarget={id} aria-label={title}>{label}</button><div className="pop" id={id} popover="auto" ref={place}>{children}</div></>;
 }
 
 export const Toggle = ({ label, checked, onChange }) => <input type="checkbox" role="switch" className="tg" aria-label={label} checked={checked} onChange={(e) => onChange(e.target.checked)} />;

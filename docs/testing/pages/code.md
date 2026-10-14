@@ -72,10 +72,10 @@
 | ID | Check | Expected |
 |---|---|---|
 | CODE-29 | Look at the right column on the repo root. | "Active in &lt;repo&gt;" with a live label: at most 3 active leases, one row per change (its symbol lease before a file-level one), each with its change title (a link), holder (the driving agent, or the person who took over), file and symbol; "See all &lt;n&gt;" opens Changes when more are held; "No active leases." when none are. |
-| CODE-30 | Open a leased file. | "Live on this file": each holder, path:lines and time left. |
+| CODE-30 | Open a leased file. | The header chip reads "*n* leases" with a dot per holder in its colour; it opens "Live on this file": each holder, path:lines and time left. No rail. |
 | CODE-68 | Open a file where one change holds a symbol lease and a file lease. | "Live on this file" lists the change once, showing its symbol lease. |
 | CODE-69 | Open a file leased by a change a runner has claimed. | Its holder reads `<agent>@<version>`, not "agent@pending". |
-| CODE-31 | Open an unleased file. | "No one holds a lease here. Edit freely; your change takes the leases it needs." |
+| CODE-31 | Open an unleased file. | A green "Free to edit" chip in the header, and no rail; the chip opens "No one holds a lease here. Edit freely; your change takes the leases it needs." |
 
 ## Edit and commit
 
@@ -147,7 +147,7 @@
 | CODE-90 | Throttle the network and reload a file's link on `main`. | The `file` and `tree` requests start at once, without waiting for `branches`; the file shows before `branches` answers. |
 | CODE-91 | Reload a commit's diff link (`?v=commits&sha=…`), then after a push to the branch click a commit's sha. | The `commits/<sha>` request starts with the `file` request, not after it; the diff shows even while the new `log?…&page=1` request is pending. |
 | CODE-1435.1 | Open a change workspace (`/:repo/code/<change id>`). Click **Release lease**, then **Give it back**. Type a line in **Message agent** and send it. | The strip above the files names the agent, workspace, intent and leased symbols. Release reads "Lease released. The agent is paused…" and the button becomes **Give it back**; giving back re-grants the lease. The message reads "Sent “…”. The agent reads it before its next step." Release while the change is mid-commit reads "Couldn't release the lease: … is mid-commit…". |
-| CODE-1432.1 | Open a file one change leases, then let another change's agent push a write to one of its symbols. | **Live on this file** shows "<other> is changing the signature of <symbol>, which <holder> leases" without a reload, and the holder's row reads its mode and "editing now". It goes after 10 minutes without a write. |
+| CODE-1432.1 | Open a file one change leases, then let another change's agent push a write to one of its symbols. | A banner over the code shows "<other> is changing the signature of <symbol>, which <holder> leases" without a reload and the header chip turns red; in its popover the holder's row reads its mode and "editing now". It goes after 10 minutes without a write. |
 | CODE-1434.1 | Edit lines outside any leased symbol and press **Open change**. | No prompt; the change opens. |
 | CODE-1434.2 | Edit inside a symbol another change leases, add a message and press **Open change**. | A prompt above the bottom bar shows the symbol and lines, the holder and its change, the lease expiry, and the three options (p(collision) on the parallel one). **Back to editing** closes it. |
 | CODE-1434.3 | In the prompt choose **Stack on** or **Run in parallel**, then **Continue**. | The change opens, stacked on the holder, or leasing the symbol alongside it. |
