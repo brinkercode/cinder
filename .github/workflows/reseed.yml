@@ -14,15 +14,14 @@ concurrency:
   cancel-in-progress: false
 jobs:
   reseed:
-    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}   # repo variable RUNNER names a self-hosted runner (this repo: cinder-arc)
+    runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v4
-      - if: vars.RUNNER == ''
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
       - run: npm ci --prefer-offline --no-audit --no-fund

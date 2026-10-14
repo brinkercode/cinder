@@ -7,7 +7,7 @@ export const OWNER_TOKEN = CINDER_TOKEN;
 // The seed's API client against the same Worker, past Access when a service token is set.
 export const api = client({ url: baseURL, token: OWNER_TOKEN, accessId, accessSecret });
 
-// Browsers come from PLAYWRIGHT_BROWSERS_PATH (baked into the cinder-arc image); never `playwright install` in CI.
+// Browsers come from PLAYWRIGHT_BROWSERS_PATH when it's set.
 export default defineConfig({
   testDir: ".",
   testIgnore: "git-fsck.test.js", // node --test, run by make check-ts
