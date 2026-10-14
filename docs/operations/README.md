@@ -215,6 +215,8 @@ The reset also removes the managed worker pools. Every seed run, reset or not, c
 
 Not deleted: Analytics Engine data (it has no delete API) and images in Cloudflare's managed container registry.
 
+`.github/workflows/teardown.yml` runs `make down` every night at 23:59 Pacific (06:59 UTC) with the release secrets, and can be run by hand from the Actions tab. It waits for a release or reseed in progress. To bring cinder back, run `make up` and `make seed`. A push to `main` also redeploys the Worker and its resources through the release, but without seed data.
+
 ## Smoke test
 
 `make smoke` (`scripts/smoke.sh`) runs against the deployment in `~/.config/cinder/live.env` (or `CINDER_URL` and `CINDER_TOKEN`). `SMOKE_VERIFY_TIMEOUT` (900 s) and `SMOKE_AGENT_TIMEOUT` (900 s) bound the waits for a worker. The checks, each PASS or FAIL with evidence:
@@ -263,6 +265,6 @@ The repository is public, so only its owner can push, and nothing a stranger sen
   - Fork pull request workflows from outside collaborators: **Require approval for all outside collaborators**.
   - Workflow permissions: **Read repository contents and packages permissions**, and leave "Allow GitHub Actions to create and approve pull requests" off.
   - Leave "Send secrets and variables to workflows from fork pull requests" off (it is off by default).
-- **Actions › Runners**: none. Every workflow runs on GitHub-hosted runners; `release.yml` and `reseed.yml` run only on pushes to `main` or a manual run, which only the owner can start.
+- **Actions › Runners**: none. Every workflow runs on GitHub-hosted runners; `release.yml` and `reseed.yml` run only on pushes to `main` or a manual run, and `teardown.yml` on its nightly schedule or a manual run, which only the owner can start.
 - **Secrets and variables › Actions**: the release secrets above live only as repository secrets. A fork's pull request never receives them.
 - **Code security**: private vulnerability reporting on, Dependabot alerts on.
