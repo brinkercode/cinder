@@ -384,6 +384,13 @@ describe("change detail", () => {
     expect(text()).toContain("Blocked: Verifier hasn't passed the head.");
   });
 
+  it("a merged change no person approved, routed by risk, renders No human approval needed", async () => {
+    const { root } = await mount(server({ ...verified(), state: "merged", review: { route: "agent", reason: "documentation-only change" }, approvals: [] }));
+    const rows = all(root).filter((n) => n.attrs.class === "rd").map((n) => n.textContent);
+    expect(rows).toContain("No human approval neededdocumentation-only change");
+    expect(rows.filter((r) => r.startsWith("Human approval given"))).toEqual([]);
+  });
+
   it("a change with review.route agent and one human approval renders Human approval as Human approval given", async () => {
     const { root } = await mount(server({ ...verified(), review: { route: "agent", reason: "risk low" }, approvals: [{ actor: { type: "human", id: "maya" }, head_sha: null, at }] }));
     expect(all(root).filter((n) => n.attrs.class === "rd").map((n) => n.textContent)).toContain("Human approval givenApproved at the head");

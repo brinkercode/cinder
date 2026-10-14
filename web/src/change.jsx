@@ -294,7 +294,7 @@ function Detail({ change: c, threads, changes, commits, checks, files: diffP, qu
     ...(c.blocked ? [["bad", c.blocked, <Link to="/needs">Decide in Needs you</Link>]] : []),
     last?.[2] === "requested" ? ["bad", "Changes requested", last[3] ?? ""]
       : c.review?.route === "human" && !approved ? ["warn", "Awaiting human approval", c.review.reason]
-        : queued || approved ? ["ok", "Human approval given", "Approved at the head"] : ["ok", "No human approval needed", c.review?.reason ?? "Routed by risk once verified"],
+        : approved || (queued && c.review?.route === "human") ? ["ok", "Human approval given", "Approved at the head"] : ["ok", "No human approval needed", c.review?.reason ?? "Routed by risk once verified"],
     ...(!held.length ? [] : waiting.length ? [["warn", `Waiting on ${waiting.join(", ")} (requested)`,
       done ? `${done} approved ${head} · auto-queue waits for the rest` : "Auto-queue holds until requested reviewers approve the head"]]
       : [["ok", "Requested reviewers approved", `${done} approved ${head}`]]),
