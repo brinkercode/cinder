@@ -48,8 +48,14 @@ export function createArtifacts(binding) {
         .then((t) => ({ token: t.plaintext, scope: t.scope, expiresAt: t.expiresAt }));
     },
     delete: (name) => binding.delete(name),
-    // lazy: one list() page; follow its cursor once the namespace outgrows a page.
-    list: async () => (await read(() => binding.list())).repos.map((r) => r.name),
+    async list() {
+      const names = [];
+      for (let cursor; ;) {
+        const page = await read(() => binding.list(cursor ? { cursor } : undefined));
+        names.push(...page.repos.map((r) => r.name));
+        if (!(cursor = page.cursor)) return names;
+      }
+    },
     async readFile(name, ref, path) {
       return (await this.readBlob(name, ref, path))?.text() ?? null;
     },
