@@ -1,4 +1,4 @@
-// Enforces docs/FRONTEND-AVOID.md rules eslint can't see: dependencies, kit config files, CSS.
+// Enforces the CONTRIBUTING.md frontend rules eslint can't see: dependencies, kit config files, CSS.
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 

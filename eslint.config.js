@@ -16,8 +16,8 @@ export default [
     rules: {
       "no-unused-vars": ["error", { varsIgnorePattern: "^[A-Z]" }],
       "no-restricted-imports": ["error", {
-        patterns: [...banned.map((name) => ({ group: [name, `${name}/*`], message: "Banned by docs/FRONTEND-AVOID.md" })),
-          { group: ["@/components/ui/*"], message: "No shadcn-style kits (docs/FRONTEND-AVOID.md)" }],
+        patterns: [...banned.map((name) => ({ group: [name, `${name}/*`], message: "Banned: see CONTRIBUTING.md, Frontend rules" })),
+          { group: ["@/components/ui/*"], message: "No shadcn-style kits (CONTRIBUTING.md, Frontend rules)" }],
       }],
     },
   },

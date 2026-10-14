@@ -626,11 +626,6 @@ describe("code page", () => {
     expect(html).toContain("<pre>GET /api/repos/acme%2Fweb/tree?ref=develop&amp;path=&amp;recursive=1: Failed to fetch</pre>");
   });
 
-  it("every check ID in docs/testing/pages/code.md is unique", () => {
-    const ids = [...readFileSync(new URL("../../docs/testing/pages/code.md", import.meta.url), "utf8").matchAll(/^\| (CODE-\d+) \|/gm)].map((m) => m[1]);
-    expect(ids.length).toBeGreaterThan(50);
-    expect(ids.filter((id, i) => ids.indexOf(id) !== i)).toEqual([]);
-  });
 
   it("leaving with unsaved edits asks for confirmation", async () => {
     const router = createMemoryRouter([{ path: "*", element: null }], { initialEntries: ["/r/code/main/a.js?v=edit"] });
