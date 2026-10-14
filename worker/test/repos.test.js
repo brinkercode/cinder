@@ -210,6 +210,18 @@ describe("repo delete forks", () => {
     await (await e.ARTIFACTS.get("del-forks")).fork("del-forks--DELFORKS-1");
   });
 
+  it("deleting a repo deletes its change forks past the binding's first list page", async () => {
+    const e = { ...env, ARTIFACTS: fakeArtifacts() };
+    const send = (method, path, body) => worker.fetch(new Request(`http://cinder.test${path}`, { method, headers: OWNER, body: JSON.stringify(body) }), e);
+    expect((await send("POST", "/api/repos", { name: "paged" })).status).toBe(201);
+    await (await e.ARTIFACTS.get("paged")).fork("paged--PAGED-1");
+    for (const n of ["a", "b", "c"]) await e.ARTIFACTS.create(`other-${n}`);
+    e.ARTIFACTS.page = 2;
+    expect((await send("DELETE", "/api/repos/paged", { confirm: "paged" })).status).toBe(204);
+    e.ARTIFACTS.page = Infinity;
+    expect(e.ARTIFACTS.repos.has("paged--PAGED-1")).toBe(false);
+  });
+
   it("a repo made again under a deleted repo's name holds none of its leases", async () => {
     const e = { ...env, ARTIFACTS: fakeArtifacts() };
     const send = (method, path, body) => worker.fetch(new Request(`http://cinder.test${path}`, { method, headers: OWNER, body: JSON.stringify(body) }), e);

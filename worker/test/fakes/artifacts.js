@@ -109,7 +109,7 @@ export function fakeArtifacts({ now = () => Date.now(), remote = (name) => `http
     repos,
     // Like Artifacts' async create: a new repo's next `creating` get() calls reject "being created" (Infinity: stuck).
     creating: 0,
-    // Like the binding's list(), one page: the newest `page` repos.
+    // Like the binding's list(), pages of `page` repos, newest first, with a cursor while more remain.
     page: Infinity,
     async create(name, opts) {
       record("create", [name, opts]);
@@ -131,7 +131,11 @@ export function fakeArtifacts({ now = () => Date.now(), remote = (name) => `http
       }
       return capability(name);
     },
-    async list() { return { repos: [...repos.keys()].slice(-fake.page).map((name) => ({ name })) }; },
+    async list({ cursor = 0 } = {}) {
+      const names = [...repos.keys()].reverse();
+      const end = cursor + fake.page;
+      return { repos: names.slice(cursor, end).map((name) => ({ name })), ...(end < names.length && { cursor: end }) };
+    },
     async delete(name) {
       record("delete", [name]);
       return repos.delete(name);
