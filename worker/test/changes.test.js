@@ -542,6 +542,19 @@ describe("change cards", () => {
     expect(card).toMatchObject({ id, state: "developing", agent: "dev", ver: "v3", tok: [1200, 300, 4000], lease: { kind: "held" }, risk_judge: null });
   });
 
+  it("a change whose number's fork name is already taken in Artifacts gets the next number", async () => {
+    const { fake } = await setup("card-taken");
+    const { id: repoId } = await env.DB.prepare("SELECT id FROM repos WHERE name = 'card-taken'").first();
+    const taken = new Set(["card-taken--CARDTAKEN-1"]);
+    const e = { ...env, ARTIFACTS: { ...fake, get: async (n) => {
+      const r = await fake.get(n);
+      return { ...r, fork: async (child) => { if (taken.has(child)) throw Object.assign(new Error(`repo already exists: ${child}`), { name: "ArtifactsError" }); return r.fork(child); } };
+    } } };
+    const change = await newChange(e, "card-taken", repoId, "x", "main", []);
+    expect(change).toMatchObject({ number: 2, key: "CARDTAKEN-2", fork: "card-taken--CARDTAKEN-2" });
+    expect((await newChange(e, "card-taken", repoId, "y", "main", [])).number).toBe(3);
+  });
+
   it("listing 50 changes makes no per-change DO call", async () => {
     const { fake } = await setup("card-50");
     const { id: repoId } = await env.DB.prepare("SELECT id FROM repos WHERE name = 'card-50'").first();

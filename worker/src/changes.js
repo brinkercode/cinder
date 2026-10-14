@@ -598,16 +598,26 @@ export const changeKey = (name, number) => (number == null ? null : `${keyPrefix
 export async function newChange(env, name, repoId, intent, branch, acceptance, kind = "change", actor, draft = false, fields = {}, requester = actor?.type === "human" ? actor.id : null) {
   const id = fields.id ?? crypto.randomUUID();
   const now = new Date().toISOString();
-  // The number is taken in the insert itself and the unique index refuses a repeat, so changes of a repo never share one. Its key names the fork.
-  const { number, fork } = await env.DB.prepare(
-    `INSERT INTO change_numbers (change_id, repo_id, number, fork)
-     SELECT ?1, ?2, n, ?3 || n FROM (SELECT coalesce(max(number), 0) + 1 AS n FROM change_numbers WHERE repo_id = ?2) RETURNING number, fork`,
-  ).bind(id, repoId, `${name}--${keyPrefix(name)}-`).first();
-  try {
-    await createArtifacts(env.ARTIFACTS).fork(name, fork);
-  } catch (err) {
-    await env.DB.prepare("DELETE FROM change_numbers WHERE change_id = ?").bind(id).run();
-    throw err;
+  let number, fork;
+  for (let tries = 1; ; tries++) {
+    // The number is taken in the insert itself and the unique index refuses a repeat, so changes of a repo never share one. Its key names the fork.
+    ({ number, fork } = await env.DB.prepare(
+      `INSERT INTO change_numbers (change_id, repo_id, number, fork)
+       SELECT ?1, ?2, n, ?3 || n FROM (SELECT coalesce(max(number), 0) + 1 AS n FROM change_numbers WHERE repo_id = ?2) RETURNING number, fork`,
+    ).bind(id, repoId, `${name}--${keyPrefix(name)}-`).first());
+    try {
+      await createArtifacts(env.ARTIFACTS).fork(name, fork);
+      break;
+    } catch (err) {
+      // A fork a deleted repo of the same name left behind (one stuck "being forked" is never listed, so never deleted)
+      // still holds its name: that number stays taken, by no change, and the change gets the next one.
+      if (/already exists/i.test(err?.message ?? "") && tries < 5) {
+        await env.DB.prepare("UPDATE change_numbers SET change_id = ? WHERE change_id = ?").bind(crypto.randomUUID(), id).run();
+        continue;
+      }
+      await env.DB.prepare("DELETE FROM change_numbers WHERE change_id = ?").bind(id).run();
+      throw err;
+    }
   }
   // A non-draft goes draft → planned on store: nothing runs in between, so the stored record is already planned.
   const change = {
