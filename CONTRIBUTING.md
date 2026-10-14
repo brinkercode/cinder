@@ -1,5 +1,14 @@
 # Contributing
 
+## Outside contributions
+
+Cinder is developed by its owner and invited collaborators.
+
+- **Pull requests from people without write access are closed automatically.** To propose a change, open an issue describing the problem and the change you'd make. If it fits, you'll be invited to send it.
+- **Issues** for bugs and ideas are welcome. Search first, and include steps to reproduce.
+- **Security issues** go through [SECURITY.md](SECURITY.md), never a public issue.
+- Every change to `main` goes through a pull request reviewed by the owner ([CODEOWNERS](.github/CODEOWNERS)) and must pass CI. Pull requests from forks run CI on GitHub-hosted runners with no secrets.
+
 ## Develop
 
 Needs Node 22+, Go 1.27+, `staticcheck` and `git` (`make check-ts` runs `e2e/git-fsck.test.js`, which checks the git
