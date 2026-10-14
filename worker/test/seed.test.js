@@ -113,11 +113,11 @@ it("the seed client never prints the Authorization or Access headers when it ret
 it("seedReview asks the owner and a placeholder maintainer to review a verifying change", async () => {
   const asked = [];
   const api = async (method, path, body) => {
-    if (path === "/api/people") return [{ email: "owner@brinkercode.dev", owner: true }, { email: PEOPLE[0], owner: false, role: "maintainer" }];
+    if (path === "/api/people") return [{ email: "owner@example.com", owner: true }, { email: PEOPLE[0], owner: false, role: "maintainer" }];
     if (path === `/api/repos/${REPOS.trunk}/changes`) return [{ id: "c1", intent: "Reject orders with a non-positive quantity", state: "verifying" }];
     if (path === "/api/changes/c1/reviewers") asked.push(body.person ?? body.agent_version);
     return method === "GET" ? [] : { id: "t1" };
   };
   await seedReview(api);
-  expect(asked).toEqual(["owner@brinkercode.dev", "ana.ruiz@brinkercode.dev", "reviewer@v2"]);
+  expect(asked).toEqual(["owner@example.com", "ana.ruiz@example.com", "reviewer@v2"]);
 });
