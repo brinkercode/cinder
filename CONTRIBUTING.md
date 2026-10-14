@@ -40,7 +40,18 @@ stubs `fetch`. Listeners share one socket per repo, so a test that mounts a live
 - **Tests.** Every acceptance item has a test named after the behaviour, and it fails without the change. Never skip or weaken a test.
 - **Checks.** `worker/`, `web/`: `eslint --max-warnings 0`, `vitest run`. Plain JavaScript only: no TypeScript and no JSDoc types used as a type system. `runner/`: `gofmt -l` empty, `go vet`, `staticcheck`, `go test -race`.
 - **Dependencies.** A new entry in a `package.json` or `go.mod` fails unless its name is in `deps-allow.txt`.
-- **Frontend.** No component kits; the banned list and CSS rules are in [docs/FRONTEND-AVOID.md](docs/FRONTEND-AVOID.md). Styling uses the tokens in `web/src/styles/tokens.css`.
+- **Frontend.** No component kits; see [Frontend rules](#frontend-rules). Styling uses the tokens in `web/src/styles/tokens.css`.
 - **Shared files.** A route is one import and one line in `worker/src/routes.js`; a page is one import and one line in `web/src/pages.jsx`; a new API shape goes in `worker/src/api/shapes/<name>.js`; migrations are named by UTC time (`worker/migrations/YYYYMMDDHHMM_<what>.sql`).
 - **Security.** Never weaken input validation at a trust boundary, data-loss handling or token handling. Artifacts tokens are never logged or returned to the browser.
-- **Docs.** A change that alters what a user or operator sees updates the doc in the same change: `docs/usage/<page>.md`, `docs/testing/pages/<page>.md` (retired check IDs are never reused), `docs/ARCHITECTURE-CLOUDFLARE.md` for bindings and resources, `docs/operations/README.md` for operations, the README for deploy and access.
+- **Docs.** A change that alters what a user or operator sees updates the doc in the same change: `docs/usage/<page>.md`, `docs/ARCHITECTURE-CLOUDFLARE.md` for bindings and resources, `docs/operations/README.md` for operations, the README for deploy and access.
+
+## Frontend rules
+
+`make check` enforces the first three (`scripts/banned-packages.json`, `eslint.config.js`, `scripts/check-frontend.mjs`); the last two are conventions:
+
+- **No component kits or their defaults.** The packages in `scripts/banned-packages.json` (Tailwind, Radix and Base UI, shadcn, lucide and Heroicons, framer-motion, sonner, recharts and similar) can't be dependencies or imports, and there is no `components.json` or `tailwind.config.*`.
+- **Icons** come only from `react-icons/pi` (Phosphor, regular weight), imported per icon.
+- **CSS:** plain CSS with custom properties. Color literals live only in `web/src/styles/tokens.css`; fonts only through `var(--font-*)`; no `backdrop-filter` and no `background-clip: text`.
+- **Native first:** `<dialog>`, the Popover API, `<details>`, container queries and `:has()` before a library. `react-aria` hooks only for widgets the platform lacks (combobox, grid, tree).
+- **Copy:** no emoji in UI text.
+

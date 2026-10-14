@@ -164,7 +164,7 @@ When a change merges or closes, its context is written to the target repo as com
 | Storage | R2 (CI cache, run logs) |
 | AI | Workers AI, AI Gateway (every model call, stored provider keys), Vectorize (advisory index) |
 | Secrets | Secrets Store, one binding per secret; cinder never encrypts or stores values |
-| Frontend | React 19, React Router 8, Vite; JavaScript with `.jsx` components; no component kits ([FRONTEND-AVOID.md](FRONTEND-AVOID.md)); visual design by the owner |
+| Frontend | React 19, React Router 8, Vite; JavaScript with `.jsx` components; no component kits ([frontend rules](../CONTRIBUTING.md#frontend-rules)); visual design by the owner |
 | Runners, CLI | Go; shell out to `git`, `ctags` (symbol index), `mergiraf` (structured merge) and the harness CLIs. These are external binaries the runner uses, not linked libraries |
 | Tests | vitest with `@cloudflare/vitest-plugin`; Go `testing` with `-race` |
 

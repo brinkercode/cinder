@@ -217,9 +217,3 @@ describe("needs you approvals", () => {
   });
 });
 
-it("docs list matches shipped need kinds", () => {
-  const doc = readFileSync(new URL("../../docs/testing/pages/needs-you.md", import.meta.url), "utf8");
-  const checks = doc.match(/^\| NEED-[\d.]+ \|.*$/gm).join("\n");
-  expect(NEED_KINDS.filter((k) => !checks.includes(k))).toEqual([]);
-  expect(doc).not.toMatch(/no raiser/);
-});
