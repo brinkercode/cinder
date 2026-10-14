@@ -198,7 +198,7 @@ Without a local checkout, an owner can click **Reset and reseed** under Settings
 
 Owner and Access configuration, Worker secrets, the AI Gateway and the Secrets Store store are left alone. Any other `CINDER_ENV` value, or none, means production: the route answers 403 and nothing is touched.
 
-The reset also removes the managed worker pools. Every seed run, reset or not, creates whichever of the two is missing: `build` (basic, min 0, max 4) and `toolchains` (standard-2, min 0, max 4, labels `linux` and `full-image`), both serving every job kind. A pool already there is left as it is. With min 0, a container runs only while a job is queued.
+The reset also removes the managed worker pools. Every seed run, reset or not, creates whichever of the two is missing: `build` (basic, min 0, max 12) and `toolchains` (standard-2, min 0, max 12, labels `linux` and `full-image`), each keeping a worker 10 minutes after its job, both serving every job kind. A pool already there is left as it is. With min 0, a container runs only while a job is queued.
 
 ## Tear down
 

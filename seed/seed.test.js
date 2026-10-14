@@ -268,14 +268,14 @@ it("a re-run changes no judge", async () => {
 // What a reset leaves of the managed pools: none.
 const wipePools = () => env.DB.batch([env.DB.prepare("DELETE FROM pool_settings"), env.DB.prepare("DELETE FROM worker_pools")]);
 const managed = async () => (await api("GET", "/api/workers/pools")).filter((p) => ["build", "toolchains"].includes(p.name))
-  .map((p) => ({ id: p.id, name: p.name, size: p.size, min: p.min, max: p.max, kinds: p.kinds, labels: p.labels }));
+  .map((p) => ({ id: p.id, name: p.name, size: p.size, min: p.min, max: p.max, kinds: p.kinds, labels: p.labels, keep_warm_s: p.keep_warm_s }));
 
-it("after a reset the seed creates the build and toolchains pools", async () => {
+it("after a reset the seed creates the build and toolchains pools, each up to 12 workers kept warm 10 minutes", async () => {
   await wipePools();
   await seed(api, undefined, []);
   expect(await managed()).toMatchObject([
-    { name: "build", size: "basic", min: 0, max: 12, labels: [] },
-    { name: "toolchains", size: "standard-2", min: 0, max: 4, labels: ["linux", "full-image"] }]);
+    { name: "build", size: "basic", min: 0, max: 12, labels: [], keep_warm_s: 600 },
+    { name: "toolchains", size: "standard-2", min: 0, max: 12, labels: ["linux", "full-image"], keep_warm_s: 600 }]);
 }, 300000);
 
 it("a re-run with both pools present changes no pool", async () => {
