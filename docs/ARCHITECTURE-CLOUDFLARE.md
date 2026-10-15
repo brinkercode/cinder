@@ -112,7 +112,7 @@ API paths drop the `/api` prefix. Handlers are listed in `worker/src/routes.js:1
 | Service | Trigger | Code | Cloudflare |
 |---|---|---|---|
 | Push pipeline | `cf.artifacts.repo.pushed` → Workflow | `pipeline.js` (`run`) | Workflow, Queue `cinder-events` |
-| Push consumer | Queue `cinder-events` | `pushes.js`, `index.js:174` | Queues, D1 `ref_writes` |
+| Push consumer | Queue `cinder-events` | `pushes.js`, `index.js:174` | Queues, D1 `ref_writes`, `rejected_pushes` |
 | Webhook delivery | Queue `cinder-webhooks` (5 retries) | `webhooks.js:37-62` | Queues |
 | Cron `*/10`, and DispatchDO's alarm | scheduled, alarm | `tick.js` `runTick`, once per 10-minute slot: the cron and DispatchDO's alarm (armed by each isolate's first request, 30 s after the cron's time) both ask `DispatchDO.takeSlot`, so the tick still runs when Cron Triggers fail. It runs `checkDrift`, `scanDaily`, `pullUsage`, `ingestAdvisories`, `cronFlows`, `expireLeases` (releases the RepoDO lease of a change parked past its idle window, recorded in D1 `lease_lapses`), `pruneGone` then `autoscale` | Cron Triggers, Durable Object alarm |
 | Account sync | cron, the tick in each hour's first 10 minutes | `accounts.js` `syncAccounts` | REST API (`/accounts/:id`, `/organizations`), D1 `organizations`, `accounts`, `account_members` |

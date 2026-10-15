@@ -117,7 +117,7 @@ judges:
 
 A `clef` judge takes `clef@2` or `clef@1`, a `clef-flash` judge `clef-flash@2` or `clef-flash@1`; any other version is rejected when saved. `@2` sends the state and questions to the Clef decision model as they are; `@1` stays callable so judges already on it keep their scored series.
 
-A judge's own airlock (Judges ▸ a judge ▸ Airlock, or `PUT /api/repos/<repo>/judges/<kind>/airlock {"on": true}`) keeps it scoring while its verdict never counts; it is separate from the repo airlock below.
+A judge's own airlock (Judges ▸ a judge ▸ Airlock, or `PUT /api/repos/<repo>/judges/<kind>/airlock {"on": true}`) keeps it scoring while its verdict never counts; it is separate from the repo airlock below. `PUT judges/<kind>`, `PUT judges/<kind>/airlock` and `PUT airlock` need `branch.write` on the repo, and a `base_url` must be `https`.
 
 To run System One on a self-hosted machine, publish it through Cloudflare Tunnel and let only the Worker in with an Access service token:
 
@@ -126,7 +126,7 @@ To run System One on a self-hosted machine, publish it through Cloudflare Tunnel
 3. Give the Worker the token, once: `npx wrangler secret put S1_ACCESS_CLIENT_ID` and `npx wrangler secret put S1_ACCESS_CLIENT_SECRET`. Every `systemone-http` call then sends it.
 4. Point the kind at `https://s1.<your-domain>` with the command above (or `go run ./cmd/cinder repo judge set <repo> risk --backend systemone-http --model <model>@<version> --base-url https://s1.<your-domain>`). Its judgments show under **Judges** as `systemone-http` once they have outcomes.
 
-For TypeSafe's hosted backend set `backend = 'jev'` and save the key in Settings ▸ Keystore as `TYPESAFE_API_KEY` (scope global, or the repo). To keep a repo's judges on your own infrastructure (`systemone-http` and `stat` only), turn on airlock:
+For TypeSafe's hosted backend set `backend = 'jev'` and save the key in Settings ▸ Keystore as `TYPESAFE_API_KEY` (scope global, or the repo). A `jev` judge with its own `base_url` gets only the repo's key; the global key goes only to TypeSafe's default URL. To keep a repo's judges on your own infrastructure (`systemone-http` and `stat` only), turn on airlock:
 
 ```sh
 npx wrangler d1 execute cinder --remote --command "INSERT INTO airlock_repos (repo_id) SELECT id FROM repos WHERE name = '<repo>'"
@@ -177,7 +177,7 @@ A call to Artifacts that gets no answer is cut off after 5 s (reads) or 30 s (pu
 
 ## Reset and reseed the nonprod deployment
 
-The committed `worker/wrangler.jsonc` sets `vars.CINDER_ENV` to `nonprod`, so the current deployment can be returned to an empty state and reseeded as often as a test pass needs. The seed writes repo history through `POST /api/repos/:name/seed`, which answers 404 on any deployment whose `CINDER_ENV` is not `nonprod`:
+A deployment whose `CINDER_ENV` var is `nonprod` can be returned to an empty state and reseeded as often as a test pass needs. The committed `worker/wrangler.jsonc` sets no `CINDER_ENV`: `make up` deploys with `--var CINDER_ENV:nonprod` only when `CINDER_ENV=nonprod` is in the environment or `~/.config/cinder/cloudflare.env`, and `make seed` needs that. Any other deploy must pass the same `--var` to keep reset and seed on. The seed writes repo history through `POST /api/repos/:name/seed`, which answers 404 on any deployment whose `CINDER_ENV` is not `nonprod`:
 
 ```sh
 set -a; . ~/.config/cinder/live.env; set +a   # CINDER_URL, CINDER_TOKEN (owner) and the Access service token

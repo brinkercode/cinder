@@ -289,6 +289,20 @@ describe("flow triggers and step types", () => {
     expect((await flowJobs(repo.id)).map((p) => [p.flow, p.trigger])).toEqual([["nightly", "cron"]]);
   });
 
+  it("no cron or manual run starts on a default branch head that is a rolled-back direct push", async () => {
+    vi.stubGlobal("fetch", withRefs(async () => new Response("{}", { status: 404 })));
+    const { e, call, repo } = await flowRepo("flow-rejected", { nightly: "name: nightly\non: [cron, manual]\ncron: \"5 3 * * *\"\nsteps:\n  test: { stage: build, run: \"npm test\", needs: [] }\n" });
+    // The cron reads the head from the log, a manual run from the ref advertisement.
+    for (const sha of ["s1", refSha("s1")]) await env.DB.prepare("INSERT INTO rejected_pushes (repo, ref, sha) VALUES ('flow-rejected', 'refs/heads/main', ?)").bind(sha).run();
+    let done;
+    worker.scheduled({ scheduledTime: Date.parse("2026-10-06T03:10:00Z") }, e, { waitUntil: (p) => { done = p; } });
+    await done.catch(() => {});
+    expect(await flowJobs(repo.id)).toEqual([]);
+    const res = await call("POST", "/api/repos/flow-rejected/flows/nightly/runs");
+    expect(res.status).toBe(409);
+    expect((await res.json()).error.code).toBe("rejected_push");
+  });
+
   it("a flow with cron \"0 3 * * *\" gets a run when the scheduled handler fires at 03:00", async () => {
     vi.stubGlobal("fetch", withRefs(async () => new Response("{}", { status: 404 })));
     const { e, repo } = await flowRepo("flow-cron3", { daily: "name: daily\non: [cron]\ncron: \"0 3 * * *\"\nsteps:\n  test: { stage: build, run: \"npm test\", needs: [] }\n" });

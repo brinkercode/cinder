@@ -112,13 +112,20 @@ export async function onPushes(batch, env) {
     // lazy: markers are never pruned, so a person may move a branch back to a sha cinder once wrote there; prune by age once it matters.
     const ours = await env.DB.prepare("SELECT 1 FROM ref_writes WHERE repo = ? AND ref = ? AND sha = ?").bind(repo, ref ?? "", after).first();
     const own = ref?.startsWith("refs/for/") ? await env.DB.prepare(
-      // lazy: the event names no pusher, so two people holding live credentials for one repo both resolve to the newest; carry the pusher once Artifacts does.
-      "SELECT t.person, r.id AS repo_id, r.name, r.default_branch FROM push_tokens t JOIN repos r ON r.name = t.fork WHERE t.fork = ? AND t.expires_at > ? " +
-      "AND NOT EXISTS (SELECT 1 FROM repo_meta m WHERE m.repo_id = r.id AND m.archived_at IS NOT NULL) ORDER BY t.created_at DESC LIMIT 1",
+      // The event names no pusher: the person is known only while one person holds live credentials for the repo.
+      "SELECT min(t.person) AS person, count(DISTINCT t.person) AS people, r.id AS repo_id, r.name, r.default_branch FROM push_tokens t JOIN repos r ON r.name = t.fork " +
+      "WHERE t.fork = ? AND t.expires_at > ? AND NOT EXISTS (SELECT 1 FROM repo_meta m WHERE m.repo_id = r.id AND m.archived_at IS NOT NULL) GROUP BY r.id",
     ).bind(repo, at).first() : null;
     if (own) {
       // cinder's own delete of the ref (reverify) opens nothing.
       if (/^0+$/.test(after)) continue;
+      // An unknown pusher opens no change; the ref is deleted so the next push to it is a new ref.
+      if (own.people > 1) {
+        console.warn(`push: ${ref} of ${repo} opens no change: ${own.people} people hold live credentials, so the pusher is unknown`);
+        await moveRef(await createArtifacts(env.ARTIFACTS).get(repo), ref, after, "0".repeat(40))
+          .catch((e) => console.error(`push: deleting ${ref} of ${repo} failed: ${e.message}`));
+        continue;
+      }
       const branch = ref.slice("refs/for/".length);
       const policy = branch && await env.REPO_DO.get(env.REPO_DO.idFromName(own.name)).policy(own.name, own.default_branch);
       if (!policy || !isAllowedTarget(policy, branch)) continue;
@@ -183,6 +190,8 @@ export async function onPushes(batch, env) {
     if ((target.archived && !ours) || released || (branch && !ours && !merging && !first && (branch === target.default_branch ||
       isAllowedTarget(await env.REPO_DO.get(env.REPO_DO.idFromName(repo)).policy(repo, target.default_branch), branch)))) {
       // A direct push to a protected target or released tag: put it back where it was (a new branch is deleted); a branch lands only through a change.
+      // Recorded first: until the rollback lands (or if it fails), flows refuse this head of the default branch.
+      await env.DB.prepare("INSERT OR IGNORE INTO rejected_pushes (repo, ref, sha) VALUES (?, ?, ?)").bind(repo, ref, after).run();
       try {
         if (!/^[0-9a-f]{40}$/.test(before ?? "")) throw new Error(`no previous sha (${before})`);
         await moveRef(await createArtifacts(env.ARTIFACTS).get(repo), ref, after, before);
