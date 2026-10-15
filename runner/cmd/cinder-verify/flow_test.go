@@ -288,3 +288,19 @@ func TestFlow_SetUpJob_MasksSecretValues(t *testing.T) {
 		t.Fatalf("Set up job log %q: printed the secret's value", setup)
 	}
 }
+
+func TestFlow_Step_GetsFreshHome_ResultsNeverReadThroughSymlinkOutOfTree(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	outside := filepath.Join(t.TempDir(), "secret.xml")
+	if err := os.WriteFile(outside, []byte("<testsuite/>"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	run := `test "$HOME" = "$TMPDIR" && test "$HOME" != "` + os.Getenv("HOME") + `" && ln -s ` + outside + ` leak.xml`
+	report, calls := runRunJob(t, []map[string]any{{"name": "test", "run": run, "junit": "leak.xml"}}, fakeRun{})
+	if report.Status != "done" {
+		t.Fatalf("report %+v, want the step to see a fresh HOME and TMPDIR", report)
+	}
+	if got := strings.Join(texts(calls, 4), "\n"); !strings.HasPrefix(got, "junit leak.xml: ") {
+		t.Fatalf("Upload artifacts log = %q, want the symlink out of the tree refused", got)
+	}
+}

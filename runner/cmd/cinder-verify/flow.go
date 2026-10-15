@@ -150,6 +150,12 @@ func runFlow(ctx context.Context, client *api.Client, c *api.Claim) (r api.Repor
 			return stop(fmt.Sprintf("git: %v\n%s", err, out))
 		}
 	}
+	home, err := verify.Workspace(dir)
+	if err != nil {
+		return stop("workspace: " + err.Error())
+	}
+	defer os.RemoveAll(home)
+	env = append(env, "HOME="+home, "TMPDIR="+home)
 	if cur != nil {
 		fmt.Fprintf(cur, "Fetched in %s\n", time.Since(start).Round(time.Millisecond))
 		if p.RunID != "" {
@@ -279,15 +285,22 @@ func (p *paths) UnmarshalJSON(b []byte) error {
 // results posts each junit: file of step s as a test suite and uploads each artifacts: file, logging each to log. A
 // file that can't be read or sent is logged and doesn't change any step's status.
 func results(ctx context.Context, client *api.Client, jobID, dir string, s flowStep, log io.Writer) {
+	// The steps' tree, read as root: os.Root refuses a path or symlink leading out of it (to /proc/1/environ).
+	root, err := os.OpenRoot(dir)
+	if err != nil {
+		fmt.Fprintf(log, "results: %v\n", err)
+		return
+	}
+	defer root.Close()
 	for _, p := range s.Junit {
-		if err := postSuite(ctx, client, jobID, filepath.Join(dir, p), p); err != nil {
+		if err := postSuite(ctx, client, jobID, root, p); err != nil {
 			fmt.Fprintf(log, "junit %s: %v\n", p, err)
 		} else {
 			fmt.Fprintf(log, "Sent test report %s of step %s\n", p, s.Name)
 		}
 	}
 	for _, p := range s.Artifacts {
-		if err := putArtifact(ctx, client, jobID, filepath.Join(dir, p)); err != nil {
+		if err := putArtifact(ctx, client, jobID, root, p); err != nil {
 			fmt.Fprintf(log, "artifact %s: %v\n", p, err)
 		} else {
 			fmt.Fprintf(log, "Uploaded artifact %s of step %s\n", p, s.Name)
@@ -295,9 +308,9 @@ func results(ctx context.Context, client *api.Client, jobID, dir string, s flowS
 	}
 }
 
-// postSuite parses the JUnit file at path and posts its counts and failed tests as suite.
-func postSuite(ctx context.Context, client *api.Client, jobID, path, suite string) error {
-	b, err := os.ReadFile(path)
+// postSuite parses the JUnit file suite in root and posts its counts and failed tests.
+func postSuite(ctx context.Context, client *api.Client, jobID string, root *os.Root, suite string) error {
+	b, err := root.ReadFile(suite)
 	if err != nil {
 		return err
 	}
@@ -321,9 +334,9 @@ func postSuite(ctx context.Context, client *api.Client, jobID, path, suite strin
 		"suite": suite, "passed": passed, "failed": failed, "skipped": skipped, "failures": failures})
 }
 
-// putArtifact streams the file at path to the Worker under its base name.
-func putArtifact(ctx context.Context, client *api.Client, jobID, path string) error {
-	f, err := os.Open(path)
+// putArtifact streams the file at path in root to the Worker under its base name.
+func putArtifact(ctx context.Context, client *api.Client, jobID string, root *os.Root, path string) error {
+	f, err := root.Open(path)
 	if err != nil {
 		return err
 	}
@@ -544,6 +557,9 @@ func execStep(ctx context.Context, client *api.Client, dir string, env, masked [
 		defer os.RemoveAll(tmp)
 		var extra, hidden []string
 		s.Run, extra, hidden, err = targetScript(ctx, s, env, tmp)
+		if err == nil {
+			err = verify.GiveToJob(tmp) // the step reads its credential files as verify.JobUser
+		}
 		if err != nil {
 			return err
 		}
@@ -567,6 +583,9 @@ func execStep(ctx context.Context, client *api.Client, dir string, env, masked [
 	cmd.Cancel = func() error { return syscall.Kill(-cmd.Process.Pid, syscall.SIGTERM) }
 	cmd.WaitDelay = 10 * time.Second
 	cmd.Env = env
+	if err := verify.AsJob(cmd); err != nil {
+		return err
+	}
 	for _, tool := range slices.Sorted(maps.Keys(s.Setup)) {
 		bin, err := setupTool(tctx, client, m, tool, s.Setup[tool])
 		if err != nil {

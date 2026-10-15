@@ -209,6 +209,7 @@ export async function startRun(request, env, { name, flow }) {
   const { def, errors } = readFlow(text, `.cinder/flows/${flow}.yml`);
   if (errors.length) return error(400, "invalid_flow", errors.map((e) => e.text).join("; "));
   if (!def.on.includes("manual")) return error(400, "invalid_flow", "on: has no manual trigger");
+  if (await rejectedHead(env, name, ref, sha)) return error(409, "rejected_push", `${ref} is at ${sha}, a direct push cinder rolled back; no flow runs on it`);
   const id = crypto.randomUUID();
   await openRun(env, repo.id, id, { ...def, flow, sha, ref, trigger: "manual" }, personOf(request));
   return Response.json((await runsOf(env, repo.id, id))[0], { status: 201 });
@@ -487,6 +488,11 @@ async function failValidation(env, target, id, payload, path, errors) {
     .bind(id, key, name, i, e.text, path, e.line)));
 }
 
+// Whether sha on branch of repo is a direct push cinder rolled back, or is still rolling back (pushes.js): a run there
+// would hand the org's secrets to commits that never went through a change.
+const rejectedHead = (env, repo, branch, sha) => env.DB.prepare("SELECT 1 FROM rejected_pushes WHERE repo = ? AND ref = ? AND sha = ?")
+  .bind(repo, `refs/heads/${branch}`, sha).first();
+
 // Runs on the Worker's cron: each repo's cron flows on its default branch head that fell due in the tick just ended.
 // lazy: reads every repo's flows each tick; keep a cron index in D1 past ~100 repos.
 export async function cronFlows(env, at) {
@@ -495,7 +501,8 @@ export async function cronFlows(env, at) {
   for (const repo of results) {
     try {
       const sha = (await createArtifacts(env.ARTIFACTS).log(repo.name, repo.default_branch))[0]?.sha;
-      if (sha) await enqueueFlows(env, repo, repo.name, sha, "cron", tick);
+      if (sha && await rejectedHead(env, repo.name, repo.default_branch, sha)) console.error(`cron flows: ${repo.name}: head ${sha} is a rolled-back direct push`);
+      else if (sha) await enqueueFlows(env, repo, repo.name, sha, "cron", tick);
     } catch (e) {
       console.error(`cron flows: ${repo.name}: ${e.message}`); // one unreadable repo doesn't hold back the others
     }

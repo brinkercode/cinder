@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"os"
@@ -37,11 +38,7 @@ func commitEdit(ctx context.Context, token, fork, branch, path, content, thread 
 	if err := git("clone", "--quiet", "--branch", branch, fork, "."); err != nil {
 		return nil, nil, err
 	}
-	p := filepath.Join(dir, path)
-	if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
-		return nil, nil, err
-	}
-	if err := os.WriteFile(p, []byte(content), 0o644); err != nil {
+	if err := writeIn(dir, path, content); err != nil {
 		return nil, nil, err
 	}
 	msg := "cinder: edit " + path
@@ -75,4 +72,20 @@ func commitEdit(ctx context.Context, token, fork, branch, path, content, thread 
 		return nil, nil, err
 	}
 	return ch.Writes, ch.Reads, nil
+}
+
+// writeIn writes content to path in dir. The fork may commit symlinks: os.Root refuses one leading out of dir, a
+// symlinked parent (g -> .git) is refused here, and one at path itself is removed first.
+func writeIn(dir, path, content string) error {
+	root, err := os.OpenRoot(dir)
+	if err != nil {
+		return err
+	}
+	defer root.Close()
+	for d := filepath.Dir(path); d != "."; d = filepath.Dir(d) {
+		if fi, err := root.Lstat(d); err == nil && fi.Mode()&os.ModeSymlink != 0 {
+			return fmt.Errorf("commit: %s is a symlink", d)
+		}
+	}
+	return cmp.Or(root.RemoveAll(path), root.MkdirAll(filepath.Dir(path), 0o755), root.WriteFile(path, []byte(content), 0o644))
 }

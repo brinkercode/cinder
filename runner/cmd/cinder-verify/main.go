@@ -52,6 +52,9 @@ func main() {
 		return
 	}
 	url, token := os.Getenv("CINDER_URL"), os.Getenv("CINDER_RUNNER_TOKEN")
+	// No child inherits the token; cinder-agent gets it explicitly. /proc/1/environ keeps it, readable only by root.
+	_ = os.Unsetenv("CINDER_RUNNER_TOKEN")
+	runnerToken = token
 	if url == "" || token == "" {
 		fmt.Fprintln(os.Stderr, "cinder-verify: CINDER_URL and CINDER_RUNNER_TOKEN must be set")
 		os.Exit(1)
@@ -97,7 +100,8 @@ func run(ctx context.Context, c *api.Claim) api.Report {
 			return api.Report{Status: "failed", Detail: err.Error()}
 		}
 		defer os.RemoveAll(dir)
-		return verify.Scan(ctx, filepath.Join(dir, "repo"), c.ReadToken, verify.Job{Target: c.TargetRemote, Branch: p.Target, Head: p.Sha, Check: p.Check})
+		// The clone is dir itself: its 0700 parent would keep verify.JobUser out of a clone below it.
+		return verify.Scan(ctx, dir, c.ReadToken, verify.Job{Target: c.TargetRemote, Branch: p.Target, Head: p.Sha, Check: p.Check})
 	case "ingest-sarif":
 		return verify.Ingest(c.Payload)
 	case "guard":
@@ -147,12 +151,15 @@ func run(ctx context.Context, c *api.Claim) api.Report {
 		if p.HeadSHA != "" {
 			head = p.HeadSHA
 		}
-		return verify.Run(ctx, filepath.Join(dir, "repo"), c.GitToken, verify.Job{Target: c.TargetRemote, Branch: c.Change.TargetBranch,
+		return verify.Run(ctx, dir, c.GitToken, verify.Job{Target: c.TargetRemote, Branch: c.Change.TargetBranch,
 			Fork: c.ForkRemote, Head: head, Check: p.Check, ReadToken: c.ReadToken, Ahead: p.Ahead, Only: p.Only, Leases: p.Leases})
 	default:
 		return runAgent(ctx, c)
 	}
 }
+
+// runnerToken is CINDER_RUNNER_TOKEN, which main removes from the environment.
+var runnerToken string
 
 // runAgent runs a claim on cinder-agent, so one entrypoint runs every kind. The claim and its tokens go over stdin,
 // never argv or env.
@@ -163,6 +170,9 @@ func runAgent(ctx context.Context, c *api.Claim) api.Report {
 	}
 	cmd := exec.CommandContext(ctx, "cinder-agent", "run-claim")
 	cmd.Stdin, cmd.Stderr = bytes.NewReader(in), os.Stderr
+	if runnerToken != "" {
+		cmd.Env = append(os.Environ(), "CINDER_RUNNER_TOKEN="+runnerToken)
+	}
 	// At the job's deadline or a cancel, SIGTERM lets cinder-agent kill its harness's process group; a minute later it's killed.
 	cmd.Cancel = func() error { return cmd.Process.Signal(syscall.SIGTERM) }
 	cmd.WaitDelay = time.Minute

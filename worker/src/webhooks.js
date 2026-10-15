@@ -1,5 +1,6 @@
 // Outbound webhooks: change, verdict and judgment events go through the cinder-webhooks Queue, one message per
-// subscribed hook, and are POSTed signed with X-Cinder-Signature: sha256=<hex HMAC-SHA256 of the body>. Each hook's
+// subscribed hook, and are POSTed signed with X-Cinder-Signature: sha256=<hex HMAC-SHA256 of "<X-Cinder-Timestamp>.<X-Cinder-Delivery>.<body>">,
+// so a receiver can refuse a replayed or stale delivery. Each hook's
 // secret lives in the account's Secrets Store; D1 holds only its reference and delivery reads it through its binding.
 import { cloudflare } from "./deploy.js";
 import { addToStore, binding, denied, rebind, SECRETS_STORE } from "./keystore.js";
@@ -124,10 +125,11 @@ export async function deliver(batch, env) {
         throw new Error("secret binding pending");
       }
       const key = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-      const signature = `sha256=${hex(await crypto.subtle.sign("HMAC", key, enc.encode(body)))}`;
+      const timestamp = String(Math.floor(Date.now() / 1000));
+      const signature = `sha256=${hex(await crypto.subtle.sign("HMAC", key, enc.encode(`${timestamp}.${msg.id}.${body}`)))}`;
       const res = await fetch(hook.url, {
         method: "POST", body, redirect: "manual",
-        headers: { "content-type": "application/json", "x-cinder-signature": signature, "x-cinder-delivery": msg.id },
+        headers: { "content-type": "application/json", "x-cinder-signature": signature, "x-cinder-delivery": msg.id, "x-cinder-timestamp": timestamp },
       });
       await record(msg.body.hook, res.ok, res.status, null);
       if (res.ok) {

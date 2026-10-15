@@ -2,10 +2,12 @@ import { env } from "cloudflare:workers";
 import { afterAll, afterEach, beforeAll, beforeEach, expect, it, vi } from "vitest";
 import { REPOS, client, seed } from "../../seed/seed.mjs";
 import { validateReset } from "../src/api/shapes.js";
+import { parseJsonc } from "../src/deploy.js";
 import worker from "../src/index.js";
 import { fakeCloudflare } from "./fakes/cloudflare.js";
 import { fakeReset } from "./fakes/reset.js";
 import { seedArtifacts } from "./fakes/seed.js";
+import wranglerRaw from "../wrangler.jsonc?raw";
 
 const TEAM = "cinder-reset.cloudflareaccess.com";
 const RSA = { name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256" };
@@ -132,4 +134,8 @@ it("Seed test: --reset waits for completion before the first section runs, and t
 
   await seed(api, undefined, [], undefined, undefined, true);
   expect(await names()).toEqual(seeded);
+});
+
+it("the committed wrangler.jsonc sets no CINDER_ENV, so a deploy refuses reset and seed unless it passes the var", () => {
+  expect(parseJsonc(wranglerRaw).vars).not.toHaveProperty("CINDER_ENV");
 });

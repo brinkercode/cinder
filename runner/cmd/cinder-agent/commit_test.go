@@ -63,3 +63,37 @@ func TestCommitEdit_Reads_AreExact(t *testing.T) {
 		t.Fatalf("reads = %v, want none", reads)
 	}
 }
+
+func TestCommitEdit_ForkSymlinks_NeverWriteOutsideTheTreeOrIntoGit(t *testing.T) {
+	t.Setenv("GIT_CONFIG_GLOBAL", os.DevNull)
+	root := t.TempDir()
+	fork, work, outside := filepath.Join(root, "fork.git"), filepath.Join(root, "work"), filepath.Join(root, "outside")
+	if err := os.Mkdir(outside, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	gitOut(t, root, "init", "--quiet", "--bare", "-b", "main", fork)
+	gitOut(t, root, "init", "--quiet", "-b", "main", work)
+	for name, target := range map[string]string{"x": outside, "g": ".git", "f": filepath.Join(outside, "f")} {
+		if err := os.Symlink(target, filepath.Join(work, name)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	gitOut(t, work, "add", ".")
+	gitOut(t, work, "commit", "--quiet", "-m", "symlinks")
+	gitOut(t, work, "push", "--quiet", fork, "main")
+
+	for _, path := range []string{"x/evil", "g/hooks/pre-commit"} {
+		if _, _, err := commitEdit(context.Background(), "", fork, "main", path, "#!/bin/sh\ntouch "+outside+"/ran\n", ""); err == nil {
+			t.Errorf("%s: written through a symlink", path)
+		}
+	}
+	if _, _, err := commitEdit(context.Background(), "", fork, "main", "f", "replaced", ""); err != nil {
+		t.Fatal(err)
+	}
+	if entries, _ := os.ReadDir(outside); len(entries) != 0 {
+		t.Fatalf("outside the clone: %v, want nothing written", entries)
+	}
+	if got := gitOut(t, fork, "cat-file", "-p", "main:f"); got != "replaced" {
+		t.Fatalf("f = %q, want the symlink replaced by the edit", got)
+	}
+}

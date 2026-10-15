@@ -9,7 +9,7 @@
   "preview_urls": false,
   "compatibility_date": "2026-10-03",
   "compatibility_flags": ["nodejs_compat"], // @cloudflare/ci
-  "vars": { "AI_GATEWAY_ID": "cinder", "CF_ACCOUNT_ID": "00000000000000000000000000000000","CINDER_ENV": "nonprod" },
+  "vars": { "AI_GATEWAY_ID": "cinder", "CF_ACCOUNT_ID": "00000000000000000000000000000000" },
   // Flow step logs live in cinder-logs (D1 rows hold only the object key); runner toolchains are cached in cinder-ci-cache.
   "r2_buckets": [{ "binding": "LOGS", "bucket_name": "cinder-logs" }, { "binding": "TOOL_CACHE", "bucket_name": "cinder-ci-cache" }],
   "containers": [{ "class_name": "WorkerLite", "image": "../runner/Dockerfile", "instance_type": "lite", "max_instances": 20, "observability": { "logs": { "enabled": true } } }, { "class_name": "WorkerBasic", "image": "../runner/Dockerfile", "instance_type": "basic", "max_instances": 20, "observability": { "logs": { "enabled": true } } }, { "class_name": "WorkerStandard", "image": "../runner/Dockerfile.full", "instance_type": "standard-2", "max_instances": 20, "observability": { "logs": { "enabled": true } } }, { "class_name": "WorkerStandard4", "image": "../runner/Dockerfile.full", "instance_type": "standard-4", "max_instances": 20, "observability": { "logs": { "enabled": true } } }],

@@ -56,8 +56,10 @@ w d1 migrations apply cinder --remote
 step "build and deploy"
 npm run build -w web
 npx --prefix worker wrangler --cwd worker/secrets deploy # cinder-secrets first: cinder's SECRETS binding points to it
+# CINDER_ENV=nonprod (environment or cloudflare.env) turns on reset and seed (make seed); unset, the deployment is production.
+var=(); [ -z "${CINDER_ENV:-}" ] || var=(--var "CINDER_ENV:$CINDER_ENV")
 # The first deploy after make down recreates the container apps and can fail transiently: one retry, and a failure prints why.
-out=$(w deploy 2>&1) || { echo "$out" | tail -20; echo "deploy failed; retrying once"; out=$(w deploy 2>&1) || { echo "$out" | tail -40; exit 1; }; }
+out=$(w deploy "${var[@]}" 2>&1) || { echo "$out" | tail -20; echo "deploy failed; retrying once"; out=$(w deploy "${var[@]}" 2>&1) || { echo "$out" | tail -40; exit 1; }; }
 echo "$out" | tail -5
 url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' <<<"$out" | head -1)
 

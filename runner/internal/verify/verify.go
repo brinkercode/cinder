@@ -58,7 +58,7 @@ type Ahead struct {
 	Token  api.Secret `json:"token"`
 }
 
-// Run checks out j into dir (which must not exist yet) and reports the check's result.
+// Run checks out j into dir (empty or not there yet) and reports the check's result.
 func Run(ctx context.Context, dir string, token api.Secret, j Job) api.Report {
 	rep, _ := run(ctx, dir, token, j)
 	return rep
@@ -121,13 +121,18 @@ func run(ctx context.Context, dir string, token api.Secret, j Job) (rep api.Repo
 		}
 	}
 
+	home, err := Workspace(dir)
+	if err != nil {
+		return api.Report{Status: "failed", Detail: "workspace: " + err.Error()}, false
+	}
+	defer os.RemoveAll(home)
 	timeout := cmp.Or(j.Timeout, 15*time.Minute)
 	cctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	cmd := exec.CommandContext(cctx, "sh", "-c", j.Check)
 	cmd.Dir = dir
-	// The check is the repo's code: it never sees the runner's tokens, as flow steps don't.
-	cmd.Env = BaseEnv()
+	// The check is the repo's code: it never sees the runner's tokens, as flow steps don't, and runs as JobUser.
+	cmd.Env = append(BaseEnv(), "HOME="+home, "TMPDIR="+home)
 	if len(j.Only) > 0 {
 		cmd.Env = append(cmd.Env, "CINDER_ONLY_TESTS="+strings.Join(j.Only, "\n"))
 	}
@@ -135,6 +140,9 @@ func run(ctx context.Context, dir string, token api.Secret, j Job) (rep api.Repo
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	cmd.Cancel = func() error { return syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL) }
 	cmd.WaitDelay = 5 * time.Second
+	if err := AsJob(cmd); err != nil {
+		return api.Report{Status: "failed", Detail: err.Error()}, false
+	}
 	out, err := cmd.CombinedOutput()
 	rep = api.Report{Status: "done", Detail: tail(out), Tree: tree, Base: base}
 	switch {
@@ -150,7 +158,8 @@ func run(ctx context.Context, dir string, token api.Secret, j Job) (rep api.Repo
 		}
 		// The final diff's writes, which the Worker checks against the change's lease before it queues.
 		if j.Branch != "" {
-			diff, err := exec.CommandContext(ctx, "git", "-C", dir, "diff", "-U0", "--no-ext-diff", "--no-textconv", "--no-renames", "refs/heads/"+j.Branch+"...HEAD", "--").Output()
+			cmd := exec.CommandContext(ctx, "git", "-C", dir, "diff", "-U0", "--no-ext-diff", "--no-textconv", "--no-renames", "refs/heads/"+j.Branch+"...HEAD", "--")
+			diff, err := asJobOutput(cmd)
 			if err == nil {
 				_, rep.Writes, rep.Reads, err = symbols.Push(dir, string(diff))
 			}

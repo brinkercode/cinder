@@ -181,3 +181,29 @@ func TestFlow_SetupStep_RunsWithToolOnPath(t *testing.T) {
 		t.Fatalf("report %+v, last step %+v; want the stub go on PATH", report, last)
 	}
 }
+
+func TestSetupTool_CacheDirOthersCanWrite_Refused(t *testing.T) {
+	stubGo(t, "")
+	var cache fakeToolCache
+	dir := t.TempDir()
+	if err := os.Chmod(dir, 0o777); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("TOOL_CACHE", dir)
+	if _, err := setupTool(context.Background(), cache.client(t), io.Discard, "go", "1.24.13"); err == nil || !strings.Contains(err.Error(), "only this runner can write") {
+		t.Fatalf("err = %v, want a job-writable tool cache refused", err)
+	}
+}
+
+func TestSetupTool_UnpackedTool_ReadableByJobUserNotWritable(t *testing.T) {
+	stubGo(t, "")
+	var cache fakeToolCache
+	t.Setenv("TOOL_CACHE", t.TempDir())
+	bin, err := setupTool(context.Background(), cache.client(t), io.Discard, "go", "1.24.13")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if fi, err := os.Stat(filepath.Dir(bin)); err != nil || fi.Mode().Perm() != 0o755 {
+		t.Fatalf("tool dir mode = %v, %v; want 0755", fi.Mode().Perm(), err)
+	}
+}

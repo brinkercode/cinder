@@ -2,6 +2,8 @@ package gitauth
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"slices"
 	"testing"
 )
@@ -54,5 +56,20 @@ func TestCommand_RefreshedToken_SendsLatest(t *testing.T) {
 	Refresh("claimed", "")
 	if !slices.Contains(Command(context.Background(), "claimed", "status").Env, "GIT_CONFIG_VALUE_0=Authorization: Bearer claimed") {
 		t.Error("a forgotten token: want the claim's token back")
+	}
+}
+
+func TestCommand_IgnoresGlobalAndSystemGitConfig(t *testing.T) {
+	home := t.TempDir()
+	if err := os.WriteFile(filepath.Join(home, ".gitconfig"), []byte("[core]\n\thooksPath = /tmp/evil\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("HOME", home)
+	t.Setenv("XDG_CONFIG_HOME", home)
+	t.Setenv("GIT_CONFIG_GLOBAL", "")
+	os.Unsetenv("GIT_CONFIG_GLOBAL") // t.Setenv restores it
+	out, _ := Command(context.Background(), "tok", "config", "--get", "core.hooksPath").Output()
+	if len(out) != 0 {
+		t.Fatalf("core.hooksPath = %q, want the job-writable global config ignored", out)
 	}
 }

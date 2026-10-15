@@ -112,6 +112,14 @@ it("a push to refs/for/main on the base repo by a credentialed person creates on
   expect(change.events[0].actor).toEqual({ type: "human", id: "owner" });
 });
 
+it("a refs/for push while two people hold live credentials for the repo opens no change", async () => {
+  const { e, repo } = await credentialedRepo("push-for-two");
+  await env.DB.prepare("INSERT INTO push_tokens (id, fork, person, expires_at, created_at) VALUES (?, 'push-for-two', 'eve@x.test', ?, ?)")
+    .bind(crypto.randomUUID(), new Date(Date.now() + 600_000).toISOString(), new Date(Date.now() + 1000).toISOString()).run();
+  await worker.queue({ messages: [{ body: pushed("push-for-two", "refs/for/main", "2".repeat(40)) }] }, e);
+  expect(await env.DB.prepare("SELECT COUNT(*) AS n FROM changes WHERE repo_id = ?").bind(repo.id).first("n")).toBe(0);
+});
+
 it("a push event for tag agent/dev/v4 with a lock message records version 4 with that lock, once, even when delivered twice", async () => {
   const lock = { name: "dev", version: 4, harness: "claude-code", model: "claude-opus-5-5", effort: "high", prompt_hash: "sha256:abc",
     tools: ["bash", "edit"], limits: { max_cost_usd: 8, max_minutes: 120 }, egress: ["pkg.go.dev"] };
@@ -207,6 +215,21 @@ it("a direct push to a protected target (main, develop, release/1.2) is rolled b
   }
   expect(await git([...dir, "rev-parse", "refs/heads/main", "refs/heads/develop"])).toBe(`${base}\n${base}`);
   expect(await git([...dir, "for-each-ref", "refs/heads/release"])).toBe("");
+});
+
+it("a direct push to main is recorded as rejected, even when its rollback fails", async () => {
+  const name = "push-rejected";
+  const bare = { get: async (n) => bareRepo(n) };
+  expect((await worker.fetch(new Request("http://cinder.test/api/repos", { method: "POST", headers: OWNER, body: JSON.stringify({ name }) }), { ...env, ARTIFACTS: fakeArtifacts() })).status).toBe(201);
+  await git(["init", "-q", "--bare", "-b", "main", `${name}.git`]);
+  const { sha: base, tree } = await commit(bareRepo(name), { branch: "main", base: null, message: "init", author: { name: "Ann", email: "ann@x.test" }, changes: [{ path: "a", content: "1\n" }] });
+  const dir = ["--git-dir", `${name}.git`];
+  const direct = await git([...dir, "commit-tree", tree, "-p", base, "-m", "direct"]);
+  await git([...dir, "update-ref", "refs/heads/main", direct]);
+  // No previous sha: the rollback can't run, so main stays at the push.
+  await worker.queue({ messages: [{ body: { ...pushed(name, "refs/heads/main", direct), payload: { ref: "refs/heads/main", before: null, after: direct, commits: [] } } }] }, { ...env, ARTIFACTS: bare });
+  expect(await git([...dir, "rev-parse", "refs/heads/main"])).toBe(direct);
+  expect(await env.DB.prepare("SELECT ref FROM rejected_pushes WHERE repo = ? AND sha = ?").bind(name, direct).first("ref")).toBe("refs/heads/main");
 });
 
 it("an annotated tag records the commit sha", async () => {
