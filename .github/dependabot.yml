@@ -24,3 +24,16 @@ updates:
     open-pull-requests-limit: 0
     ignore:
       - dependency-name: "*"
+  # cinder's own toolchain: CI actions, the root npm workspace lockfile and the runner module.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+  - package-ecosystem: gomod
+    directory: "/runner"
+    schedule:
+      interval: weekly

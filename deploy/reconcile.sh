@@ -14,7 +14,7 @@ cfg=worker/wrangler.jsonc
 # api METHOD PATH [JSON]: prints the response body; exits non-zero unless Cloudflare reports success.
 api() {
   local out
-  out=$(curl -sS -X "$1" "$base$2" -H "Authorization: Bearer $tok" -H "Content-Type: application/json" ${3:+--data "$3"}) || return 1
+  out=$(curl -sS -X "$1" "$base$2" -H @<(printf 'Authorization: Bearer %s\n' "$tok") -H "Content-Type: application/json" ${3:+--data-binary @<(printf '%s' "$3")}) || return 1
   jq -e .success >/dev/null 2>&1 <<<"$out" || return 1
   printf '%s' "$out"
 }

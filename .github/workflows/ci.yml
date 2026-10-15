@@ -19,8 +19,8 @@ jobs:
       matrix:
         shard: [1, 2, 3]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
       - run: npm ci --prefer-offline --no-audit --no-fund
@@ -30,10 +30,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
       - run: npm ci --prefer-offline --no-audit --no-fund
@@ -52,8 +52,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
       - run: npm ci --prefer-offline --no-audit --no-fund
@@ -62,24 +62,26 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           go-version-file: runner/go.mod
-      - run: go install honnef.co/go/tools/cmd/staticcheck@latest
+      - run: go install honnef.co/go/tools/cmd/staticcheck@2026.2.2
       - run: make check-go
   # Builds the slim runner image when a Dockerfile changes and reports its size and cold start.
   image:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
       - id: changed
-        run: git diff --quiet origin/${{ github.base_ref }}...HEAD -- 'runner/Dockerfile*' || echo dockerfile=1 >> "$GITHUB_OUTPUT"
+        env:
+          BASE: ${{ github.base_ref }}
+        run: git diff --quiet "origin/$BASE...HEAD" -- 'runner/Dockerfile*' || echo dockerfile=1 >> "$GITHUB_OUTPUT"
       - if: steps.changed.outputs.dockerfile
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           go-version-file: runner/go.mod
       - if: steps.changed.outputs.dockerfile
@@ -96,11 +98,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
       - id: changed
-        run: git diff --quiet origin/${{ github.base_ref }}...HEAD -- runner/Dockerfile.full || echo full=1 >> "$GITHUB_OUTPUT"
+        env:
+          BASE: ${{ github.base_ref }}
+        run: git diff --quiet "origin/$BASE...HEAD" -- runner/Dockerfile.full || echo full=1 >> "$GITHUB_OUTPUT"
       - if: steps.changed.outputs.full
         name: build the full runner image
         run: docker build -f runner/Dockerfile.full -t cinder-runner-full-test runner

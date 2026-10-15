@@ -19,7 +19,7 @@ bad=0
 # api METHOD PATH [JSON]: prints the body; fails unless Cloudflare reports success (a missing resource is a failure).
 api() {
   local out
-  out=$(curl -sS -X "$1" "$base$2" -H "Authorization: Bearer $tok" -H "Content-Type: application/json" ${3:+--data "$3"}) || return 1
+  out=$(curl -sS -X "$1" "$base$2" -H @<(printf 'Authorization: Bearer %s\n' "$tok") -H "Content-Type: application/json" ${3:+--data "$3"}) || return 1
   jq -e .success >/dev/null 2>&1 <<<"$out" || { why=$(jq -r '[.errors[]?.message] | join("; ")' 2>/dev/null <<<"$out" | head -c 300); return 1; }
   printf '%s' "$out"
 }

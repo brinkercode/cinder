@@ -9,19 +9,22 @@ set -a
 . "$conf/cloudflare.env"; . "$conf/live.env"
 set +a
 acct=${CF_ACCOUNT_ID:?}
-H=(-H "Authorization: Bearer $CINDER_TOKEN")
-[ -z "${CINDER_ACCESS_CLIENT_ID:-}" ] || H+=(-H "CF-Access-Client-Id: $CINDER_ACCESS_CLIENT_ID" -H "CF-Access-Client-Secret: $CINDER_ACCESS_CLIENT_SECRET")
+# curl reads the headers from a process substitution (-H @<(hdr)) so the tokens never show in the process list.
+hdr() {
+  printf 'Authorization: Bearer %s\n' "$CINDER_TOKEN"
+  [ -z "${CINDER_ACCESS_CLIENT_ID:-}" ] || printf 'CF-Access-Client-Id: %s\nCF-Access-Client-Secret: %s\n' "$CINDER_ACCESS_CLIENT_ID" "$CINDER_ACCESS_CLIENT_SECRET"
+}
 step() { printf '\n== %s\n' "$*"; }
 
 step "health"
-for i in $(seq 1 30); do curl -fsS "${H[@]}" "$CINDER_URL/api/health" && echo && break; [ "$i" -lt 30 ] || { echo "health never answered"; exit 1; }; sleep 10; done
+for i in $(seq 1 30); do curl -fsS -H @<(hdr) "$CINDER_URL/api/health" && echo && break; [ "$i" -lt 30 ] || { echo "health never answered"; exit 1; }; sleep 10; done
 
 step "container apps"
 # lazy: one app per container class in wrangler.jsonc, each ready when it has a version and a healthy instance (a
 # version alone can't take a start yet: "no container instance can be provided"); wait up to 30 min for the images.
 want=$(grep -o '"image":' worker/wrangler.jsonc | wc -l)
 for i in $(seq 1 90); do
-  have=$(curl -sS "https://api.cloudflare.com/client/v4/accounts/$acct/containers/applications?per_page=100" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+  have=$(curl -sS "https://api.cloudflare.com/client/v4/accounts/$acct/containers/applications?per_page=100" -H @<(printf 'Authorization: Bearer %s\n' "$CLOUDFLARE_API_TOKEN") \
     | jq '[.result[]? | select(.name | startswith("cinder")) | select(.version != null and (.health.instances.healthy // 0) > 0)] | length')
   echo "$have of $want container apps ready"
   [ "${have:-0}" -ge "$want" ] && break; [ "$i" -lt 90 ] || { echo "container apps not ready"; exit 1; }; sleep 20
