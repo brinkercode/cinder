@@ -34,3 +34,19 @@ func TestEntrypoint_FlowAndDevelopClaims_RunTheirKindsHandler(t *testing.T) {
 		}
 	}
 }
+
+func TestRunAgent_RunnerTokenUnsetFromEnv_StillReachesCinderAgent(t *testing.T) {
+	bin := t.TempDir()
+	agent := "#!/bin/sh\nprintf '{\"status\":\"done\",\"detail\":\"%s\"}' \"$CINDER_RUNNER_TOKEN\"\n"
+	if err := os.WriteFile(filepath.Join(bin, "cinder-agent"), []byte(agent), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", bin+string(os.PathListSeparator)+os.Getenv("PATH"))
+	t.Setenv("CINDER_RUNNER_TOKEN", "")
+	os.Unsetenv("CINDER_RUNNER_TOKEN") // as main leaves it; t.Setenv restores it
+	runnerToken = "runner-secret"
+	t.Cleanup(func() { runnerToken = "" })
+	if rep := run(context.Background(), &api.Claim{Job: api.Job{Kind: "develop"}}); rep.Detail != "runner-secret" {
+		t.Fatalf("report %+v, want cinder-agent to get the runner token", rep)
+	}
+}

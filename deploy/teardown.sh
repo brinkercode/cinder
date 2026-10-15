@@ -19,7 +19,7 @@ bad=0
 # api METHOD PATH [JSON]: prints the body; fails unless Cloudflare reports success (a missing resource is a failure).
 api() {
   local out
-  out=$(curl -sS -X "$1" "$base$2" -H "Authorization: Bearer $tok" -H "Content-Type: application/json" ${3:+--data "$3"}) || return 1
+  out=$(curl -sS -X "$1" "$base$2" -H @<(printf 'Authorization: Bearer %s\n' "$tok") -H "Content-Type: application/json" ${3:+--data "$3"}) || return 1
   jq -e .success >/dev/null 2>&1 <<<"$out" || { why=$(jq -r '[.errors[]?.message] | join("; ")' 2>/dev/null <<<"$out" | head -c 300); return 1; }
   printf '%s' "$out"
 }
@@ -74,7 +74,8 @@ for ns in $(names namespace); do
   fi
   [ -n "${repos//$'\n'/}" ] || gone "Artifacts repos in $ns"
   # lazy: an empty namespace is deleted when the API allows it; a refusal leaves it (it is free and implicit), not an error.
-  if [ -n "$dry" ]; then echo "would delete Artifacts namespace $ns"
+  if [ -z "${repos//$'\n'/}" ] && ! api GET "/artifacts/namespaces/$ns" >/dev/null; then :
+  elif [ -n "$dry" ]; then echo "would delete Artifacts namespace $ns"
   elif api DELETE "/artifacts/namespaces/$ns" >/dev/null; then echo "deleted Artifacts namespace $ns"; else echo "kept    Artifacts namespace $ns (not deletable)"; fi
 done
 

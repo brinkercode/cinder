@@ -22,10 +22,10 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
       - run: npm ci --prefer-offline --no-audit --no-fund
@@ -49,8 +49,10 @@ jobs:
           if [ -n "$last" ] && git diff --quiet "$last" HEAD -- runner; then echo "containers=none" >> "$GITHUB_OUTPUT"; else echo "containers=gradual" >> "$GITHUB_OUTPUT"; fi
       - name: deploy
         id: deploy
+        env:
+          CONTAINERS: ${{ steps.kind.outputs.containers }}
         run: |
-          out=$(npx --prefix worker wrangler --cwd worker deploy --containers-rollout ${{ steps.kind.outputs.containers }} 2>&1) || { echo "$out" | tail -200; exit 1; }; echo "$out" | tail -5
+          out=$(npx --prefix worker wrangler --cwd worker deploy --var CINDER_ENV:nonprod --containers-rollout "$CONTAINERS" 2>&1) || { echo "$out" | tail -200; exit 1; }; echo "$out" | tail -5
           echo "url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' <<<"$out" | head -1)" >> "$GITHUB_OUTPUT"
           echo "version=$(grep -oE 'Version ID: [0-9a-f-]+' <<<"$out" | cut -d' ' -f3)" >> "$GITHUB_OUTPUT"
       - name: Worker secrets
@@ -62,11 +64,14 @@ jobs:
       - name: health
         env:
           CINDER_URL: ${{ steps.deploy.outputs.url }}
+          H_ID: ${{ secrets.CINDER_ACCESS_CLIENT_ID }}
+          H_SECRET: ${{ secrets.CINDER_ACCESS_CLIENT_SECRET }}
         run: |
           # The Worker sits behind Cloudflare Access: pass the runner service token to reach /api/health.
+          # Headers go through a process substitution so the secrets never show in the process list.
           for i in 1 2 3 4 5 6; do
-            curl -fsS -H "CF-Access-Client-Id: ${{ secrets.CINDER_ACCESS_CLIENT_ID }}" -H "CF-Access-Client-Secret: ${{ secrets.CINDER_ACCESS_CLIENT_SECRET }}" \
-              $CINDER_URL/api/health && exit 0
+            curl -fsS -H @<(printf 'CF-Access-Client-Id: %s\nCF-Access-Client-Secret: %s\n' "$H_ID" "$H_SECRET") \
+              "$CINDER_URL/api/health" && exit 0
             sleep 10
           done; exit 1
       - name: warm
@@ -79,16 +84,21 @@ jobs:
           H_TOKEN: ${{ secrets.CINDER_OWNER_TOKEN }}
         run: |
           # Best-effort: a page that errors (an empty repo has no tree, a cold Durable Object can 500) is printed, never fails the release.
-          get() { curl -sS -o /dev/null -w "%{http_code} %{time_total}s $1\n" -H "CF-Access-Client-Id: $H_ID" -H "CF-Access-Client-Secret: $H_SECRET" -H "Authorization: Bearer $H_TOKEN" "$CINDER_URL$1"; }
-          for r in $(curl -fsS -H "CF-Access-Client-Id: $H_ID" -H "CF-Access-Client-Secret: $H_SECRET" -H "Authorization: Bearer $H_TOKEN" "$CINDER_URL/api/repos" \
+          # Headers come from a process substitution so the secrets never show in the process list.
+          hdr() { printf 'CF-Access-Client-Id: %s\nCF-Access-Client-Secret: %s\nAuthorization: Bearer %s\n' "$H_ID" "$H_SECRET" "$H_TOKEN"; }
+          get() { curl -sS -o /dev/null -w "%{http_code} %{time_total}s $1\n" -H @<(hdr) "$CINDER_URL$1"; }
+          for r in $(curl -fsS -H @<(hdr) "$CINDER_URL/api/repos" \
             | node -e 'for (const r of JSON.parse(require("fs").readFileSync(0))) console.log(`${encodeURIComponent(r.name)}=${r.default_branch}`)'); do
             e=${r%%=*}; b=${r#*=}
             for p in "" "/tree?ref=$b&path=&recursive=1" /changes /branches "/flows?ref=$b"; do get "/api/repos/$e$p"; done
           done
       # Releases never seed: reseed (reseed.yml or Settings › Demo data) and `make e2e-live` run by hand.
       - name: tag
+        env:
+          VERSION: ${{ steps.deploy.outputs.version }}
+          REASON: ${{ inputs.reason || github.event.head_commit.message }}
         run: |
           tag="release-$(date -u +%Y%m%d-%H%M)"
-          git -c user.name=cinder-release -c user.email=brinkercode@users.noreply.github.com tag -a "$tag" -m "Release ${{ steps.deploy.outputs.version }} (${{ inputs.reason || github.event.head_commit.message }})"
+          git -c user.name=cinder-release -c user.email=brinkercode@users.noreply.github.com tag -a "$tag" -m "Release $VERSION ($REASON)"
           git push origin "$tag"
-          echo "Released $tag (Worker version ${{ steps.deploy.outputs.version }})" >> "$GITHUB_STEP_SUMMARY"
+          echo "Released $tag (Worker version $VERSION)" >> "$GITHUB_STEP_SUMMARY"

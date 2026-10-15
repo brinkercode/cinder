@@ -27,8 +27,8 @@ function capabilityOf(method, pathname) {
   if ((pathname === `/api/repos/${AGENTS_REPO}` || pathname.startsWith(`/api/repos/${AGENTS_REPO}/`)) && method !== "GET") return "agent.release";
   if (/^\/api\/repos\/[^/]+\/branches(\/|$)/.test(pathname) && method !== "GET") return "branch.write";
   if (/^\/api\/repos\/[^/]+\/archive$/.test(pathname)) return "repo.archive";
-  // The branch policy sets judges and approvers, so repo.write is not enough to write it (policy.js, commits.js).
-  if (/^\/api\/repos\/[^/]+\/policy$/.test(pathname) && method !== "GET") return "branch.write";
+  // The branch policy, judges and airlock decide what lands, so repo.write is not enough to write it (policy.js, commits.js).
+  if (/^\/api\/repos\/[^/]+\/(policy|airlock|judges(\/.*)?)$/.test(pathname) && method !== "GET") return "branch.write";
   // review can approve (reviewChange calls approveChange), so it needs approve too; reviewChange lets a comment through on repo.write.
   if (/^\/api\/changes\/[^/]+\/(deps\/approve|review)$/.test(pathname)) return "change.approve";
   if (method === "GET" || pathname === "/api/live-ticket") return "repo.read";

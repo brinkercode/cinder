@@ -11,7 +11,7 @@ mkdir -p "$conf" && chmod 700 "$conf"
 env_file="$conf/cloudflare.env"
 # shellcheck disable=SC1090
 if [ -r "$env_file" ]; then set -a; . "$env_file"; set +a; fi
-api() { curl -sS "https://api.cloudflare.com/client/v4$1" -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN:-}" -H "Content-Type: application/json" "${@:2}"; }
+api() { curl -sS "https://api.cloudflare.com/client/v4$1" -H @<(printf 'Authorization: Bearer %s\n' "${CLOUDFLARE_API_TOKEN:-}") -H "Content-Type: application/json" "${@:2}"; }
 account() { api /accounts | jq -r 'select(.success) | .result[0].id // empty'; }
 
 echo "== Cloudflare auth"

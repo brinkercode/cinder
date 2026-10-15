@@ -9,9 +9,12 @@ if [ -z "${CINDER_URL:-}" ]; then set -a; . "$conf/live.env"; [ ! -r "$conf/acce
 : "${CINDER_URL:?}" "${CINDER_TOKEN:?}"
 vt=${SMOKE_VERIFY_TIMEOUT:-900} at=${SMOKE_AGENT_TIMEOUT:-900}
 R=svc-orders-go T=main
-H=(-H "Authorization: Bearer $CINDER_TOKEN")
-[ -z "${CINDER_ACCESS_CLIENT_ID:-}" ] || H+=(-H "CF-Access-Client-Id: $CINDER_ACCESS_CLIENT_ID" -H "CF-Access-Client-Secret: $CINDER_ACCESS_CLIENT_SECRET")
-api() { curl -sS --max-time 60 "${H[@]}" -H "content-type: application/json" "$@"; }
+# curl reads the headers from a process substitution (-H @<(hdr)) so the tokens never show in the process list.
+hdr() {
+  printf 'Authorization: Bearer %s\n' "$CINDER_TOKEN"
+  [ -z "${CINDER_ACCESS_CLIENT_ID:-}" ] || printf 'CF-Access-Client-Id: %s\nCF-Access-Client-Secret: %s\n' "$CINDER_ACCESS_CLIENT_ID" "$CINDER_ACCESS_CLIENT_SECRET"
+}
+api() { curl -sS --max-time 60 -H @<(hdr) -H "content-type: application/json" "$@"; }
 t0=$(date +%s); passed=0 failed=0
 W=$(mktemp -d); mine=()
 cleanup() { for c in "${mine[@]}"; do api -X POST "$CINDER_URL/api/changes/$c/close" -d '{"reason":"smoke test"}' -o /dev/null; done; rm -rf "$W"; }
@@ -26,7 +29,7 @@ checks() { api "$CINDER_URL/api/changes/$1/checks" | jq -c '[.[] | "\(.kind):\(.
 until_ok() { local end=$((SECONDS + $1)); shift; while ! "$@"; do [ "$SECONDS" -lt "$end" ] || return 1; sleep 10; done; }
 
 # --- 1. sign-in and health
-health=$(curl -sS --max-time 30 "${H[@]}" "$CINDER_URL/api/health" -w ' http=%{http_code}')
+health=$(curl -sS --max-time 30 -H @<(hdr) "$CINDER_URL/api/health" -w ' http=%{http_code}')
 me=$(api -w ' http=%{http_code}' "$CINDER_URL/api/me")
 if [[ $health == *http=200 && $me == *http=200 ]]; then ok "sign-in and API health" "health ${health%% http*}, me $(jq -rc '.email // .person // .name // "ok"' <<<"${me% http=*}" 2>/dev/null)"
 else bad "sign-in and API health" "health: ${health:0:80}; me: ${me:0:80}"; fi

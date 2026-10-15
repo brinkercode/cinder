@@ -49,7 +49,8 @@ func Command(ctx context.Context, token string, args ...string) *exec.Cmd {
 			cmd.Env = append(cmd.Env, kv)
 		}
 	}
-	cmd.Env = append(cmd.Env, "GIT_TERMINAL_PROMPT=0")
+	// A job's code can write a global or system config (core.hooksPath, core.fsmonitor) that would run with this token.
+	cmd.Env = append(cmd.Env, "GIT_TERMINAL_PROMPT=0", "GIT_CONFIG_GLOBAL="+os.DevNull, "GIT_CONFIG_NOSYSTEM=1")
 	if t, ok := fresh.Load(token); ok {
 		token = t.(string)
 	}

@@ -44,7 +44,7 @@ When a permission is missing, `make up` stops and names it (for example `reconci
 
 ```sh
 npm ci
-make up      # deploy everything to your account
+CINDER_ENV=nonprod make up  # deploy everything to your account; CINDER_ENV=nonprod turns on reset and seed
 make seed    # fill it with the seeded repositories and their activity
 make smoke   # PASS/FAIL checks against the deployment
 make down    # delete everything make up created
@@ -52,9 +52,9 @@ make down    # delete everything make up created
 
 `make up` creates every missing Cloudflare resource cinder uses, applies migrations, deploys the Worker and builds the container images, then creates the Zero Trust organization and the Access sign-in when they are missing. It then waits until the Worker answers and the five container apps exist. It deploys only.
 
-`make seed` seeds the deployment's repositories (`node seed/seed.mjs --full`), imports pulse and deploys its staging and production environments to your account as Workers `pulse-staging` and `pulse-production` (`make down` deletes them), and warms the pages. Set `CINDER_DEMO=1` to also file the demo scenario's intents on pulse. Re-running it is safe: what is already seeded is skipped.
+`make seed` seeds the deployment's repositories (`node seed/seed.mjs --full`), imports pulse and deploys its staging and production environments to your account as Workers `pulse-staging` and `pulse-production` (`make down` deletes them), and warms the pages. Set `CINDER_DEMO=1` to also file the demo scenario's intents on pulse. Re-running it is safe: what is already seeded is skipped. It needs a deployment made with `CINDER_ENV=nonprod`; without it the deployment is production and refuses reset and seed.
 
-No GitHub is involved. Re-running `make up` is safe and redeploys. After `make up`, you can also reseed from Settings › Access & people › Demo data (**Reset and reseed**, **Start the demo scenario**), with no checkout or terminal. Agent model calls reach AI Gateway through the Worker's AI binding, so there is no gateway token to create.
+No GitHub is involved. Re-running `make up` is safe and redeploys. After `CINDER_ENV=nonprod make up`, you can also reseed from Settings › Access & people › Demo data (**Reset and reseed**, **Start the demo scenario**), with no checkout or terminal. Agent model calls reach AI Gateway through the Worker's AI binding, so there is no gateway token to create.
 
 `make smoke` prints PASS or FAIL with one line of evidence for each check and exits non-zero if any failed. It uses only the API and plain `git` with the credentials `make up` wrote to `~/.config/cinder/`, and closes the changes it opened. See [operations](docs/operations/README.md#smoke-test).
 

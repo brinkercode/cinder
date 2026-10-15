@@ -355,10 +355,41 @@ describe("judge configuration", () => {
       expect((await put("/api/repos/jdg-backend-put/judges/risk", bad)).status).toBe(400);
     }
     expect((await put("/api/repos/jdg-backend-put/judges/nope", { backend: "clef", model_version: "clef@2" })).status).toBe(400);
-    const ok = { backend: "systemone-http", model_version: "s1@2", base_url: "http://s1.lan:8080" };
+    const ok = { backend: "systemone-http", model_version: "s1@2", base_url: "https://s1.lan:8080" };
     expect((await put("/api/repos/jdg-backend-put/judges/risk", ok)).status).toBe(200);
     expect(await env.DB.prepare("SELECT backend, model_version, base_url FROM judge_config WHERE repo_id = ? AND kind = 'risk'").bind(repo).first())
       .toEqual(ok);
+  });
+
+  it("PUT /judges/:kind rejects a plain http base_url", async () => {
+    await repoId("jdg-http-url");
+    const res = await put("/api/repos/jdg-http-url/judges/risk", { backend: "systemone-http", model_version: "s1@2", base_url: "http://s1.lan:8080" });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error.message).toContain("base_url: expected an https URL");
+  });
+
+  it("a jev judge with its own base_url never gets the global key, only the repo's", async () => {
+    const repo = await repoId("jdg-jev-url");
+    await env.DB.prepare("INSERT OR REPLACE INTO judge_config (repo_id, kind, backend, model_version, base_url) VALUES (?, 'risk', 'jev', 'jev@1', 'https://jev.attacker.example')").bind(repo).run();
+    const id = crypto.randomUUID();
+    await env.DB.prepare("INSERT INTO keystore_secrets (id, name, kind, scope, repo, owner, store_id, store_secret_id, store_secret_name, created_at) VALUES (?, 'TYPESAFE_API_KEY', 'api_key', 'global', NULL, 'owner', 'store1', ?, ?, ?)")
+      .bind(id, id, `cinder_${id}`, new Date().toISOString()).run();
+    const fetch = vi.spyOn(globalThis, "fetch").mockImplementation(async () => Response.json({ answers: { touches: 0.9 } }));
+    try {
+      const global = { ...env, SECRETS: { read: async (b) => (b === binding(id) ? "global-key" : null) } };
+      expect((await judge(global, repo, "risk", {}, Q)).touches.reason).toMatch(/TYPESAFE_API_KEY Keystore secret/);
+      expect(fetch).not.toHaveBeenCalled();
+      await env.DB.prepare("UPDATE judge_config SET base_url = NULL WHERE repo_id = ? AND kind = 'risk'").bind(repo).run();
+      expect((await judge(global, repo, "risk", {}, Q)).touches.answer).toBe("yes");
+      expect(new Request(...fetch.mock.calls[0]).headers.get("authorization")).toBe("Bearer global-key");
+      await env.DB.prepare("UPDATE judge_config SET base_url = 'https://jev.attacker.example' WHERE repo_id = ? AND kind = 'risk'").bind(repo).run();
+      expect((await judge(await typesafeKey("jdg-jev-url", "repo-key"), repo, "risk", {}, Q)).touches.answer).toBe("yes");
+      expect(fetch.mock.calls[1][0]).toBe("https://jev.attacker.example/v1/systemone");
+      expect(new Request(...fetch.mock.calls[1]).headers.get("authorization")).toBe("Bearer repo-key");
+    } finally {
+      fetch.mockRestore();
+      await env.DB.prepare("DELETE FROM keystore_secrets WHERE id = ?").bind(id).run();
+    }
   });
 
   it("PUT /judges/:kind rejects a clef version with no mapped model", async () => {

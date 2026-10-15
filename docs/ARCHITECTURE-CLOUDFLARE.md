@@ -112,7 +112,7 @@ API paths drop the `/api` prefix. Handlers are listed in `worker/src/routes.js:1
 | Service | Trigger | Code | Cloudflare |
 |---|---|---|---|
 | Push pipeline | `cf.artifacts.repo.pushed` → Workflow | `pipeline.js` (`run`) | Workflow, Queue `cinder-events` |
-| Push consumer | Queue `cinder-events` | `pushes.js`, `index.js:174` | Queues, D1 `ref_writes` |
+| Push consumer | Queue `cinder-events` | `pushes.js`, `index.js:174` | Queues, D1 `ref_writes`, `rejected_pushes` |
 | Webhook delivery | Queue `cinder-webhooks` (5 retries) | `webhooks.js:37-62` | Queues |
 | Cron `*/10`, and DispatchDO's alarm | scheduled, alarm | `tick.js` `runTick`, once per 10-minute slot: the cron and DispatchDO's alarm (armed by each isolate's first request, 30 s after the cron's time) both ask `DispatchDO.takeSlot`, so the tick still runs when Cron Triggers fail. It runs `checkDrift`, `scanDaily`, `pullUsage`, `ingestAdvisories`, `cronFlows`, `expireLeases` (releases the RepoDO lease of a change parked past its idle window, recorded in D1 `lease_lapses`), `pruneGone` then `autoscale` | Cron Triggers, Durable Object alarm |
 | Account sync | cron, the tick in each hour's first 10 minutes | `accounts.js` `syncAccounts` | REST API (`/accounts/:id`, `/organizations`), D1 `organizations`, `accounts`, `account_members` |
@@ -122,7 +122,7 @@ API paths drop the `/api` prefix. Handlers are listed in `worker/src/routes.js:1
 | Test results | verify job report `POST /work/jobs/:j/report` with `tests` (at most 5000 `{test, status, duration}`, else 400) | `work.js` `report`, `flakes.js` `listFlakes` | D1 `verify_runs` (one row per verify job: repo, change, head sha, attempt), `test_results` (one row per test per attempt), `test_runs` (latest result per test per sha), `test_quarantine` (tests at or over the repo's flake threshold; `flakes.js` `quarantineFailures`), `quarantine_off` (repos with auto-quarantine off) |
 | Merges and owners | merge job report `POST /work/jobs/:j/report` that merges the change | `work.js` `report`, `merges.js` `recordMerge` | D1 `merges` (one row per merge: change, sha, target, files), `owners` (weight per path and owner), `owner_decays` (when each path's owners last decayed) |
 | Queue-head evaluator | RepoDO alarm, 250 ms debounce, 60 s sweep | `index.js:50-73` | DO alarms |
-| Realtime | WebSocket via RepoDO hibernation | `live.js`, `index.js:37-47` | DO |
+| Realtime | WebSocket via RepoDO hibernation, opened with a 60 s ticket signed by `LIVE_TICKET_KEY` (Secrets Store) | `live.js`, `index.js:37-47` | DO |
 | Container egress | `outboundByHost` | `workers.js:21-34` | Containers outbound + AI Binding → AI Gateway |
 | Container internet egress | `enableInternet = false`, `interceptHttps = true`, catch-all `outbound` | `workers.js` (`egress`) | Containers outbound (HTTP and HTTPS, any proxy setting; raw sockets have no route) |
 | Lazy repo fetch | Blobless clones (`--filter=blob:none`) in the runner's git helpers; `gitRead` in the egress | `runner/internal/gitauth`, `workers.js` (`gitRead`) | Artifacts git (partial clone) + Containers outbound |

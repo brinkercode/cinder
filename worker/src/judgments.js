@@ -2,7 +2,7 @@ import { JUDGMENT_KINDS, KIND_QUESTIONS } from "./api/contract.js";
 import { brierByWeek, calibrate, trustOf } from "./calibration.js";
 import { binding } from "./keystore.js";
 import { error, hex, sha256 } from "./router.js";
-import { BACKENDS, CLEF_MODELS, createS1Client, isPinnedModel } from "./s1/client.js";
+import { BACKENDS, CLEF_MODELS, JEV_BASE_URL, createS1Client, isPinnedModel } from "./s1/client.js";
 import { notify } from "./webhooks.js";
 import { clearNeeds, raiseNeeds } from "./needs.js";
 
@@ -201,10 +201,11 @@ export async function judge(env, repo, kind, state, questions, change) {
     "LEFT JOIN judge_settings s ON s.repo_id = c.repo_id AND s.kind = c.kind LEFT JOIN airlock_repos a ON a.repo_id = c.repo_id WHERE c.repo_id = ? AND c.kind = ?",
   ).bind(repo, kind).first();
   if (!cfg) return results;
-  // jev's TypeSafe key is the Keystore's unexpired TYPESAFE_API_KEY: the repo's own, else the global one.
+  // jev's TypeSafe key is the Keystore's unexpired TYPESAFE_API_KEY: the repo's own, else the global one. The global key
+  // goes to the default base URL only: a repo's base_url is set on that repo, so it gets the repo's own key or none.
   const keyId = cfg.backend === "jev" && await env.DB.prepare("SELECT id FROM keystore_secrets WHERE name = 'TYPESAFE_API_KEY' AND " +
-    "(scope = 'global' OR (scope = 'repo' AND repo = (SELECT name FROM repos WHERE id = ?))) AND (expires_at IS NULL OR expires_at > ?) ORDER BY scope = 'global' LIMIT 1")
-    .bind(repo, new Date().toISOString()).first("id");
+    "((scope = 'global' AND coalesce(?3, ?4) = ?4) OR (scope = 'repo' AND repo = (SELECT name FROM repos WHERE id = ?1))) AND (expires_at IS NULL OR expires_at > ?2) ORDER BY scope = 'global' LIMIT 1")
+    .bind(repo, new Date().toISOString(), cfg.base_url, JEV_BASE_URL).first("id");
   let client, res;
   try {
     client = createS1Client({ backend: cfg.backend, model: cfg.model_version, env, baseUrl: cfg.base_url ?? undefined,
@@ -256,7 +257,7 @@ export async function putAirlock(request, env, { name }) {
   return Response.json({ airlock: body.on });
 }
 
-// A judge setting's errors: the backend and pinned model that answer kind, base_url (required for systemone-http), and the
+// A judge setting's errors: the backend and pinned model that answer kind, base_url (https, required for systemone-http), and the
 // optional min_outcomes (integer >= 1) and min_confidence (0..1).
 function judgeErrors(kind, body) {
   const errors = [];
@@ -265,7 +266,7 @@ function judgeErrors(kind, body) {
   if (!isPinnedModel(body?.model_version)) errors.push("model_version: expected name@version, not latest");
   else if (["clef", "clef-flash"].includes(body.backend) && !Object.hasOwn(CLEF_MODELS, body.model_version)) errors.push(`model_version: expected one of ${Object.keys(CLEF_MODELS).join(", ")}`);
   const baseUrl = body?.base_url ?? null;
-  if (baseUrl !== null && !(/^https?:\/\//.test(baseUrl) && URL.canParse(baseUrl))) errors.push("base_url: expected an http(s) URL");
+  if (baseUrl !== null && !(/^https:\/\//.test(baseUrl) && URL.canParse(baseUrl))) errors.push("base_url: expected an https URL");
   if (body?.backend === "systemone-http" && baseUrl === null) errors.push("base_url: required for systemone-http");
   if (body?.min_outcomes != null && !(Number.isInteger(body.min_outcomes) && body.min_outcomes >= 1)) errors.push("min_outcomes: expected integer >= 1");
   if (body?.min_confidence != null && !(typeof body.min_confidence === "number" && body.min_confidence >= 0 && body.min_confidence <= 1)) errors.push("min_confidence: expected 0..1");

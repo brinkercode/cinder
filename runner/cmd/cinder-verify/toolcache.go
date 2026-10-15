@@ -16,6 +16,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"syscall"
 
 	"github.com/brinkercode/cinder/runner/internal/api"
 )
@@ -56,6 +57,13 @@ func setupTool(ctx context.Context, client *api.Client, log io.Writer, tool, ver
 	if root == "" {
 		root = filepath.Join(os.TempDir(), "cinder-toolcache")
 	}
+	// Steps run as verify.JobUser: a cache it could write would hand later jobs its binaries, reused unchecked.
+	if err := os.MkdirAll(root, 0o755); err != nil {
+		return "", err
+	}
+	if fi, err := os.Lstat(root); err != nil || !fi.IsDir() || fi.Mode().Perm()&0o002 != 0 || fi.Sys().(*syscall.Stat_t).Uid != uint32(os.Geteuid()) {
+		return "", fmt.Errorf("setup %s: tool cache %s must be a directory only this runner can write", tool, root)
+	}
 	dest := filepath.Join(root, tool, version)
 	bin := filepath.Join(dest, up.bin)
 	if _, err := os.Stat(dest); err == nil {
@@ -70,6 +78,9 @@ func setupTool(ctx context.Context, client *api.Client, log io.Writer, tool, ver
 		return "", err
 	}
 	defer os.RemoveAll(tmp)
+	if err := os.Chmod(tmp, 0o755); err != nil { // MkdirTemp's 0700 would hide the tool from verify.JobUser
+		return "", err
+	}
 	archive, err := os.CreateTemp("", "cinder-tool-")
 	if err != nil {
 		return "", err

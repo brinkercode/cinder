@@ -27,6 +27,8 @@ async function setup(name) {
   return { e, call, change, hook, sent, cf, qenv: { ...env, ...cf.env } };
 }
 
+// What a delivery's signature covers: its timestamp, its delivery id and its body.
+const signed = (init) => `${init.headers["x-cinder-timestamp"]}.${init.headers["x-cinder-delivery"]}.${init.body}`;
 const message = (body) => ({ id: crypto.randomUUID(), body, attempts: 1, ack: vi.fn(), retry: vi.fn() });
 
 afterEach(() => {
@@ -53,7 +55,7 @@ it("webhooks has no secret column, and a delivery is signed with the value store
   expect(signature).toMatch(/^sha256=[0-9a-f]{64}$/);
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(stored.value), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
   const mac = Uint8Array.from(signature.slice(7).match(/../g), (h) => parseInt(h, 16));
-  expect(await crypto.subtle.verify("HMAC", key, mac, new TextEncoder().encode(init.body))).toBe(true);
+  expect(await crypto.subtle.verify("HMAC", key, mac, new TextEncoder().encode(signed(init)))).toBe(true);
   expect(JSON.parse(init.body)).toEqual(sent[0].body);
   expect(msg.ack).toHaveBeenCalled();
   expect(msg.retry).not.toHaveBeenCalled();
@@ -147,5 +149,21 @@ it("rotate returns a new secret, and delivery signs with it", async () => {
   const [, init] = fetch.mock.calls[0];
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
   const mac = Uint8Array.from(init.headers["x-cinder-signature"].slice(7).match(/../g), (h) => parseInt(h, 16));
-  expect(await crypto.subtle.verify("HMAC", key, mac, new TextEncoder().encode(init.body))).toBe(true);
+  expect(await crypto.subtle.verify("HMAC", key, mac, new TextEncoder().encode(signed(init)))).toBe(true);
+});
+
+it("a delivery signs its timestamp and delivery id with the body, so a replay under another id or time fails", async () => {
+  const { hook, qenv } = await setup("hook-replay");
+  const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("ok"));
+  const msg = message({ hook: hook.id, kind: "judgment", data: {}, at: new Date().toISOString() });
+  await worker.queue({ queue: "cinder-webhooks", messages: [msg] }, qenv);
+  const [, init] = fetch.mock.calls[0];
+  expect(init.headers["x-cinder-delivery"]).toBe(msg.id);
+  expect(Math.abs(Number(init.headers["x-cinder-timestamp"]) - Date.now() / 1000)).toBeLessThan(60);
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(hook.secret), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
+  const mac = Uint8Array.from(init.headers["x-cinder-signature"].slice(7).match(/../g), (h) => parseInt(h, 16));
+  const verify = (text) => crypto.subtle.verify("HMAC", key, mac, new TextEncoder().encode(text));
+  expect(await verify(signed(init))).toBe(true);
+  expect(await verify(init.body)).toBe(false);
+  expect(await verify(`${Number(init.headers["x-cinder-timestamp"]) + 1}.${msg.id}.${init.body}`)).toBe(false);
 });

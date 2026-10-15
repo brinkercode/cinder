@@ -185,7 +185,7 @@ func TestReleaseWorkflow_SkipsImagesWhenRunnerUnchanged(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := string(b)
-	for _, want := range []string{"git describe --tags --abbrev=0 --match 'release-*'", `git diff --quiet "$last" HEAD -- runner`, "containers=none", "deploy --containers-rollout ${{ steps.kind.outputs.containers }}"} {
+	for _, want := range []string{"git describe --tags --abbrev=0 --match 'release-*'", `git diff --quiet "$last" HEAD -- runner`, "containers=none", "CONTAINERS: ${{ steps.kind.outputs.containers }}", `--containers-rollout "$CONTAINERS"`} {
 		if !strings.Contains(s, want) {
 			t.Errorf("release.yml does not contain %q", want)
 		}

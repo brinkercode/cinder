@@ -233,3 +233,15 @@ it("a person invited as contributor to only repo A gets 200 on GET /api/repos li
   expect((await res.json()).map((r) => r.name)).toEqual(["sel-a"]);
   expect((await get("/api/workers/pools")).status).toBe(200);
 });
+
+it("writing a repo's judges or airlock needs branch.write, not repo.write", async () => {
+  await env.DB.batch([
+    env.DB.prepare("INSERT INTO repos (id, name, default_branch, strategy, branch_policy, created_at) VALUES ('jr1', 'judge-roles', 'main', 'trunk', '{}', '2026-10-14')"),
+    env.DB.prepare("INSERT INTO repo_roles VALUES ('jr1', 'dev@judges.test', 'developer'), ('jr1', 'mt@judges.test', 'maintainer')"),
+  ]);
+  for (const path of ["/api/repos/judge-roles/judges/risk", "/api/repos/judge-roles/judges/risk/airlock", "/api/repos/judge-roles/airlock"]) {
+    expect(await can(env, "dev@judges.test", "PUT", path)).toBe(false);
+    expect(await can(env, "mt@judges.test", "PUT", path)).toBe(true);
+  }
+  expect(await can(env, "dev@judges.test", "GET", "/api/repos/judge-roles/judges")).toBe(true);
+});

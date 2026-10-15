@@ -10,7 +10,7 @@ cat > "$tmp/bin/curl" <<'FAKE'
 #!/usr/bin/env bash
 method=GET
 while [ $# -gt 0 ]; do
-  case $1 in -X) method=$2; shift ;; --data) echo "$2" >> "$STATE/data"; shift ;; https://*) path=${1#https://api.cloudflare.com/client/v4/accounts/acct1} ;; esac
+  case $1 in -X) method=$2; shift ;; --data-binary) { cat "${2#@}"; echo; } >> "$STATE/data"; shift ;; https://*) path=${1#https://api.cloudflare.com/client/v4/accounts/acct1} ;; esac
   shift
 done
 echo "$method $path" >> "$STATE/calls"
