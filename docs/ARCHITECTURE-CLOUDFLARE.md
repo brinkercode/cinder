@@ -122,7 +122,7 @@ API paths drop the `/api` prefix. Handlers are listed in `worker/src/routes.js:1
 | Test results | verify job report `POST /work/jobs/:j/report` with `tests` (at most 5000 `{test, status, duration}`, else 400) | `work.js` `report`, `flakes.js` `listFlakes` | D1 `verify_runs` (one row per verify job: repo, change, head sha, attempt), `test_results` (one row per test per attempt), `test_runs` (latest result per test per sha), `test_quarantine` (tests at or over the repo's flake threshold; `flakes.js` `quarantineFailures`), `quarantine_off` (repos with auto-quarantine off) |
 | Merges and owners | merge job report `POST /work/jobs/:j/report` that merges the change | `work.js` `report`, `merges.js` `recordMerge` | D1 `merges` (one row per merge: change, sha, target, files), `owners` (weight per path and owner), `owner_decays` (when each path's owners last decayed) |
 | Queue-head evaluator | RepoDO alarm, 250 ms debounce, 60 s sweep | `index.js:50-73` | DO alarms |
-| Realtime | WebSocket via RepoDO hibernation | `live.js`, `index.js:37-47` | DO |
+| Realtime | WebSocket via RepoDO hibernation, opened with a 60 s ticket signed by `LIVE_TICKET_KEY` (Secrets Store) | `live.js`, `index.js:37-47` | DO |
 | Container egress | `outboundByHost` | `workers.js:21-34` | Containers outbound + AI Binding → AI Gateway |
 | Container internet egress | `enableInternet = false`, `interceptHttps = true`, catch-all `outbound` | `workers.js` (`egress`) | Containers outbound (HTTP and HTTPS, any proxy setting; raw sockets have no route) |
 | Lazy repo fetch | Blobless clones (`--filter=blob:none`) in the runner's git helpers; `gitRead` in the egress | `runner/internal/gitauth`, `workers.js` (`gitRead`) | Artifacts git (partial clone) + Containers outbound |

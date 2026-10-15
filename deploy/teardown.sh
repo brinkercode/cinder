@@ -74,7 +74,8 @@ for ns in $(names namespace); do
   fi
   [ -n "${repos//$'\n'/}" ] || gone "Artifacts repos in $ns"
   # lazy: an empty namespace is deleted when the API allows it; a refusal leaves it (it is free and implicit), not an error.
-  if [ -n "$dry" ]; then echo "would delete Artifacts namespace $ns"
+  if [ -z "${repos//$'\n'/}" ] && ! api GET "/artifacts/namespaces/$ns" >/dev/null; then :
+  elif [ -n "$dry" ]; then echo "would delete Artifacts namespace $ns"
   elif api DELETE "/artifacts/namespaces/$ns" >/dev/null; then echo "deleted Artifacts namespace $ns"; else echo "kept    Artifacts namespace $ns (not deletable)"; fi
 done
 
