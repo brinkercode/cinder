@@ -7,6 +7,9 @@ ARG PYTHON_VERSION=3.12.11
 ARG PIPX_VERSION=1.7.1
 ARG UV_VERSION=0.8.22
 ARG RUST_VERSION=1.90.0
+ARG RUSTUP_VERSION=1.29.1
+# static.rust-lang.org/rustup/archive/<version>/x86_64-unknown-linux-gnu/rustup-init.sha256
+ARG RUSTUP_SHA256=dda7234360b7f578ca8b0ddcb80145646fa61a67c1720a5abc7051b35c9fcb71
 ARG DOTNET_SDK_VERSION=10.0.100
 ARG TEMURIN_TAG=21.0.8_9-jdk
 ARG MAVEN_VERSION=3.9.11
@@ -22,27 +25,28 @@ ARG YQ_VERSION=4.47.1
 ARG CLAUDE_CODE_VERSION=2.0.14
 ARG BUILDAH_VERSION=1.28.2+ds1-3+deb12u1+b3
 
-FROM golang:${GO_VERSION} AS go
-FROM node:${NODE_VERSION}-bookworm-slim AS node
-FROM eclipse-temurin:${TEMURIN_TAG} AS java
+# Base images are pinned by digest, which wins over the tag: bump a version ARG and its digest together.
+FROM golang:${GO_VERSION}@sha256:820153096fda4de6ac1b7194d12e416b7dd8f4e9a33d17e0345b111b945162d8 AS go
+FROM node:${NODE_VERSION}-bookworm-slim@sha256:b21fe589dfbe5cc39365d0544b9be3f1f33f55f3c86c87a76ff65a02f8f5848e AS node
+FROM eclipse-temurin:${TEMURIN_TAG}@sha256:7d1d666ddafac14da0ded6b4b076becf76cf88b31f9d7953a76555cc82f86511 AS java
 # .NET comes from Microsoft's SDK image: CI runners get connection resets from dot.net's install script host.
-FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_SDK_VERSION} AS dotnet
-FROM maven:${MAVEN_VERSION}-eclipse-temurin-21 AS maven
-FROM gradle:${GRADLE_VERSION}-jdk21 AS gradle
-FROM php:${PHP_VERSION}-cli-bookworm AS php
-FROM composer:${COMPOSER_VERSION} AS composer
-FROM ruby:${RUBY_VERSION}-slim-bookworm AS ruby
-FROM hashicorp/terraform:${TERRAFORM_VERSION} AS terraform
-FROM alpine/helm:${HELM_VERSION} AS helm
-FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv
+FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_SDK_VERSION}@sha256:c7445f141c04f1a6b454181bd098dcfa606c61ba0bd213d0a702489e5bd4cd71 AS dotnet
+FROM maven:${MAVEN_VERSION}-eclipse-temurin-21@sha256:6fdc855a6ed81d288ca7ca37ac6ff5e9308b612485c0801d70b25a858c83d237 AS maven
+FROM gradle:${GRADLE_VERSION}-jdk21@sha256:db12d4789367d4676ef3d8aa672685e0e451705776b53f7d81c953fba3b1d55b AS gradle
+FROM php:${PHP_VERSION}-cli-bookworm@sha256:0a500e60616d3386146474f3c88447c92b81f6ea0dcba80362661277aab6b20a AS php
+FROM composer:${COMPOSER_VERSION}@sha256:5248900ab8b5f7f880c2d62180e40960cd87f60149ec9a1abfd62ac72a02577c AS composer
+FROM ruby:${RUBY_VERSION}-slim-bookworm@sha256:b084aa6c608f29f4a3b54577884bb7e983abd0852c3650e7ab03f9b46f87151e AS ruby
+FROM hashicorp/terraform:${TERRAFORM_VERSION}@sha256:dfb1889a8ee74ada3ddacc48f89b8a0d69f3e114de3d8a2ce15f6a8d3dbfdbe2 AS terraform
+FROM alpine/helm:${HELM_VERSION}@sha256:aef9b56f64e866207d9591d0abd8f6d767b36aadd12edf68f8a719716d9d29c9 AS helm
+FROM ghcr.io/astral-sh/uv:${UV_VERSION}@sha256:9874eb7afe5ca16c363fe80b294fe700e460df29a55532bbfea234a0f12eddb1 AS uv
 
 FROM go AS build
 WORKDIR /src
 COPY . .
 RUN CGO_ENABLED=0 go build -o /out/ ./cmd/cinder-agent ./cmd/cinder-verify
 
-FROM python:${PYTHON_VERSION}-slim-bookworm
-ARG PIPX_VERSION RUST_VERSION KUBECTL_VERSION GH_VERSION YQ_VERSION CLAUDE_CODE_VERSION BUILDAH_VERSION
+FROM python:${PYTHON_VERSION}-slim-bookworm@sha256:519591d6871b7bc437060736b9f7456b8731f1499a57e22e6c285135ae657bf7
+ARG PIPX_VERSION RUST_VERSION RUSTUP_VERSION RUSTUP_SHA256 KUBECTL_VERSION GH_VERSION YQ_VERSION CLAUDE_CODE_VERSION BUILDAH_VERSION
 # libicu72 is required by the .NET SDK; the lib* runtime packages are what the copied PHP and Ruby builds link against.
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential git git-lfs curl ca-certificates unzip zstd xz-utils \
       jq shellcheck sqlite3 openssh-client libicu72 libssl-dev pkg-config \
@@ -70,8 +74,10 @@ RUN npm install -g @anthropic-ai/claude-code@${CLAUDE_CODE_VERSION} && npm cache
 RUN npm install -g opencode-ai@1.18.32 && npm cache clean --force
 RUN pip install --no-cache-dir pipx==${PIPX_VERSION}
 COPY --from=uv /uv /uvx /usr/local/bin/
-RUN curl -sSf --retry 5 --retry-all-errors -o /tmp/rustup.sh https://sh.rustup.rs && sh /tmp/rustup.sh -y --no-modify-path --profile minimal --default-toolchain ${RUST_VERSION} --component rustfmt,clippy \
-    && rm -rf /tmp/rustup.sh /usr/local/rustup/downloads /usr/local/rustup/tmp
+RUN curl -sSf --retry 5 --retry-all-errors -o /tmp/rustup-init https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/x86_64-unknown-linux-gnu/rustup-init \
+    && echo "${RUSTUP_SHA256}  /tmp/rustup-init" | sha256sum -c - && chmod +x /tmp/rustup-init \
+    && /tmp/rustup-init -y --no-modify-path --profile minimal --default-toolchain ${RUST_VERSION} --component rustfmt,clippy \
+    && rm -rf /tmp/rustup-init /usr/local/rustup/downloads /usr/local/rustup/tmp
 COPY --from=dotnet /usr/share/dotnet /usr/share/dotnet
 COPY --from=java /opt/java/openjdk /opt/java/openjdk
 COPY --from=maven /usr/share/maven /usr/share/maven
@@ -90,5 +96,9 @@ RUN curl -sSfLo /usr/local/bin/kubectl https://dl.k8s.io/release/v${KUBECTL_VERS
       | tar -xz -C /usr/local/bin --strip-components=2 gh_${GH_VERSION}_linux_amd64/bin/gh
 # Smoke test: the build fails unless every toolchain answers its version command.
 RUN node --version && npm --version && corepack --version && go version && python --version && pip --version && pipx --version && uv --version && rustup --version && rustc --version && cargo --version && cargo fmt --version && cargo clippy --version && dotnet --version && java -version && mvn --version && gradle --version && php --version && composer --version && ruby --version && bundle --version && terraform version && helm version && kubectl version --client && gh --version && jq --version && yq --version && git-lfs --version && shellcheck --version && sqlite3 --version && git --version && make --version && claude --version && opencode --version && buildah --version
+# cinder-verify stays root; checks and flow steps run as cinder-job (internal/verify/job.go), so they can't read its
+# environment or write /usr/local/bin, root's HOME or the tool cache, which lives where only root writes.
+RUN useradd --uid 10001 --user-group --no-create-home --shell /usr/sbin/nologin cinder-job
+ENV TOOL_CACHE=/var/cache/cinder-toolcache
 COPY --from=build /out/ /usr/local/bin/
 ENTRYPOINT ["cinder-verify"]

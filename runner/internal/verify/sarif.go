@@ -29,8 +29,14 @@ func findings(ctx context.Context, dir, branch string) ([]api.Finding, error) {
 			return nil, err
 		}
 	}
+	// The check's tree, read as root: os.Root stops a symlink swapped in after the walk reading outside it.
+	root, err := os.OpenRoot(dir)
+	if err != nil {
+		return nil, err
+	}
+	defer root.Close()
 	var out []api.Finding
-	err := filepath.WalkDir(dir, func(p string, d fs.DirEntry, err error) error {
+	err = fs.WalkDir(root.FS(), ".", func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -40,7 +46,7 @@ func findings(ctx context.Context, dir, branch string) ([]api.Finding, error) {
 		if !d.Type().IsRegular() || filepath.Ext(p) != ".sarif" {
 			return nil
 		}
-		b, err := os.ReadFile(p)
+		b, err := root.ReadFile(p)
 		if err != nil {
 			return err
 		}
@@ -170,8 +176,8 @@ func severity(score, level string) string {
 
 // changedLines maps each file to the new-side line numbers the change added or modified.
 func changedLines(ctx context.Context, dir, branch string) (map[string]map[int]bool, error) {
-	out, err := exec.CommandContext(ctx, "git", "-C", dir, "diff", "-U0", "--no-ext-diff", "--no-textconv", "--no-renames",
-		"--no-prefix", "refs/heads/"+branch+"...HEAD", "--").Output()
+	out, err := asJobOutput(exec.CommandContext(ctx, "git", "-C", dir, "diff", "-U0", "--no-ext-diff", "--no-textconv", "--no-renames",
+		"--no-prefix", "refs/heads/"+branch+"...HEAD", "--"))
 	if err != nil {
 		return nil, fmt.Errorf("git diff: %w", err)
 	}

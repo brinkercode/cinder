@@ -35,7 +35,7 @@ func Scan(ctx context.Context, dir string, token api.Secret, j Job) api.Report {
 	if rep.Findings, err = findings(ctx, dir, ""); err != nil {
 		return fail(err)
 	}
-	files, err := exec.CommandContext(ctx, "git", "-C", dir, "ls-files", "-z").Output()
+	files, err := asJobOutput(exec.CommandContext(ctx, "git", "-C", dir, "ls-files", "-z"))
 	if err != nil {
 		return fail(err)
 	}

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/cgi"
 	"net/http/httptest"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -226,5 +227,36 @@ git clone -q --bare w target.git; git -C target.git config uploadpack.allowFilte
 	rep := Run(context.Background(), filepath.Join(t.TempDir(), "w"), "read-token", j)
 	if rep.Status != "done" || checkLog(rep.Detail) != "ONE\ntwo\nTHREE\n" {
 		t.Fatalf("want the merge to fetch the base blob with the token and the check to see both edits, got %+v", rep)
+	}
+}
+
+func TestRun_Check_GetsFreshHomeAndTmpdir_NotTheRunners(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	j := repos(t)
+	j.Check = `test "$HOME" = "$TMPDIR" && test "$HOME" != "` + os.Getenv("HOME") + `" && touch "$HOME/.gitconfig" && printf ok`
+	rep := Run(context.Background(), filepath.Join(t.TempDir(), "w"), "", j)
+	if rep.Status != "done" || checkLog(rep.Detail) != "ok" {
+		t.Fatalf("want a writable HOME and TMPDIR of the check's own, got %+v", rep)
+	}
+	if _, err := os.Stat(filepath.Join(os.Getenv("HOME"), ".gitconfig")); err == nil {
+		t.Fatal("the check wrote the runner's HOME")
+	}
+}
+
+// Runs only as root, as in the pool images (which add JobUser): the check can't write root's files.
+func TestRun_AsRoot_CheckRunsAsJobUser(t *testing.T) {
+	if os.Geteuid() != 0 {
+		t.Skip("needs root and the " + JobUser + " user")
+	}
+	dir, err := os.MkdirTemp("", "cinder-verify-") // t.TempDir's 0700 parent would keep JobUser out
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { os.RemoveAll(dir) })
+	j := repos(t)
+	j.Check = `id -u; touch /usr/local/bin/cinder-planted 2>/dev/null && echo wrote; echo built > out.txt && cat out.txt`
+	rep := Run(context.Background(), dir, "", j)
+	if got := checkLog(rep.Detail); rep.Status != "done" || strings.HasPrefix(got, "0\n") || strings.Contains(got, "wrote") || !strings.Contains(got, "built") {
+		t.Fatalf("want the check to run unprivileged and write only its tree, got %+v", rep)
 	}
 }
